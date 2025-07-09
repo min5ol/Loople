@@ -1,0 +1,27 @@
+# Java / Gradle / Maven 공통
+/build/
+/out/
+/target/
+/.gradle/
+/.idea/
+/*.iml
+
+# Node.js
+/node_modules/
+/dist/
+/build/
+
+# VSCode & IntelliJ 설정
+.vscode/
+.idea/
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# 로그
+*.log
+
+# 환경 변수 파일
+.env
+.env.*
