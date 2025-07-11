@@ -8,6 +8,7 @@ package com.loople.backend.v1.domain.dongcode.repository;
 import com.loople.backend.v1.domain.dongcode.entity.AdministrativeDong;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,5 +23,7 @@ public interface AdministrativeDongRepository extends JpaRepository<Administrati
      * @param eupmyun - 읍면동
      * @return Optional<AdministrativeDong>
      */
-    Optional<AdministrativeDong> findBySidoAndSigunguAndEupmyun(String sido, String sigungu, String eupmyun);
+    List<AdministrativeDong> findBySidoAndSigunguAndEupmyun(String sido, String sigungu, String eupmyun);
+
+
 }

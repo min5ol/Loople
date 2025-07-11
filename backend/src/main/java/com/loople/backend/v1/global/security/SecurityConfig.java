@@ -23,21 +23,16 @@ public class SecurityConfig {
      * @throws Exception - 설정 오류 발생 시
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() // CSRF 비활성화
+                .csrf().disable()
+                .formLogin().disable()
+                .httpBasic().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**",
-                                "/swagger-ui.html",
-                                "/webjars/**",
-                                "/api/v1/auth/**" // 로그인, 회원가입 등 허용
-                        ).permitAll() // 위 경로는 인증 없이 허용
-                        .anyRequest().authenticated() // 나머지는 인증 필요
+                        .anyRequest().permitAll()
                 );
 
-        return http.build(); // 필터 체인 빌드
+        return http.build();
     }
+
 }

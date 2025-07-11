@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 공공 API 호출하여 행정동 데이터 수집 및 저장
@@ -92,4 +93,13 @@ public class AdministrativeDongDumpService {
             page++; // 다음 페이지
         }
     }
+
+    public AdministrativeDong getBeopjeongCodeByAddress(String sido, String sigungu, String eupmyun) {
+        List<AdministrativeDong> dongList = repository.findBySidoAndSigunguAndEupmyun(sido, sigungu, eupmyun);
+        if (dongList == null || dongList.isEmpty()) {
+            throw new IllegalArgumentException("해당 주소를 찾을 수 없습니다.");
+        }
+        return dongList.get(0); // 첫 번째 결과만 반환
+    }
+
 }
