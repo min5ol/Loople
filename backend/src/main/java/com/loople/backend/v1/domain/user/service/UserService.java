@@ -5,6 +5,8 @@
  */
 package com.loople.backend.v1.domain.user.service;
 
+import com.loople.backend.v1.domain.user.dto.SignupRequestDto;
+
 /**
  * 사용자 관련 비즈니스 로직 명세
  */
@@ -15,4 +17,6 @@ public interface UserService {
      * @param imageUrl - 저장할 이미지 URL
      */
     void updateProfileImage(String imageUrl);
+
+    void saveUserInfo(SignupRequestDto request);
 }
