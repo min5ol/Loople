@@ -15,17 +15,25 @@ public class ResidenceServiceImpl implements ResidenceService {
     private final ResidenceRepository residenceRepository;
 
     @Override
-    public Residence findOrCreate(String address, String regionCode, double gpsLat, double gpsLng) {
+    public Residence findOrCreate(String address, String regionCode, double gpsLat, double gpsLng, String name, String ruleTypeStr) {
         Optional<Residence> existing = residenceRepository.findByAddressAndRegionCode(address.trim(), regionCode.trim());
         if (existing.isPresent()) return existing.get();
 
+        String safeName = (name == null || name.trim().isEmpty()) ? "기타" : name.trim();
+        RuleType ruleType;
+        try {
+            ruleType = RuleType.valueOf(ruleTypeStr != null ? ruleTypeStr.toUpperCase() : "ETC");
+        } catch (IllegalArgumentException e) {
+            ruleType = RuleType.ETC;
+        }
+
         Residence residence = Residence.builder()
-                .name(null) // 필요 시 로직으로 추출하거나 추가
+                .name(safeName)
                 .address(address)
                 .regionCode(regionCode)
                 .gpsLat(gpsLat)
                 .gpsLng(gpsLng)
-                .ruleType(RuleType.ETC) // 임시 기본값
+                .ruleType(ruleType)
                 .description(null)
                 .build();
 
