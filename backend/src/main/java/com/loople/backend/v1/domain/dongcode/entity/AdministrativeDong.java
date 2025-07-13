@@ -1,21 +1,11 @@
-/**
- * 행정동 엔티티
- * 작성자: 장민솔
- * 작성일: 2025-07-10
- */
 package com.loople.backend.v1.domain.dongcode.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * 행정동 정보 테이블 매핑
- */
 @Entity
 @Table(name = "administrative_dong")
 @Getter
@@ -25,34 +15,55 @@ public class AdministrativeDong {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // PK
+    private Long id;
 
-    private String sido; // 시도
+    private String sido;
 
-    private String sigungu; // 시군구
+    private String sigungu;
 
-    private String eupmyun; // 읍면동
+    private String eupmyun;
+
+    @Column(name = "ri_name")
+    private String riName;
 
     @Column(name = "dong_code")
-    private String dongCode; // 행정동 코드
+    private String dongCode;
+
+    @Column(name = "order_priority")
+    private Integer order;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt; // 생성일시
+    private LocalDateTime createdAt;
 
-    /**
-     * 생성자
-     * @param sido - 시도
-     * @param sigungu - 시군구
-     * @param eupmyun - 읍면동
-     * @param dongCode - 행정동 코드
-     * @param createdAt - 생성일시
-     */
+    @Column(name = "gps_lat")
+    private Double gpsLat;
+
+    @Column(name = "gps_lng")
+    private Double gpsLng;
+
+    public String getRegionCode() {
+        return this.dongCode;
+    }
+
     @Builder
-    public AdministrativeDong(String sido, String sigungu, String eupmyun, String dongCode, LocalDateTime createdAt) {
+    public AdministrativeDong(String sido, String sigungu, String eupmyun, String riName, String dongCode, Integer order, LocalDateTime createdAt) {
         this.sido = sido;
         this.sigungu = sigungu;
         this.eupmyun = eupmyun;
+        this.riName = riName;
         this.dongCode = dongCode;
+        this.order = order;
         this.createdAt = createdAt;
+    }
+
+    public String getAddress() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(sido);
+        sb.append(" ").append(sigungu);
+        sb.append(" ").append(eupmyun);
+        if (riName != null && !riName.trim().isEmpty()) {
+            sb.append(" ").append(riName);
+        }
+        return sb.toString().trim();
     }
 }

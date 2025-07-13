@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 /**
  * 애플리케이션 시작 시 덤프 실행
  */
-// @Component
+// @Component // 자동 러너 되기때문에 덤핑 시에만 주석 해제
 @RequiredArgsConstructor
 public class AdministrativeDongDumpRunner implements CommandLineRunner {
 

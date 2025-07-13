@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class SignupRequestDto {
-    private String email; // 사용자 이메일
-    private String profileImageUrl; // 프로필 이미지 URL
+    private String email;
+    private String profileImageUrl;
     private String password;
     private String name;
     private String nickname;
@@ -18,7 +18,10 @@ public class SignupRequestDto {
     private String sido;
     private String sigungu;
     private String eupmyun;
-    private String detailAddress;   //상세주소
+    private String ri;
+    private String detailAddress;
+    private Double gpsLat;
+    private Double gpsLng;
 
     public User toEntity(){
         return User.builder()
@@ -28,10 +31,10 @@ public class SignupRequestDto {
                 .name(name)
                 .nickname(nickname)
                 .phone(phone)
-                .residenceId(1234567890L)   //임시데이터 생성
+                .residenceId(null)
                 .detailAddress(detailAddress)
-                .provider("local") // 기본값 설정
-                .role("USER")      // 기본값 설정
+                .provider("local")
+                .role("USER")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .isDeleted(false)
