@@ -51,8 +51,10 @@ public class UserServiceImpl implements UserService {
         Residence residence = residenceService.findOrCreate(
                 dong.getAddress(),
                 dong.getRegionCode(),
-                request.getGpsLat(),  // 👈 여기로 변경
-                request.getGpsLng()   // 👈 여기로 변경
+                request.getGpsLat(),
+                request.getGpsLng(),
+                request.getResidenceName(),
+                request.getRuleType()
         );
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());

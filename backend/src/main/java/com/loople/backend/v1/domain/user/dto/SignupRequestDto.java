@@ -22,8 +22,10 @@ public class SignupRequestDto {
     private String detailAddress;
     private Double gpsLat;
     private Double gpsLng;
+    private String residenceName;   // ✅ 추가
+    private String ruleType;        // ✅ 추가
 
-    public User toEntity(){
+    public User toEntity() {
         return User.builder()
                 .email(email)
                 .profileImageUrl(profileImageUrl)

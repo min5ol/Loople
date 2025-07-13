@@ -5,6 +5,18 @@ import { normalizeSido } from '../../utils/normalizeAddress';
 
 const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
 
+const ruleTypeOptions = [
+  { label: "아파트", value: "APT" },
+  { label: "빌라", value: "VILLA" },
+  { label: "주택", value: "HOUSE" },
+  { label: "오피스텔", value: "OFFICE" },
+  { label: "상가/상업시설", value: "COMMERCIAL" },
+  { label: "공공시설", value: "PUBLIC" },
+  { label: "기숙사", value: "DORM" },
+  { label: "공장", value: "FACTORY" },
+  { label: "기타", value: "ETC" },
+];
+
 export default function SignUp() {
   const [formData, setFormData] = useState({
     email: '',
@@ -22,6 +34,8 @@ export default function SignUp() {
     sigungu: '',
     eupmyun: '',
     ri: null,
+    ruleType: 'ETC',
+    residenceName: '',
   });
 
   const handleChange = (e) => {
@@ -32,7 +46,6 @@ export default function SignUp() {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     try {
       const { data: presignedUrl } = await instance.get(`/s3/presigned-url`, {
         params: {
@@ -40,11 +53,9 @@ export default function SignUp() {
           contentType: file.type
         }
       });
-
       await axios.put(presignedUrl, file, {
         headers: { 'Content-Type': file.type }
       });
-
       setFormData(prev => ({ ...prev, profileImageUrl: file.name }));
     } catch (err) {
       console.error("❌ 이미지 업로드 실패", err);
@@ -52,14 +63,9 @@ export default function SignUp() {
   };
 
   const simulatePASS = () => {
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    const fakePhone = `010-1234-${randomNum}`;
+    const fakePhone = `010-1234-${Math.floor(1000 + Math.random() * 9000)}`;
     alert("PASS 인증은 실제 환경에서만 작동합니다.\n(테스트용 정보가 자동 입력됩니다)");
-    setFormData(prev => ({
-      ...prev,
-      name: "홍길동",
-      phone: fakePhone
-    }));
+    setFormData(prev => ({ ...prev, name: "홍길동", phone: fakePhone }));
   };
 
   const handleAddressSearch = () => {
@@ -70,13 +76,11 @@ export default function SignUp() {
           alert("주소 정보를 불러올 수 없습니다. 다른 주소를 선택해주세요.");
           return;
         }
-
         try {
           const res = await axios.get('https://dapi.kakao.com/v2/local/search/address.json', {
             params: { query: fullAddress },
             headers: { Authorization: `KakaoAK ${KAKAO_API_KEY}` }
           });
-
           const result = res.data.documents[0];
           if (result) {
             const {
@@ -95,7 +99,8 @@ export default function SignUp() {
               sido: normalizeSido(region_1depth_name.trim()),
               sigungu: region_2depth_name.replace(/\s/g, ''),
               eupmyun: region_3depth_name.replace(/\s/g, ''),
-              ri: null
+              ri: null,
+              residenceName: inferResidenceName(fullAddress, result.address)
             }));
           } else {
             alert("주소 검색 결과가 없습니다.");
@@ -105,6 +110,11 @@ export default function SignUp() {
         }
       }
     }).open();
+  };
+
+  const inferResidenceName = (fullAddress, kakaoData) => {
+    const parts = fullAddress.split(' ');
+    return parts[parts.length - 1] || "기타";
   };
 
   useEffect(() => {
@@ -117,11 +127,8 @@ export default function SignUp() {
   const submitUserInfo = async (e) => {
     e.preventDefault();
 
-    const requiredFields = [
-      'email', 'password', 'name', 'nickname', 'phone', 'address',
-      'gpsLat', 'gpsLng', 'regionCode', 'sido', 'sigungu', 'eupmyun', 'detailAddress'
-    ];
-    for (let field of requiredFields) {
+    const required = ['email', 'password', 'name', 'nickname', 'phone', 'address', 'gpsLat', 'gpsLng', 'regionCode', 'sido', 'sigungu', 'eupmyun', 'detailAddress'];
+    for (let field of required) {
       if (!formData[field]) {
         alert(`${field}을(를) 입력해 주세요.`);
         return;
@@ -129,20 +136,17 @@ export default function SignUp() {
     }
 
     const queryParams = new URLSearchParams();
-    const keys = [
-      'email', 'password', 'name', 'nickname', 'phone',
-      'sido', 'sigungu', 'eupmyun', 'detailAddress', 'gpsLat', 'gpsLng'
-    ];
+    const keys = ['email', 'password', 'name', 'nickname', 'phone', 'sido', 'sigungu', 'eupmyun', 'detailAddress', 'gpsLat', 'gpsLng'];
     keys.forEach(key => queryParams.append(key, formData[key]));
     queryParams.append('ri', formData.ri ?? '');
+    queryParams.append('ruleType', formData.ruleType);
+    queryParams.append('residenceName', formData.residenceName || "기타");
 
     try {
       const res = await instance.post(`/users/signup?${queryParams.toString()}`, {
         profileImageUrl: formData.profileImageUrl || null
       });
-
       alert("회원가입 성공");
-      console.log("✅ 회원가입 성공:", res.data);
     } catch (err) {
       alert("회원가입 실패");
       console.error("🚨 회원가입 실패", err.response?.data || err.message);
@@ -163,8 +167,17 @@ export default function SignUp() {
 
         <input name="address" placeholder="선택된 주소" value={formData.address} readOnly />
         <input name="detailAddress" placeholder="상세주소" value={formData.detailAddress} onChange={handleChange} />
-        <input type="file" name="profileImageUrl" onChange={handleFileChange} />
 
+        <select name="ruleType" value={formData.ruleType} onChange={handleChange}>
+          {ruleTypeOptions.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+
+        <input name="residenceName" placeholder="건물명 (예: 서울숲자이 101동)" value={formData.residenceName} onChange={handleChange} />
+        <small>건물명은 추론된 값으로 같은 주민을 연결합니다. 미입력 시 '기타'로 처리됩니다.</small>
+
+        <input type="file" name="profileImageUrl" onChange={handleFileChange} />
         <input type="submit" value="회원가입" />
       </form>
     </div>

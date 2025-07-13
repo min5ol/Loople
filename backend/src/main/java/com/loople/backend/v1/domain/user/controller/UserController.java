@@ -33,8 +33,10 @@ public class UserController {
             @RequestParam("eupmyun") String eupmyun,
             @RequestParam(value = "ri", required = false) String ri,
             @RequestParam("detailAddress") String detailAddress,
-            @RequestParam("gpsLat") Double gpsLat, // 추가
-            @RequestParam("gpsLng") Double gpsLng, // 추가
+            @RequestParam("gpsLat") Double gpsLat,
+            @RequestParam("gpsLng") Double gpsLng,
+            @RequestParam(value = "residenceName", required = false) String residenceName,
+            @RequestParam(value = "ruleType", required = false) String ruleType,
             @RequestBody(required = false) ProfileImageRequestDto profileImageDto
     ) {
         String profileImageUrl = (profileImageDto != null && profileImageDto.getImageUrl() != null)
@@ -54,7 +56,9 @@ public class UserController {
                 ri,
                 detailAddress,
                 gpsLat,
-                gpsLng
+                gpsLng,
+                residenceName,
+                ruleType
         );
 
         try {
