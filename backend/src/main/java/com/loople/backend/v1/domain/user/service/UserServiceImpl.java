@@ -1,61 +1,68 @@
-/**
- * 사용자 서비스 구현체
- * 작성자: 장민솔
- * 작성일: 2025-07-09
- */
 package com.loople.backend.v1.domain.user.service;
 
 import com.loople.backend.v1.domain.dongcode.entity.AdministrativeDong;
 import com.loople.backend.v1.domain.dongcode.service.AdministrativeDongDumpService;
+import com.loople.backend.v1.domain.residence.entity.Residence;
+import com.loople.backend.v1.domain.residence.service.ResidenceService;
 import com.loople.backend.v1.domain.user.dto.SignupRequestDto;
 import com.loople.backend.v1.domain.user.entity.User;
 import com.loople.backend.v1.domain.user.repository.UserRepository;
 import com.loople.backend.v1.global.exception.UserNotFoundException;
-import com.loople.backend.v1.global.s3.PresignedUrlService;
 import com.loople.backend.v1.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
-/**
- * 사용자 관련 비즈니스 로직 처리
- */
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository; // 사용자 리포지토리
-    private final PresignedUrlService presignedUrlService;
+    private final UserRepository userRepository;
     private final AdministrativeDongDumpService dongService;
+    private final ResidenceService residenceService;
+    private final PasswordEncoder passwordEncoder;
 
     /**
-     * 프로필 이미지 수정
-     * @param imageUrl - 저장할 이미지 URL
+     * 현재 로그인한 유저의 프로필 이미지를 변경한다.
      */
     @Override
     public void updateProfileImage(String imageUrl) {
-        Long userId = SecurityUtil.getCurrentUserId(); // 현재 사용자 ID 조회
-
-        User user = userRepository.findById(userId) // 사용자 조회
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId)); // 없으면 예외
-
-        user.updateProfileImageUrl(imageUrl); // 프로필 이미지 URL 변경
+        Long userId = SecurityUtil.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
+        user.updateProfileImageUrl(imageUrl);
     }
 
+    /**
+     * 회원가입 로직
+     * 1. 행정동 주소 코드로 매핑
+     * 2. 해당 주소로 레지던스 조회 또는 생성
+     * 3. 비밀번호 암호화 및 User 엔티티 저장
+     */
     @Override
     public void saveUserInfo(SignupRequestDto request) {
-        String presignedUrl = presignedUrlService.generatePresignedUrl(request.getProfileImageUrl());
-        if (request.getProfileImageUrl() != null && !request.getProfileImageUrl().isEmpty()) {
-            presignedUrl = presignedUrlService.generatePresignedUrl(request.getProfileImageUrl());
-        }
-        String Code = dongService.getBeopjeongCodeByAddress(request.getSido(), request.getSigungu(), request.getEupmyun()).getDongCode();
-        Long dongCode = Long.valueOf(Code);
+        AdministrativeDong dong = dongService.getByAddress(
+                request.getSido().trim(),
+                request.getSigungu().trim(),
+                request.getEupmyun().trim(),
+                request.getRi() != null ? request.getRi().trim() : null
+        );
 
-        User user = request.toEntity();
-        user.updateProfileImageUrl(presignedUrl);
-        user.updateResidenceId(dongCode);
+        Residence residence = residenceService.findOrCreate(
+                dong.getAddress(),
+                dong.getRegionCode(),
+                request.getGpsLat(),  // 👈 여기로 변경
+                request.getGpsLng()   // 👈 여기로 변경
+        );
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        User user = request.toEntity()
+                .toBuilder()
+                .password(encodedPassword)
+                .residenceId(residence.getId())
+                .build();
+
         userRepository.save(user);
     }
 }
