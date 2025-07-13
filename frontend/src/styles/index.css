@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+}
+
+@font-face {
+  font-family: 'pretendard';
+  src: url('/fonts/PRETENDARD-THIN.OTF') format('opentype');
+  font-weight: 100;
+}
+
+@font-face {
+  font-family: 'pretendard';
+  src: url('/fonts/PRETENDARD-EXTRALIGHT.OTF') format('opentype');
+  font-weight: 200;
+}
+
+@font-face {
+  font-family: 'pretendard';
+  src: url('/fonts/PRETENDARD-LIGHT.OTF') format('opentype');
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: 'pretendard';
+  src: url('/fonts/PRETENDARD-REGULAR.OTF') format('opentype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'pretendard';
+  src: url('/fonts/PRETENDARD-MEDIUM.OTF') format('opentype');
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'pretendard';
+  src: url('/fonts/PRETENDARD-SEMIBOLD.OTF') format('opentype');
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: 'pretendard';
+  src: url('/fonts/PRETENDARD-BOLD.OTF') format('opentype');
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: 'pretendard';
+  src: url('/fonts/PRETENDARD-EXTRABOLD.OTF') format('opentype');
+  font-weight: 800;
+}
+
+@font-face {
+  font-family: 'pretendard';
+  src: url('/fonts/PRETENDARD-BLACK.OTF') format('opentype');
+  font-weight: 900;
+}
