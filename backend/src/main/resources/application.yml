@@ -28,3 +28,9 @@ cloud:
       static: ${AWS_REGION}
     s3:
       bucket: ${AWS_S3_BUCKET}
+
+openai:
+  api:
+    model: gpt-4o
+    base-url: http://localhost:8080/v2/chat
+    key: ${OPENAI_API_KEY}
