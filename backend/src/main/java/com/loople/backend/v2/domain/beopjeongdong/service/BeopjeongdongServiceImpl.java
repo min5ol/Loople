@@ -18,12 +18,18 @@ public class BeopjeongdongServiceImpl implements BeopjeongdongService
 
     @Override
     @Transactional
-    public void saveAllIfNotExists(List<BeopjeongdongDto> dtoList)
-    {
-        for(BeopjeongdongDto dto : dtoList)
-        {
-            if(dto.dongCode() == null || repository.existsByDongCode(dto.dongCode()))
+    public void saveAllIfNotExists(List<BeopjeongdongDto> dtoList) {
+        for (BeopjeongdongDto dto : dtoList) {
+            if (
+                    dto.dongCode() == null ||
+                            dto.sido() == null ||
+                            dto.sigungu() == null ||
+                            dto.eupmeyon() == null ||
+                            repository.existsByDongCode(dto.dongCode())
+            ) {
                 continue;
+            }
+
             repository.save(Beopjeongdong.builder()
                     .sido(dto.sido())
                     .sigungu(dto.sigungu())
