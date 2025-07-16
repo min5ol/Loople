@@ -7,10 +7,12 @@ import google from "../../assets/google.png";
 import kakao from "../../assets/kakao.png";
 import naver from "../../assets/naver.png";
 import apple from "../../assets/apple.png";
+import {Link} from "react-router-dom";
 
 export default function Home() {
 
   return (
+    <div>
     <div className="bg-surface-dark w-[100vw] flex">
       <img src={brandLogo} className="absolute top-[1.17vw] left-[1.54vw] w-[6.59vw]"/>
       <img src={HomeLeft} className="w-[64.13vw]"/>
@@ -37,6 +39,10 @@ export default function Home() {
           <a href="#"><img src={apple} className="w-[2.93vw] ml-[.37vw] mr-[.37vw]"/></a>
         </div>
       </div>
+    </div>
+
+    
+    <Link to="quiz">퀴즈 풀기</Link>
     </div>
   );
 }
