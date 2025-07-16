@@ -180,6 +180,7 @@ export default function SignUp() {
         <input type="file" name="profileImageUrl" onChange={handleFileChange} />
         <input type="submit" value="회원가입" />
       </form>
+      
     </div>
   );
 }
