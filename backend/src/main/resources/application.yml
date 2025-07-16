@@ -15,7 +15,6 @@ spring:
 
   servlet:
     multipart:
-      enabled: true  # multipart 업로드 활성화
       max-file-size: 10MB  # 파일 크기 제한 (10MB로 설정)
       max-request-size: 10MB  # 전체 요청 크기 제한 (10MB로 설정)
 

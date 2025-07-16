@@ -1,3 +1,9 @@
+/**
+ * 작성일자: 2025-07-15
+ * 작성자: 장민솔
+ * 설명: 공공데이터 포털의 법정동 전체 목록 API를 호출하고, 응답을 DTO로 파싱하는 클라이언트
+ */
+
 package com.loople.backend.v2.domain.beopjeongdong.infra;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,8 +29,16 @@ public class BeopjeongdongOpenApiClient {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
+    // 공공데이터포털 법정동 전체 API
     private static final String BASE_URL = "https://api.odcloud.kr/api/15063424/v1/uddi:6d7fd177-cc7d-426d-ba80-9b137edf6066";
     private static final String RAW_SERVICE_KEY = "5XKFEYF43oYs3Om6Khnyz05BGRaXOcSHrfLS/whaa+Msj/WXw1VxuZJXmAkh6dMpTrmXQyc5Lwxjr5C99WBxew==";
+
+    /**
+     * 지정한 page, perPage로 법정동 데이터를 조회
+     * @param page 페이지 번호
+     * @param perPage 페이지당 항목 수
+     * @return 법정동 DTO 리스트
+     */
 
     public List<BeopjeongdongDto> fetchDongData(int page, int perPage) {
         try {
