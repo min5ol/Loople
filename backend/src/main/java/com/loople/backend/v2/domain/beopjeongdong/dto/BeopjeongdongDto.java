@@ -1,3 +1,9 @@
+/**
+ * 작성일자: 2025-07-14
+ * 작성자: 장민솔
+ * 설명: 법정동 오픈API 응답에서 단일 동 항목 매핑 DTO
+ */
+
 package com.loople.backend.v2.domain.beopjeongdong.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

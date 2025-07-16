@@ -1,3 +1,9 @@
+/**
+ * 작성일자: 2025-07-15
+ * 작성자: 장민솔
+ * 설명: 애플리케이션 시작 시 법정동 API에서 모든 동 정보를 가져와 DB에 저장하는 러너
+ */
+
 package com.loople.backend.v2.domain.beopjeongdong.runner;
 
 import com.loople.backend.v2.domain.beopjeongdong.dto.BeopjeongdongDto;
