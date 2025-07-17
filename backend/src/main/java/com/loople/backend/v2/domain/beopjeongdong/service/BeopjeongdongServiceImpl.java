@@ -52,4 +52,13 @@ public class BeopjeongdongServiceImpl implements BeopjeongdongService
                     .build());
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String getDongCode(String sido, String sigungu, String eupmyun, String ri) {
+        return repository.findByParts(sido, sigungu, eupmyun, ri == null || ri.isBlank() ? null : ri)
+                .map(Beopjeongdong::getDongCode)
+                .orElseThrow(() -> new IllegalArgumentException("주소에 해당하는 동코드를 찾을 수 없습니다."));
+    }
+
 }

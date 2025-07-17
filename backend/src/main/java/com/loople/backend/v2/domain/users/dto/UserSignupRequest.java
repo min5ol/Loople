@@ -15,8 +15,10 @@ public record UserSignupRequest(
         @NotBlank String name,
         @NotBlank String nickname,
         @NotBlank String phone,
-        @NotBlank String dongCode,
-        @NotBlank String address,
+        @NotBlank String sido,
+        @NotBlank String sigungu,
+        @NotBlank String eupmyun,
+        String ri,
         String detailAddress,
         String profileImageUrl
 ){}
