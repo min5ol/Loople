@@ -12,4 +12,5 @@ import java.util.List;
 public interface BeopjeongdongService
 {
     void saveAllIfNotExists(List<BeopjeongdongDto> dtoList);
+    String getDongCode(String sido, String sigungu, String eupmyun, String ri);
 }

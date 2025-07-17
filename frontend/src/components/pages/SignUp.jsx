@@ -4,6 +4,7 @@ import { DEFAULT_PROFILE_IMAGE_URL } from "../../constants/defaults";
 import { normalizeSido } from "../../utils/normalizeAddress";
 import ProfileImageUploader from "../organisms/ProfileImageUploader";
 import { searchKakaoAddress } from "../../services/kakaoService";
+import axios from "axios";
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -16,11 +17,11 @@ export default function SignUp() {
     detailAddress: "",
     gpsLat: "",
     gpsLng: "",
-    regionCode: "",
+    dong_code: "", // ✅ 백엔드에서 조회해서 채움
     sido: "",
     sigungu: "",
     eupmyun: "",
-    ri: "",
+    ri: "", // optional
     profileImageUrl: null,
   });
 
@@ -44,21 +45,39 @@ export default function SignUp() {
           const result = res.documents[0];
           if (!result) return alert("주소 검색 결과가 없습니다.");
 
-          const { region_1depth_name, region_2depth_name, region_3depth_name, b_code } = result.address;
+          const { region_1depth_name, region_2depth_name, region_3depth_name } = result.address;
+
+          const sido = normalizeSido(region_1depth_name.trim());
+          const sigungu = region_2depth_name.replace(/\s/g, "");
+          const eupmyun = region_3depth_name.replace(/\s/g, "");
+          const ri = ""; // 필요하면 향후 입력 받기
+
+          // ✅ 동코드 조회 API 호출
+          const dongRes = await axios.get("http://localhost:8080/api/v2/beopjeongdong/dong-code", {
+            params: {
+              sido,
+              sigungu,
+              eupmyun,
+              ri,
+            },
+          });
+
+          const dongCode = dongRes.data.dongCode;
 
           setFormData((prev) => ({
             ...prev,
             address: fullAddress,
             gpsLat: result.y,
             gpsLng: result.x,
-            regionCode: b_code,
-            sido: normalizeSido(region_1depth_name.trim()),
-            sigungu: region_2depth_name.replace(/\s/g, ""),
-            eupmyun: region_3depth_name.replace(/\s/g, ""),
-            ri: null,
+            sido,
+            sigungu,
+            eupmyun,
+            ri,
+            dong_code: dongCode, // ✅ 저장
           }));
         } catch (err) {
-          console.error("주소 검색 실패", err);
+          console.error("❌ 주소 처리 중 오류", err);
+          alert("주소 처리에 실패했습니다.");
         }
       },
     }).open();
@@ -66,13 +85,18 @@ export default function SignUp() {
 
   const simulatePASS = () => {
     const fakePhone = `010-1234-${Math.floor(1000 + Math.random() * 9000)}`;
-    alert("PASS 인증 시뮬레이션 (실서비스만 활성화됨)");
+    alert("PASS 인증 시뮬레이션");
     setFormData((prev) => ({ ...prev, name: "홍길동", phone: fakePhone }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const requiredFields = ["email", "password", "nickname", "name", "phone", "address", "detailAddress", "gpsLat", "gpsLng", "regionCode", "sido", "sigungu", "eupmyun"];
+
+    const requiredFields = [
+      "email", "password", "nickname", "name", "phone",
+      "address", "detailAddress", "gpsLat", "gpsLng",
+      "sido", "sigungu", "eupmyun", "dong_code"
+    ];
 
     for (let field of requiredFields) {
       if (!formData[field]) {
@@ -81,16 +105,20 @@ export default function SignUp() {
       }
     }
 
-    try {
-      const payload = {
-        ...formData,
-        profileImageUrl: formData.profileImageUrl ?? DEFAULT_PROFILE_IMAGE_URL,
-      };
+    const payload = {
+      ...formData,
+      ri: formData.ri?.trim() || null,
+      profileImageUrl: formData.profileImageUrl ?? DEFAULT_PROFILE_IMAGE_URL,
+    };
 
+    console.log("🚀 회원가입 payload 전송", payload);
+
+    try {
       await signup(payload);
-      alert("회원가입 성공");
+      alert("회원가입 성공!");
     } catch (err) {
-      alert("회원가입 실패");
+      console.error("❌ 회원가입 실패:", err.response?.data || err);
+      alert(`회원가입 실패: ${err.response?.data?.message || "서버 오류"}`);
     }
   };
 
@@ -105,6 +133,7 @@ export default function SignUp() {
     <div className="max-w-lg mx-auto p-4">
       <form onSubmit={handleSubmit} className="space-y-4">
         <ProfileImageUploader onUpload={handleUpload} />
+
         <input name="email" placeholder="이메일" value={formData.email} onChange={handleChange} />
         <input name="password" type="password" placeholder="비밀번호" value={formData.password} onChange={handleChange} />
         <input name="nickname" placeholder="닉네임" value={formData.nickname} onChange={handleChange} />
@@ -119,7 +148,6 @@ export default function SignUp() {
 
         <button type="submit">회원가입</button>
       </form>
-      
     </div>
   );
 }
