@@ -1,7 +1,7 @@
 package com.loople.backend.v2.domain.users.service;
 
 import com.loople.backend.v2.domain.beopjeongdong.entity.Beopjeongdong;
-import com.loople.backend.v2.domain.beopjeongdong.repository.BeopjeongdongRepository;
+import com.loople.backend.v2.domain.beopjeongdong.service.BeopjeongdongService;
 import com.loople.backend.v2.domain.userNotification.entity.UserNotification;
 import com.loople.backend.v2.domain.userNotification.repository.UserNotificationRepository;
 import com.loople.backend.v2.domain.users.dto.UserSignupRequest;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final BeopjeongdongRepository beopjeongdongRepository;
+    private final BeopjeongdongService beopjeongdongService;
     private final UserNotificationRepository userNotificationRepository;
     private final VillageStatusRepository villageStatusRepository;
     private final PasswordEncoder passwordEncoder;
@@ -31,20 +31,32 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserSignupResponse signup(UserSignupRequest request) {
 
-        // 이메일 중복 검사
+        // 1. 이메일 중복 확인
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
 
-        // 시도, 시군구, 읍면, 리 기준으로 동코드 조회
-        Beopjeongdong dong = beopjeongdongRepository.findByParts(
+        // 2. 동코드 조회 (서비스를 통해)
+        String dongCode = beopjeongdongService.getDongCode(
                 request.sido(),
                 request.sigungu(),
                 request.eupmyun(),
                 request.ri()
-        ).orElseThrow(() -> new IllegalArgumentException("주소에 해당하는 동코드를 찾을 수 없습니다."));
+        );
 
-        // 유저 생성
+        // 3. 법정동 정보 가져오기
+        Beopjeongdong dong = beopjeongdongService.findByDongCode(dongCode)
+                .orElseThrow(() -> new IllegalArgumentException("법정동 정보를 찾을 수 없습니다."));
+
+        // 4. 전체 주소 조합
+        String fullAddress = String.join(" ",
+                request.sido(),
+                request.sigungu(),
+                request.eupmyun(),
+                request.ri() == null ? "" : request.ri()
+        ).trim();
+
+        // 5. 유저 생성
         User user = User.builder()
                 .email(request.email())
                 .passwordHash(passwordEncoder.encode(request.password()))
@@ -52,8 +64,7 @@ public class UserServiceImpl implements UserService {
                 .nickname(request.nickname())
                 .phone(request.phone())
                 .beopjeongdong(dong)
-                .address(request.sido() + " " + request.sigungu() + " " + request.eupmyun() +
-                        (request.ri() != null ? " " + request.ri() : ""))
+                .address(fullAddress)
                 .detailAddress(request.detailAddress())
                 .profileImageUrl(request.profileImageUrl())
                 .role(Role.USER)
@@ -62,10 +73,10 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-        // 기본 알림 설정 생성
+        // 6. 알림 설정 초기화
         userNotificationRepository.save(UserNotification.of(user));
 
-        // 마을 상태 없으면 추가
+        // 7. 마을 상태 초기화
         if (!villageStatusRepository.existsByDongCode(dong.getDongCode())) {
             villageStatusRepository.save(new VillageStatus(dong.getDongCode(), 1, 0, null));
         }

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { signup } from "../../services/userService";
 import { DEFAULT_PROFILE_IMAGE_URL } from "../../constants/defaults";
-import { normalizeSido } from "../../utils/normalizeAddress";
-import ProfileImageUploader from "../organisms/ProfileImageUploader";
+import { parseAddress } from "../../utils/parseAddress";
 import { searchKakaoAddress } from "../../services/kakaoService";
+import ProfileImageUploader from "../organisms/ProfileImageUploader";
 import axios from "axios";
 
 export default function SignUp() {
@@ -17,21 +17,29 @@ export default function SignUp() {
     detailAddress: "",
     gpsLat: "",
     gpsLng: "",
-    dong_code: "", // ✅ 백엔드에서 조회해서 채움
+    dong_code: "",
     sido: "",
     sigungu: "",
     eupmyun: "",
-    ri: "", // optional
+    ri: "",
     profileImageUrl: null,
   });
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleUpload = (uploadedUrl) => {
-    setFormData((prev) => ({ ...prev, profileImageUrl: uploadedUrl }));
+  const handleUpload = (url) => {
+    console.log("✅ 이미지 업로드 완료:", url);
+    setFormData((prev) => ({ ...prev, profileImageUrl: url }));
   };
 
   const handleAddressSearch = () => {
@@ -42,27 +50,13 @@ export default function SignUp() {
 
         try {
           const res = await searchKakaoAddress(fullAddress);
-          const result = res.documents[0];
+          const result = res.documents?.[0];
           if (!result) return alert("주소 검색 결과가 없습니다.");
 
-          const { region_1depth_name, region_2depth_name, region_3depth_name } = result.address;
-
-          const sido = normalizeSido(region_1depth_name.trim());
-          const sigungu = region_2depth_name.replace(/\s/g, "");
-          const eupmyun = region_3depth_name.replace(/\s/g, "");
-          const ri = ""; // 필요하면 향후 입력 받기
-
-          // ✅ 동코드 조회 API 호출
-          const dongRes = await axios.get("http://localhost:8080/api/v2/beopjeongdong/dong-code", {
-            params: {
-              sido,
-              sigungu,
-              eupmyun,
-              ri,
-            },
+          const { sido, sigungu, eupmyun, ri } = parseAddress(result.address);
+          const { data } = await axios.get("http://localhost:8080/api/v2/beopjeongdong/dong-code", {
+            params: { sido, sigungu, eupmyun, ri },
           });
-
-          const dongCode = dongRes.data.dongCode;
 
           setFormData((prev) => ({
             ...prev,
@@ -73,7 +67,7 @@ export default function SignUp() {
             sigungu,
             eupmyun,
             ri,
-            dong_code: dongCode, // ✅ 저장
+            dong_code: data.dongCode,
           }));
         } catch (err) {
           console.error("❌ 주소 처리 중 오류", err);
@@ -91,63 +85,61 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("📤 제출 데이터:", formData);
 
-    const requiredFields = [
+    const required = [
       "email", "password", "nickname", "name", "phone",
       "address", "detailAddress", "gpsLat", "gpsLng",
       "sido", "sigungu", "eupmyun", "dong_code"
     ];
 
-    for (let field of requiredFields) {
-      if (!formData[field]) {
-        alert(`${field}을(를) 입력해 주세요.`);
+    for (let key of required) {
+      if (!formData[key]) {
+        alert(`${key}은(는) 필수입니다.`);
         return;
       }
     }
 
     const payload = {
-      ...formData,
-      ri: formData.ri?.trim() || null,
+      email: formData.email,
+      password: formData.password,
+      nickname: formData.nickname,
+      name: formData.name,
+      phone: formData.phone,
+      detailAddress: formData.detailAddress,
       profileImageUrl: formData.profileImageUrl ?? DEFAULT_PROFILE_IMAGE_URL,
+      sido: formData.sido,
+      sigungu: formData.sigungu,
+      eupmyun: formData.eupmyun,
+      ri: formData.ri || "",
     };
-
-    console.log("🚀 회원가입 payload 전송", payload);
 
     try {
       await signup(payload);
-      alert("회원가입 성공!");
+      alert("🎉 회원가입 성공!");
     } catch (err) {
-      console.error("❌ 회원가입 실패:", err.response?.data || err);
-      alert(`회원가입 실패: ${err.response?.data?.message || "서버 오류"}`);
+      console.error("❌ 회원가입 실패", err);
+      alert("회원가입 실패");
     }
   };
 
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-
   return (
-    <div className="max-w-lg mx-auto p-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <ProfileImageUploader onUpload={handleUpload} />
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-lg mx-auto">
+      <ProfileImageUploader onUpload={handleUpload} />
 
-        <input name="email" placeholder="이메일" value={formData.email} onChange={handleChange} />
-        <input name="password" type="password" placeholder="비밀번호" value={formData.password} onChange={handleChange} />
-        <input name="nickname" placeholder="닉네임" value={formData.nickname} onChange={handleChange} />
-        <input name="name" placeholder="이름" value={formData.name} onChange={handleChange} />
-        <input name="phone" placeholder="휴대폰번호" value={formData.phone} onChange={handleChange} />
+      <input name="email" placeholder="이메일" value={formData.email} onChange={handleChange} />
+      <input name="password" type="password" placeholder="비밀번호" value={formData.password} onChange={handleChange} />
+      <input name="nickname" placeholder="닉네임" value={formData.nickname} onChange={handleChange} />
+      <input name="name" placeholder="이름" value={formData.name} onChange={handleChange} />
+      <input name="phone" placeholder="휴대폰번호" value={formData.phone} onChange={handleChange} />
 
-        <button type="button" onClick={simulatePASS}>PASS 본인인증 (테스트용)</button>
-        <button type="button" onClick={handleAddressSearch}>주소 검색</button>
+      <button type="button" onClick={simulatePASS}>PASS 인증 시뮬</button>
+      <button type="button" onClick={handleAddressSearch}>주소 검색</button>
 
-        <input name="address" placeholder="선택된 주소" value={formData.address} readOnly />
-        <input name="detailAddress" placeholder="상세주소" value={formData.detailAddress} onChange={handleChange} />
+      <input name="address" placeholder="주소" value={formData.address} readOnly />
+      <input name="detailAddress" placeholder="상세주소" value={formData.detailAddress} onChange={handleChange} />
 
-        <button type="submit">회원가입</button>
-      </form>
-    </div>
+      <button type="submit">회원가입</button>
+    </form>
   );
 }

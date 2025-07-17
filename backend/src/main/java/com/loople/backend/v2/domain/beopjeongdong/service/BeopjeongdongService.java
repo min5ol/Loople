@@ -6,11 +6,16 @@
 package com.loople.backend.v2.domain.beopjeongdong.service;
 
 import com.loople.backend.v2.domain.beopjeongdong.dto.BeopjeongdongDto;
+import com.loople.backend.v2.domain.beopjeongdong.entity.Beopjeongdong;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface BeopjeongdongService
-{
+public interface BeopjeongdongService {
     void saveAllIfNotExists(List<BeopjeongdongDto> dtoList);
     String getDongCode(String sido, String sigungu, String eupmyun, String ri);
+    Optional<Beopjeongdong> findByDongCode(String dongCode);
+    Beopjeongdong getDongByAddressParts(String sido, String sigungu, String eupmyun, String ri);
 }
+
+
