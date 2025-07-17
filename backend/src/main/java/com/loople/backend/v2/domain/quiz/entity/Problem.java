@@ -29,8 +29,6 @@ public class Problem {
     @Column(name="created_at")
     private LocalDateTime createdAt;
 
-    private int points;
-
     @Builder
     public Problem(String question, ProblemType type, String answer) {
         this.question = question;

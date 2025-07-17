@@ -12,25 +12,25 @@ import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
-public class S3Service
-{
+public class S3Service {
+
     private final AmazonS3 amazonS3;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String createPresignedUrl(String fileName, String contentType)
-    {
-        Date expiration = new Date();
-        expiration.setTime(System.currentTimeMillis() + 1000 * 60 * 5);
+    public String createPresignedUrl(String fileName, String contentType) {
+        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 5); // 5분
 
-        GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucket, fileName)
-                        .withMethod(HttpMethod.PUT)
-                        .withExpiration(expiration);
-        generatePresignedUrlRequest.setContentType(contentType);
+        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, fileName)
+                .withMethod(HttpMethod.PUT)
+                .withExpiration(expiration);
 
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+        // ✅ Content-Type 서명에 포함
+        request.setContentType(contentType);
+
+        // ❌ ACL 생략: 프론트에서도 안 보내고, 서명에도 포함 안 시킴
+        URL url = amazonS3.generatePresignedUrl(request);
         return url.toString();
     }
 }
