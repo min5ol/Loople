@@ -1,7 +1,8 @@
 package com.loople.backend.v2.domain.quiz.controller;
 
-import com.loople.backend.v2.domain.quiz.dto.ProblemRequestDto;
 import com.loople.backend.v2.domain.quiz.dto.ProblemResponseDto;
+import com.loople.backend.v2.domain.quiz.dto.UserAnswerRequestDto;
+import com.loople.backend.v2.domain.quiz.dto.UserAnswerResponseDto;
 import com.loople.backend.v2.domain.quiz.service.QuizService;
 import com.loople.backend.v2.global.api.OpenApiClient;
 import lombok.RequiredArgsConstructor;
@@ -10,47 +11,79 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/quiz")
+@RequestMapping("api/v2/quiz")
+@CrossOrigin(origins = "http://localhost:5173")
 public class QuizController {
 
     private final OpenApiClient openApiClient;
     private final QuizService quizService;
 
-    //문제 생성 및 db 저장 후 클라이언트에게 문제 show
-    @GetMapping("/build")
+    //문제 생성 및 db 저장 후 저장된 문제 클라이언트에게 show
+    @GetMapping("/buildAndShow")
     public Mono<ProblemResponseDto> buildQuiz() {
         String prompt = buildPrompt();
-        return openApiClient.requestChatCompletion(prompt)
+        Mono<ProblemResponseDto> map = openApiClient.requestChatCompletion(prompt)
                 .map(response -> {
                     ProblemResponseDto problemResponseDto = quizService.saveProblem(response);
                     return problemResponseDto;
                 });
+
+        return map;
+    }
+
+    @GetMapping("/buildAndShow/test")
+    public Mono<ProblemResponseDto> testBuildQuiz(){
+        String dummyResponse = "type: OX\n" +
+                "question: 돼지는 꿀꿀\n" +
+                "answer: O";
+
+//        String dummyResponse = "type: MULTIPLE\n" +
+//                "question: 다음 중 우리나라의 수도는 어디인가?\n" +
+//                "answer: C\n" +
+//                "options:\n" +
+//                "A. 부산\n" +
+//                "B. 대구\n" +
+//                "C. 서울\n" +
+//                "D. 인천";
+
+        ProblemResponseDto problemResponseDto = quizService.saveProblem(dummyResponse);
+        return Mono.just(problemResponseDto);
+    }
+    
+    //사용자 응답 제출 비교
+    @PostMapping("/submitAnswer")
+    public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto request){
+        System.out.println("request = " + request);
+        String SubmittedAnswer = request.getSubmittedAnswer();
+        Long problemId = request.getProblemId();
+        System.out.println("problemId = " + problemId);
+        System.out.println("SubmittedAnswer = " + SubmittedAnswer);
+
+        return quizService.saveUserAnswer(request);
     }
 
     private String buildPrompt(){
-        return "전체 주제는 순환 경제야.\n" +
-                "문제 유형은 \"OX\" 또는 \"MULTIPLE\" 중 하나로 명시하고, \n" +
-                "문제 난이도는 그리 어렵지 않게 해주면 돼.\n" +
-                "초등학생, 중학생들이 맞출 수 있는 수준으로 해주라.\n" +
-                "주의할 점은 처음 접한 사람이 이해하지 못 하는 단어 사용은 자제해줘.\n" +
-                "앞서 언급한 주제와 난이도에 맞게 다음 형식으로 문제 하나를 만들어줘:\n" +
+        return "주제: 순환 경제\n" +
+                "문제 유형: OX 또는 MULTIPLE\n" +
+                "난이도: 초·중학생 수준\n" +
+                "조건: 어려운 단어 금지\n" +
                 "\n" +
-                "형식:\n" +
+                "출력 형식:\n" +
                 "type: OX\n" +
-                "question: 2+3은 6이다.\n" +
-                "answer: X\n" +
+                "question: ...\n" +
+                "answer: O/X\n" +
                 "\n" +
                 "또는\n" +
                 "\n" +
                 "type: MULTIPLE\n" +
-                "question: 2 + 3은?\n" +
+                "question: ...\n" +
                 "options:\n" +
-                "A. 4\n" +
-                "B. 5\n" +
-                "C. 6\n" +
-                "D. 7\n" +
-                "answer: B";
-
+                "  A. ...\n" +
+                "  B. ...\n" +
+                "  C. ...\n" +
+                "  D. ...\n" +
+                "answer: A/B/C/D\n" +
+                "문제 하나 생성해줘.\n";
     }
 
 }

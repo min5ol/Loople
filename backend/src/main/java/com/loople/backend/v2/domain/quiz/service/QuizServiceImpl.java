@@ -1,29 +1,28 @@
 package com.loople.backend.v2.domain.quiz.service;
 
-import com.loople.backend.v2.domain.quiz.dto.MultipleOptionRequestDto;
-import com.loople.backend.v2.domain.quiz.dto.MultipleOptionResponseDto;
-import com.loople.backend.v2.domain.quiz.dto.ProblemRequestDto;
-import com.loople.backend.v2.domain.quiz.dto.ProblemResponseDto;
+import com.loople.backend.v2.domain.quiz.dto.*;
 import com.loople.backend.v2.domain.quiz.entity.MultipleOption;
 import com.loople.backend.v2.domain.quiz.entity.Problem;
 import com.loople.backend.v2.domain.quiz.entity.ProblemType;
+import com.loople.backend.v2.domain.quiz.entity.UserAnswer;
 import com.loople.backend.v2.domain.quiz.repository.MultipleOptionRepository;
 import com.loople.backend.v2.domain.quiz.repository.ProblemRepository;
-import com.loople.backend.v2.global.api.OpenApiClient;
+import com.loople.backend.v2.domain.quiz.repository.UserAnswerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class QuizServiceImpl implements QuizService{
 
-    private final OpenApiClient openApiClient;
     private final ProblemRepository problemRepository;
     private final MultipleOptionRepository multipleOptionRepository;
+    private final UserAnswerRepository userAnswerRepository;
 
     @Override
     public ProblemResponseDto saveProblem(String response) {
@@ -38,7 +37,7 @@ public class QuizServiceImpl implements QuizService{
                 .map(opt -> new MultipleOptionResponseDto(opt.getContent(), opt.getOptionOrder()))
                 .toList();
 
-        return new ProblemResponseDto(problem.getQuestion(), problem.getType(), responseOptions);
+        return new ProblemResponseDto(problem.getNo(), problem.getQuestion(), problem.getType(), responseOptions);
     }
 
     @Override
@@ -48,6 +47,25 @@ public class QuizServiceImpl implements QuizService{
             multipleOptions.add(new MultipleOption(problem, optionDto.getContent(), optionDto.getOptionOrder()));
         }
         multipleOptionRepository.saveAll(multipleOptions);
+    }
+
+    @Override
+    public UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto) {
+        Long problemId = userAnswerRequestDto.getProblemId();
+        String submittedAnswer = userAnswerRequestDto.getSubmittedAnswer();
+        Long userId = getLoggedInUserId();
+        boolean isCorrect = checkTheAnswer(userAnswerRequestDto);
+        UserAnswer userAnswer = UserAnswer.builder()
+                .userId(userId)
+                .problemId(problemId)
+                .submittedAnswer(submittedAnswer)
+                .isCorrect(isCorrect?1:0)
+                .points(isCorrect?3:1)
+                .build();
+
+        userAnswerRepository.save(userAnswer);
+
+        return new UserAnswerResponseDto(userAnswer.getIsCorrect(), isCorrect?3:1);
     }
 
     //db 저장용 파싱
@@ -111,4 +129,17 @@ public class QuizServiceImpl implements QuizService{
         }
     }
 
+    private Long getLoggedInUserId(){
+        //추후 수정 예정
+        return 1L;
+    }
+
+    private boolean checkTheAnswer(UserAnswerRequestDto userAnswerRequestDto){
+        return problemRepository.findById(userAnswerRequestDto.getProblemId())
+                .map(problem -> problem.getAnswer().equals(userAnswerRequestDto.getSubmittedAnswer()))
+                .orElseThrow(() -> new IllegalArgumentException("해당 문제는 존재하지 않습니다."));
+    }
+
 }
+
+
