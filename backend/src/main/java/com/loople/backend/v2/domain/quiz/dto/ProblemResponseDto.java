@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class ProblemResponseDto {
+    private Long no;
     private String question;
     private ProblemType type;
     private List<MultipleOptionResponseDto> options;

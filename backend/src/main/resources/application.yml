@@ -21,6 +21,9 @@ spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
+  jackson:
+    time-zone: Asia/Seoul
+
 cloud:
   aws:
     credentials:

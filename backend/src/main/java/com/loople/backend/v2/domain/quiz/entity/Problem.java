@@ -26,7 +26,7 @@ public class Problem {
     @Column(name="answer")
     private String answer;
 
-    @Column(name="created_at")
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
