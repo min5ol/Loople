@@ -4,7 +4,9 @@ import { DEFAULT_PROFILE_IMAGE_URL } from "../../constants/defaults";
 import { parseAddress } from "../../utils/parseAddress";
 import { searchKakaoAddress } from "../../services/kakaoService";
 import ProfileImageUploader from "../organisms/ProfileImageUploader";
+import SignupSuccessModal from "../atoms/SignupSuccessModal";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -24,6 +26,9 @@ export default function SignUp() {
     ri: "",
     profileImageUrl: null,
   });
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -85,8 +90,6 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("📤 제출 데이터:", formData);
-
     const required = [
       "email", "password", "nickname", "name", "phone",
       "address", "detailAddress", "gpsLat", "gpsLng",
@@ -116,30 +119,110 @@ export default function SignUp() {
 
     try {
       await signup(payload);
-      alert("🎉 회원가입 성공!");
+      setShowSuccessModal(true);
     } catch (err) {
       console.error("❌ 회원가입 실패", err);
       alert("회원가입 실패");
     }
   };
 
+  const handleSuccessConfirm = () => {
+    setShowSuccessModal(false);
+    navigate("/onboarding");
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-lg mx-auto">
-      <ProfileImageUploader onUpload={handleUpload} />
+    <>
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-md mx-auto p-6 bg-white rounded-xl shadow space-y-4"
+      >
+        <h2 className="text-center text-xl font-bold mb-2">회원가입</h2>
 
-      <input name="email" placeholder="이메일" value={formData.email} onChange={handleChange} />
-      <input name="password" type="password" placeholder="비밀번호" value={formData.password} onChange={handleChange} />
-      <input name="nickname" placeholder="닉네임" value={formData.nickname} onChange={handleChange} />
-      <input name="name" placeholder="이름" value={formData.name} onChange={handleChange} />
-      <input name="phone" placeholder="휴대폰번호" value={formData.phone} onChange={handleChange} />
+        <div className="flex flex-col items-center gap-2">
+          <img
+            src={formData.profileImageUrl || DEFAULT_PROFILE_IMAGE_URL}
+            alt="프로필 미리보기"
+            className="w-24 h-24 rounded-full border object-cover"
+          />
+          <ProfileImageUploader onUpload={handleUpload} />
+        </div>
 
-      <button type="button" onClick={simulatePASS}>PASS 인증 시뮬</button>
-      <button type="button" onClick={handleAddressSearch}>주소 검색</button>
+        <input
+          name="email"
+          placeholder="이메일"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          name="password"
+          type="password"
+          placeholder="비밀번호"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          name="nickname"
+          placeholder="닉네임"
+          value={formData.nickname}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          name="name"
+          placeholder="이름"
+          value={formData.name}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          name="phone"
+          placeholder="휴대폰번호"
+          value={formData.phone}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
 
-      <input name="address" placeholder="주소" value={formData.address} readOnly />
-      <input name="detailAddress" placeholder="상세주소" value={formData.detailAddress} onChange={handleChange} />
+        <div className="flex gap-2">
+          <button type="button" onClick={simulatePASS} className="flex-1 bg-gray-200 rounded p-2">
+            PASS 인증 시뮬
+          </button>
+          <button type="button" onClick={handleAddressSearch} className="flex-1 bg-gray-200 rounded p-2">
+            주소 검색
+          </button>
+        </div>
 
-      <button type="submit">회원가입</button>
-    </form>
+        <input
+          name="address"
+          placeholder="주소"
+          value={formData.address}
+          readOnly
+          className="w-full border p-2 rounded bg-gray-50"
+        />
+        <input
+          name="detailAddress"
+          placeholder="상세주소"
+          value={formData.detailAddress}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold p-2 rounded"
+        >
+          회원가입
+        </button>
+      </form>
+
+      {showSuccessModal && (
+        <SignupSuccessModal
+          nickname={formData.nickname}
+          onClose={handleSuccessConfirm}
+        />
+      )}
+    </>
   );
 }

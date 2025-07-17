@@ -54,7 +54,6 @@ public class BeopjeongdongServiceImpl implements BeopjeongdongService {
     public Optional<Beopjeongdong> findByDongCode(String dongCode) {
         return repository.findByDongCode(dongCode);
     }
-
     private boolean isBlank(String str) {
         return str == null || str.trim().isEmpty();
     }
