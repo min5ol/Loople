@@ -4,6 +4,8 @@ import com.loople.backend.v2.domain.beopjeongdong.entity.Beopjeongdong;
 import com.loople.backend.v2.domain.beopjeongdong.service.BeopjeongdongService;
 import com.loople.backend.v2.domain.userNotification.entity.UserNotification;
 import com.loople.backend.v2.domain.userNotification.repository.UserNotificationRepository;
+import com.loople.backend.v2.domain.users.dto.UserLoginRequest;
+import com.loople.backend.v2.domain.users.dto.UserLoginResponse;
 import com.loople.backend.v2.domain.users.dto.UserSignupRequest;
 import com.loople.backend.v2.domain.users.dto.UserSignupResponse;
 import com.loople.backend.v2.domain.users.entity.Provider;
@@ -12,6 +14,7 @@ import com.loople.backend.v2.domain.users.entity.User;
 import com.loople.backend.v2.domain.users.repository.UserRepository;
 import com.loople.backend.v2.domain.villageStatus.entity.VillageStatus;
 import com.loople.backend.v2.domain.villageStatus.repository.VillageStatusRepository;
+import com.loople.backend.v2.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final UserNotificationRepository userNotificationRepository;
     private final VillageStatusRepository villageStatusRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
     @Override
     @Transactional
@@ -96,5 +100,20 @@ public class UserServiceImpl implements UserService {
         log.info("[회원가입] 전체 완료: {}ms", System.currentTimeMillis() - start);
 
         return new UserSignupResponse(user.getNo(), user.getNickname());
+    }
+
+    @Override
+    public UserLoginResponse login(UserLoginRequest request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+
+        if(!passwordEncoder.matches(request.password(), user.getPasswordHash()))
+        {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        String token = jwtProvider.createToken(user.getNo(), user.getRole());
+
+        return new UserLoginResponse(token);
     }
 }

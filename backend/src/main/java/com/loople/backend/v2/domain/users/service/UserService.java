@@ -6,6 +6,8 @@
 
 package com.loople.backend.v2.domain.users.service;
 
+import com.loople.backend.v2.domain.users.dto.UserLoginRequest;
+import com.loople.backend.v2.domain.users.dto.UserLoginResponse;
 import com.loople.backend.v2.domain.users.dto.UserSignupRequest;
 import com.loople.backend.v2.domain.users.dto.UserSignupResponse;
 
@@ -17,4 +19,5 @@ public interface UserService
      * @return 응답 DTO
      */
     UserSignupResponse signup(UserSignupRequest request);
+    UserLoginResponse login(UserLoginRequest request);
 }
