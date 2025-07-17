@@ -39,3 +39,7 @@ openai:
     model: gpt-4o
     base-url: https://api.openai.com/v1/chat/completions
     key: ${OPENAI_API_KEY}
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  expiration: 3600000
