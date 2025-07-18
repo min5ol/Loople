@@ -1,3 +1,8 @@
+/*
+    작성일자: 2025-07-16
+    작성자: 백진선
+    설명: 사용자 답변 정보를 저장하는 엔티티 클래스
+*/
 package com.loople.backend.v2.domain.quiz.entity;
 
 import jakarta.persistence.*;
@@ -16,31 +21,31 @@ import java.time.LocalDateTime;
 public class UserAnswer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long no;
+    private Long no;    //답변 고유 번호(PK)
 
     @Column(name="user_id")
-    private Long userId;
+    private Long userId;    //사용자 고유 번호(FK)
 
     @Column(name="problem_id")
-    private Long problemId;
+    private Long problemId; //문제 고유 번호(FK)
 
     @Column(name="submitted_answer")
-    private String submittedAnswer;
+    private String submittedAnswer; //사용자 제출 답안
 
     @Column(name="is_correct")
-    private int isCorrect;
+    private int isCorrect;  //정답 여부(1: 정답, 0: 오답)
 
     @Column(name="is_weekly")
-    private int isWeekly;
+    private int isWeekly;   //주간 접속 여부(1: TRUE, 0: FALSE)
 
     @Column(name="is_monthly")
-    private int isMonthly;
+    private int isMonthly;  //월간 접속 여부(1: TRUE, 0: FALSE)
 
     //참가(오답) 3, 정답 7, 주간 20, 월간 100
-    private int points;
+    private int points; //획득한 포인트 점수
 
     @Column(name="solved_at")
-    private LocalDate solvedAt;
+    private LocalDate solvedAt; //문제 풀이 날짜
 
     @Builder
     public UserAnswer(Long userId, Long problemId, String submittedAnswer, int isCorrect, int isWeekly, int isMonthly, int points, LocalDate solvedAt) {

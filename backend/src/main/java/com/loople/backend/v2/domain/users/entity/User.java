@@ -104,6 +104,11 @@ public class User
         this.updatedAt = LocalDateTime.now();
     }
 
+    /*
+        작성일자: 2025-07-18
+        작성자: 백진선
+        설명: 사용자 포인트를 누적 값으로 더하는 메서드
+    */
     public void addPoints(int pointsToAdd){
         this.points += pointsToAdd;
     }

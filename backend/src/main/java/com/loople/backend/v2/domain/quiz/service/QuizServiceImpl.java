@@ -1,3 +1,8 @@
+/*
+    작성일자: 2025-07-16
+    작성자: 백진선
+    설명: 퀴즈 문제 및 사용자 답안 관련 비즈니스 로직을 퍼리하는 서비스 구현체
+*/
 package com.loople.backend.v2.domain.quiz.service;
 
 import com.loople.backend.v2.domain.quiz.dto.*;
@@ -26,46 +31,62 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class QuizServiceImpl implements QuizService{
 
-    private final ProblemRepository problemRepository;
-    private final MultipleOptionRepository multipleOptionRepository;
-    private final UserAnswerRepository userAnswerRepository;
-    private final UserRepository userRepository;
-    private final JwtProvider jwtProvider;
+    private final ProblemRepository problemRepository;  //문제 엔티티 DB 접근용 Repository
+    private final MultipleOptionRepository multipleOptionRepository;    //문제 옵션 엔티티 DB 접근용 Repository
+    private final UserAnswerRepository userAnswerRepository;    //사용자 답안 엔티티 DB 접근용 Repository
+    private final UserRepository userRepository;    //사용자 엔티티 DB 접근용 Repository
 
+    //OpenAPI로부터 받은 문제 데이터를 파싱 및 저장
     @Override
     public ProblemResponseDto saveProblem(String response) {
+        // OpenAPI 응답 문자열을 파싱해 문제 요청 DTO 생성
         ProblemRequestDto problemRequestDto = parseApiResponse(response);
         List<MultipleOptionRequestDto> options = problemRequestDto.getOptions();
 
+        //문제 엔티티 생성 및 요청 DTO 데이터 저장
         Problem problem = new Problem(problemRequestDto.getQuestion(), problemRequestDto.getType(), problemRequestDto.getAnswer());
         problemRepository.save(problem);
+        
+        //옵션 저장 처리
         saveOption(options, problem);
 
+        //저장된 옵션 DTO 리스트로 반환
         List<MultipleOptionResponseDto> responseOptions = options.stream()
                 .map(opt -> new MultipleOptionResponseDto(opt.getContent(), opt.getOptionOrder()))
                 .toList();
 
+        //문제 응답 DTO 반환
         return new ProblemResponseDto(problem.getNo(), problem.getQuestion(), problem.getType(), responseOptions, false);
     }
 
+    //문제 옵션 저장
     @Override
     public void saveOption(List<MultipleOptionRequestDto> options, Problem problem) {
+        //문제와 연관된 옵션 엔티티 리스트 생성
         List<MultipleOption> multipleOptions = new ArrayList<>();
         for(MultipleOptionRequestDto optionDto : options){
             multipleOptions.add(new MultipleOption(problem, optionDto.getContent(), optionDto.getOptionOrder()));
         }
+        
+        //옵션 일괄 저장
         multipleOptionRepository.saveAll(multipleOptions);
     }
 
+    //사용자 답안 저장 및 정답 여부, 점수 계산 
     @Override
     public UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto, Long userId) {
+        //전처리
         Long problemId = userAnswerRequestDto.getProblemId();
         String submittedAnswer = userAnswerRequestDto.getSubmittedAnswer();
+        
+        //정답 여부 체크
         boolean isCorrect = checkTheAnswer(userAnswerRequestDto);
+        
+        //주간, 월간 접속 여부 체크
         boolean isWeekly=false;
         boolean isMonthly = false;
 
-        //주간 출석 체크 - 일요일일 때 한 번에 체크
+        //주간 출석 체크 - 일요일인 경우 한 번에 체크
         if (LocalDate.now().getDayOfWeek() == DayOfWeek.SUNDAY) {
             if(hasCheckedAttendanceForAWeek(userId)){
                 isWeekly = true;
@@ -77,9 +98,13 @@ public class QuizServiceImpl implements QuizService{
             isMonthly = true;
         }
 
+        //점수 계산(정답 여부, 주간 및 월간 출석 보너스 포함)
         int totalPoints = (isCorrect?7:3) + (isWeekly?20:0) + (isMonthly?100:0);
+        
+        //사용자 점수 업데이트
         updatedUserPoints(new UpdatedUserPointRequest(userId, totalPoints), userId);
 
+        //사용자 답안 엔티티 생성 및 저장
         UserAnswer userAnswer = UserAnswer.builder()
                 .userId(userId)
                 .problemId(problemId)
@@ -90,25 +115,24 @@ public class QuizServiceImpl implements QuizService{
                 .points(totalPoints)
                 .solvedAt(LocalDate.now())
                 .build();
-
-        System.out.println("userAnswer = " + userAnswer);
+        
         userAnswerRepository.save(userAnswer);
 
+        //답안 채점 결과 DTO 반환
         return new UserAnswerResponseDto(userAnswer.getIsCorrect(), userAnswer.getIsWeekly(), userAnswer.getIsMonthly(), totalPoints);
 
     }
 
+    //오늘 문제 풀이 여부 반환
     @Override
     public boolean hasSolvedTodayProblem(Long userId) {
+        //현재 로그인된 사용자가 오늘 문제를 푼 기록이 있는지 조회
         Optional<UserAnswer> byUserIdAndSolvedDate = userAnswerRepository.findByUserIdAndSolvedAt(userId, LocalDate.now());
 
-        if(byUserIdAndSolvedDate.isPresent()){
-            return true;
-        }
-        return false;
+        return byUserIdAndSolvedDate.isPresent();
     }
 
-    //db 저장용 파싱
+    //db 저장용 파싱 -> OpenAPI 응답 문자열을 파싱해 ProblemRequestDto 객체 생성
     private ProblemRequestDto parseApiResponse(String response) {
         //response: "type: OX\nquestion: 순환 경제는 물건을 오래 쓰고, 다시 쓰는 것을 중요하게 생각한다.\nanswer: O"
         // 응답을 줄 단위로 분리
@@ -143,7 +167,7 @@ public class QuizServiceImpl implements QuizService{
 
                     // 각 옵션 라인이 "A. ", "B. " 등 형식에 맞는지 검사
                     if (optLine.matches("^[A-D]\\.\\s.*")) {
-                        // 옵션 라벨 (A, B, C, D)
+                        // 현재 옵션 라벨 (A, B, C, D)
                         int label = convertLabelToNumber(optLine.substring(0, 1));
 
                         // 옵션 내용 (라벨 뒤의 텍스트)
@@ -159,6 +183,7 @@ public class QuizServiceImpl implements QuizService{
         return new ProblemRequestDto(question, ProblemType.valueOf(type), answer, options);
     }
 
+    //현재 옵션 라벨(A~D)을 숫자(1~4)로 변환
     private int convertLabelToNumber(String label) {
         switch (label.toUpperCase()) {
             case "A": return 1;
@@ -169,12 +194,14 @@ public class QuizServiceImpl implements QuizService{
         }
     }
 
+    //사용자가 응답한 답안과 문제의 정답과의 일치 여부
     private boolean checkTheAnswer(UserAnswerRequestDto userAnswerRequestDto){
         return problemRepository.findById(userAnswerRequestDto.getProblemId())
                 .map(problem -> problem.getAnswer().equals(userAnswerRequestDto.getSubmittedAnswer()))
                 .orElseThrow(() -> new IllegalArgumentException("해당 문제는 존재하지 않습니다."));
     }
 
+    //이번 주에 사용자가 매일 출석했는지 확인
     private boolean hasCheckedAttendanceForAWeek(Long userId){
         LocalDate today = LocalDate.now();  //2025-07-18
         LocalDate weekAgo = today.minusDays(6); //오늘 포함 7일 -> 2025-07-12
@@ -184,6 +211,7 @@ public class QuizServiceImpl implements QuizService{
         return counted == 7;
     }
 
+    //이번 달에 사용자가 매일 출석했는지 확인
     private boolean hasCheckedAttendanceForAMonth(Long userId){
         LocalDate today = LocalDate.now();  //2025-07-18
         YearMonth thisMonth = YearMonth.from(today);    //2025-07
@@ -196,6 +224,7 @@ public class QuizServiceImpl implements QuizService{
         return totalDayOfThisMonth == counted;
     }
 
+    //사용자 점수 업데이트
     private void updatedUserPoints(UpdatedUserPointRequest request, Long userId){
         System.out.println("userId = " + userId);
         User user = userRepository.findById(userId)
