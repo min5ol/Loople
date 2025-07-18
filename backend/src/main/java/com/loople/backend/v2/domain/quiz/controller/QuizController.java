@@ -1,3 +1,22 @@
+/*
+    작성일: 2025-07-16
+    작성자: 백진선
+    설명:
+    퀴즈 생성 및 사용자 응답 처리 기능 담당
+
+    주요 기능:
+    1. buildQuiz() - 인증된 사용자가 오늘 푼 문제가 없으면 OpenApiClient를 통해 퀴즈 문제를 생성, 저장 후 반환
+    2. testBuildQuiz() - 테스트용 더미 문제 반환
+    3. getAnswer() - 사용자가 제출한 답안을 저장하고 결과 반환
+    4. JWT 토큰 기반 사용자 인증: 요청 헤더의 Authorization 토큰을 확인하여 사용자 식별
+
+    보안:
+    - JWT 토큰 검증 실패 시 401 Unauthorized 응답
+
+    기타:
+    - CORS 설정으로 프론트엔드(http://localhost:5173)에서 API 접근 허용
+ */
+
 package com.loople.backend.v2.domain.quiz.controller;
 
 import com.loople.backend.v2.domain.quiz.dto.ProblemResponseDto;
@@ -13,7 +32,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v2/quiz")
@@ -25,7 +43,8 @@ public class QuizController {
     private final JwtProvider jwtProvider;
 
     //문제 생성 및 db 저장 후 저장된 문제 클라이언트에게 show
-    @GetMapping("/buildAndShow")
+    //Mono: 비동기 단일 값 컨테이너 -> 나중에 1개의 데이터를 비동기적으로 받음
+    @PostMapping("/buildAndShow")
     public Mono<ProblemResponseDto> buildQuiz(HttpServletRequest request) {
         Long userId = getLoggedInUserId(request);
         if(quizService.hasSolvedTodayProblem(userId)){
@@ -33,8 +52,8 @@ public class QuizController {
         }
 
         String prompt = buildPrompt();
-        Mono<ProblemResponseDto> map = openApiClient.requestChatCompletion(prompt)
-                .map(response -> {
+        Mono<ProblemResponseDto> map = openApiClient.requestChatCompletion(prompt)  //API로 prompt를 보내 비동기적으로 응답 받아옴
+                .map(response -> {  //받은 응답을 내부 로직 처리 후 ProblemResponseDto 객체로 반환하여 저장
                     ProblemResponseDto problemResponseDto = quizService.saveProblem(response);
                     return problemResponseDto;
                 });
@@ -42,6 +61,7 @@ public class QuizController {
         return map;
     }
 
+    //테스트용
     @GetMapping("/buildAndShow/test")
     public Mono<ProblemResponseDto> testBuildQuiz(HttpServletRequest request){
         Long userId = getLoggedInUserId(request);
@@ -74,6 +94,7 @@ public class QuizController {
         return quizService.saveUserAnswer(userAnswerRequestDto, userId);
     }
 
+    //API 문제 요청 프롬프트
     private String buildPrompt(){
         return "너는 초등학생과 중학생이 매일 순환경제와 분리배출에 대해 배울 수 있도록 퀴즈 문제를 만드는 친절한 환경 교육 선생님이야.\n" +
                 "\n" +
@@ -110,22 +131,24 @@ public class QuizController {
                 "이제 위 조건에 맞는 퀴즈 문제를 하나만 생성해줘.";
     }
 
+    //현재 로그인 된 사용자 ID를 JWT 토큰에서 추출
     private Long getLoggedInUserId(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization");
-        if (!StringUtils.hasText(bearer) || !bearer.startsWith("Bearer ")) {
+        String bearer = request.getHeader("Authorization"); //Authorization 헤더 추출
+        if (!StringUtils.hasText(bearer) || !bearer.startsWith("Bearer ")) {    //헤더 유효성 검사
             throw new UnauthorizedException("Authorization 헤더가 존재하지 않거나 유효하지 않습니다.");
         }
-        String token = bearer.substring(7);
-        if (!jwtProvider.validateToken(token)) {
+        String token = bearer.substring(7); //JWT 토큰 추출
+        if (!jwtProvider.validateToken(token)) {    //JWT 유효성 검사
             throw new UnauthorizedException("JWT Token이 존재하지 않습니다.");
         }
-        return jwtProvider.getUserId(token);
+        return jwtProvider.getUserId(token);    //사용자 ID 추출
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    //인증 실패 시 사용할 커스텀 예외 클래스
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)    //예외 발생 시 자동으로 HTTP 상태 코드 401(Unauthorized)로 응답
     public class UnauthorizedException extends RuntimeException {
         public UnauthorizedException(String message) {
-            super(message);
+            super(message); //예외 메시지 부모 클래스(RuntimeException)로 전달
         }
     }
 
