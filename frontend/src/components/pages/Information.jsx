@@ -1,10 +1,16 @@
+// 작성일: 2025.07.18
+// 작성자: 장민솔
+// 설명: 회원가입 완료 후 Loople 서비스 철학을 소개하는 슬라이드 페이지. 각 슬라이드는 이미지+텍스트로 구성. 인디케이터와 이동 버튼 포함됨.
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import village from "../../assets/villiage.png";
 import plant from "../../assets/plant_bloom.png";
 import person from "../../assets/woman_avatar.png";
 import room from "../../assets/room_full.png";
 
+// 슬라이드 내용: 5개로 구성
 const slides = [
   {
     title: "분리배출은 시작입니다",
@@ -39,7 +45,7 @@ const slides = [
 ];
 
 export default function Information() {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(0); // 현재 슬라이드 인덱스
   const navigate = useNavigate();
 
   const next = () => setStep((s) => Math.min(s + 1, slides.length - 1));
@@ -51,7 +57,7 @@ export default function Information() {
 
   return (
     <div className="min-h-screen bg-[#FEF7E2] flex flex-col justify-between items-center px-6 py-10 font-[pretendard] text-[#202020]">
-      {/* 상단 콘텐츠 */}
+      {/* 상단 콘텐츠: 이모지, 제목, 설명, 이미지 */}
       <div className="text-center space-y-6 max-w-lg">
         <div className="text-5xl">{emoji}</div>
         <h2 className="text-[1.75rem] font-bold text-[#264D3D]">{title}</h2>
@@ -63,7 +69,7 @@ export default function Information() {
         />
       </div>
 
-      {/* 인디케이터 */}
+      {/* 인디케이터: 현재 위치 시각적으로 보여줌 */}
       <div className="flex gap-2 mt-8 mb-4">
         {slides.map((_, i) => (
           <span
@@ -75,7 +81,7 @@ export default function Information() {
         ))}
       </div>
 
-      {/* 내비게이션 */}
+      {/* 하단 네비게이션: 이전, 건너뛰기, 다음 or 시작하기 */}
       <div className="flex justify-between items-center w-full max-w-xs text-sm mb-4">
         <button
           onClick={prev}
