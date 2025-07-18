@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -29,11 +30,11 @@ public class UserAnswer {
     @Column(name="is_correct")
     private int isCorrect;
 
-    //참가(오답) 1, 정답 3, 주간 10, 월간 100
+    //참가(오답) 1, 정답 3, 주간 20, 월간 100
     private int points;
 
-    @Column(name="submitted_at", insertable = false, updatable=false)
-    private LocalDateTime submittedAt;
+    @Column(name="solved_at", insertable = false, updatable=false)
+    private LocalDate solvedAt;
 
     @Builder
     public UserAnswer(Long userId, Long problemId, String submittedAnswer, int isCorrect, int points) {

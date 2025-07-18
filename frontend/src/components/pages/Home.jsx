@@ -42,7 +42,11 @@ export default function Home() {
     </div>
 
     
-    <Link to="quiz">퀴즈 풀기</Link>
+    <div className="flex justify-center mt-10">
+      <Link to="quiz" className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+        퀴즈 풀기
+      </Link>
     </div>
+  </div>
   );
 }

@@ -10,6 +10,7 @@ import com.loople.backend.v2.domain.beopjeongdong.entity.Beopjeongdong;
 import com.loople.backend.v2.domain.mybadge.entity.MyBadge;
 import com.loople.backend.v2.domain.myplants.entity.MyPlant;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class User
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long no;
 
+    @Email
     @Column(unique = true)
     private String email;
 

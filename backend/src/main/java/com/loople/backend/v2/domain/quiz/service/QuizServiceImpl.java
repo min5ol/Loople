@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -61,11 +60,21 @@ public class QuizServiceImpl implements QuizService{
                 .submittedAnswer(submittedAnswer)
                 .isCorrect(isCorrect?1:0)
                 .points(isCorrect?3:1)
+//                .
                 .build();
 
         userAnswerRepository.save(userAnswer);
 
         return new UserAnswerResponseDto(userAnswer.getIsCorrect(), isCorrect?3:1);
+    }
+
+    @Override
+    public void hasSolvedTodayProblem(Long userId) {
+//        Optional<UserAnswer> byUserIdAndSolvedDate = userAnswerRepository.findByUserIdAndSolvedDate(userId, LocalDate.now());
+//
+//        if(byUserIdAndSolvedDate.isPresent()){
+//            throw new AlreadyBoundException("오늘 이미 문제를 풀었습니다.");
+//        }
     }
 
     //db 저장용 파싱
