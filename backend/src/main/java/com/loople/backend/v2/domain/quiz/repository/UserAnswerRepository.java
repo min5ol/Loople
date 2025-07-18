@@ -9,6 +9,7 @@ import com.loople.backend.v2.domain.quiz.entity.UserAnswer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
@@ -28,4 +29,6 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
      * @return 해당 기간 내 제출한 답안 개수
      */
     Long countAttendanceByUserIdAndSolvedAtBetween(Long userId, LocalDate start, LocalDate end);
+
+    List<UserAnswer> findByUserIdAndSolvedAtBetween(Long userId, LocalDate start, LocalDate end);
 }
