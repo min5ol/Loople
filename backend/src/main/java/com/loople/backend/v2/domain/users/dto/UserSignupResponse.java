@@ -10,5 +10,6 @@ package com.loople.backend.v2.domain.users.dto;
 public record UserSignupResponse(
 
         Long userId,     // 생성된 사용자 ID
-        String nickname  // 사용자가 설정한 닉네임
+        String nickname,  // 사용자가 설정한 닉네임
+        String token // 가입 시 토큰 발급
 ) {}

@@ -8,10 +8,7 @@
 
 package com.loople.backend.v2.domain.users.controller;
 
-import com.loople.backend.v2.domain.users.dto.UserLoginRequest;
-import com.loople.backend.v2.domain.users.dto.UserLoginResponse;
-import com.loople.backend.v2.domain.users.dto.UserSignupRequest;
-import com.loople.backend.v2.domain.users.dto.UserSignupResponse;
+import com.loople.backend.v2.domain.users.dto.*;
 import com.loople.backend.v2.domain.users.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +37,7 @@ public class UserController {
 
         UserSignupResponse response = userService.signup(request);
 
-        log.info("회원가입 완료: userId={}, nickname={}", response.userId(), response.nickname());
+        log.info("회원가입 완료: userId={}, nickname={}, token={}", response.userId(), response.nickname(), response.token());
 
         return ResponseEntity.ok(response);
     }
@@ -59,5 +56,19 @@ public class UserController {
         log.info("로그인 성공: token={}", response.token());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<EmailCheckResponse> checkEmail(@RequestParam String email)
+    {
+        boolean available = userService.isEmailAvailable(email);
+        return ResponseEntity.ok(new EmailCheckResponse(available));
+    }
+
+    @GetMapping("/check-nickname")
+    public ResponseEntity<NicknameCheckResponse> checkNickname(@RequestParam String nickname)
+    {
+        boolean available = userService.isNicknameAvailable(nickname);
+        return ResponseEntity.ok(new NicknameCheckResponse(available));
     }
 }

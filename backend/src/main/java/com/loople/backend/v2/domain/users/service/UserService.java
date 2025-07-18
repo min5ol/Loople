@@ -29,4 +29,8 @@ public interface UserService {
      * @return 로그인 성공 시 토큰 포함 응답 DTO
      */
     UserLoginResponse login(UserLoginRequest request);
+
+    boolean isEmailAvailable(String email);
+
+    boolean isNicknameAvailable(String nickname);
 }
