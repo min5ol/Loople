@@ -107,8 +107,11 @@ public class UserServiceImpl implements UserService {
             log.info("[회원가입] 마을 상태 이미 존재: dongCode={}", dong.getDongCode());
         }
 
+        // 8. 토큰 발급
+        String token = jwtProvider.createToken(user.getNo(), user.getRole());
+
         log.info("[회원가입] 전체 완료: {}ms 소요", System.currentTimeMillis() - start);
-        return new UserSignupResponse(user.getNo(), user.getNickname());
+        return new UserSignupResponse(user.getNo(), user.getNickname(), token);
     }
 
     /**
@@ -136,5 +139,15 @@ public class UserServiceImpl implements UserService {
         log.info("[로그인] 성공: userId={}, role={}, token 생성 완료", user.getNo(), user.getRole());
 
         return new UserLoginResponse(token);
+    }
+
+    @Override
+    public boolean isEmailAvailable(String email) {
+        return !userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean isNicknameAvailable(String nickname) {
+        return !userRepository.existsByNickname(nickname);
     }
 }

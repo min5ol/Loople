@@ -25,6 +25,9 @@ export default defineConfig({
       'w-ground': '#F6F6F6',
       'b-ground':'#202020',
     },
+    boxSizing: {
+      DEFAULT: 'border-box',
+    }
   },
   transformCSS: 'pre',
 })
