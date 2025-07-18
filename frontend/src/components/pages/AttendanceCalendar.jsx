@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from "react";
+import instance from '../../apis/instance.js'; 
 
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+
+export const getAttendanceDays = async () => {
+  const res = await instance.get('/quiz/getAttendanceDays');
+  return res.data;
+};
 
 export default function AttendanceCalendar() {
   const [today, setToday] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState([]);
+  const [attendanceDays, setAttendanceDays] = useState([]);
 
-  // 임의 출석 날짜
-  const attendanceDays = [3, 5, 7, 12, 15, 18, 21, 25, 27];
+  useEffect(() => {
+    handleAttendance();
+  }, []);
 
   useEffect(() => {
     generateCalendarDays(today);
-  }, [today]);
+  }, [today, attendanceDays]);
 
   function generateCalendarDays(date) {
     const year = date.getFullYear();
@@ -41,8 +49,18 @@ export default function AttendanceCalendar() {
     setCalendarDays(daysArray);
   }
 
+  const handleAttendance = async() => {
+    try {
+      const data = await getAttendanceDays();
+      setAttendanceDays(data);
+    } catch (error) {
+      console.error("Failed to fetch attendance days:", error);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex justify-center items-center bg-[#FEF7E2]">
+    <div className="bg-[#FEF7E2] min-h-screen flex flex-col justify-center items-center">
+    <div className="flex justify-center items-center ">
       <div className="max-w-md w-full p-6 bg-white rounded-xl shadow-lg font-['Pretendard',sans-serif]">
         <div className="grid grid-cols-7 gap-3 mb-4 font-semibold text-gray-700 text-lg">
           {weekdays.map((day) => (
@@ -72,6 +90,12 @@ export default function AttendanceCalendar() {
           })}
         </div>
       </div>
+    </div>
+    <div className="flex justify-center mt-4">
+              <button className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
+                되돌아가기
+              </button>
+          </div>
     </div>
   );
 }

@@ -43,4 +43,6 @@ public interface QuizService {
      * @return 오늘 문제를 풀었으면 true, 아니면 false
      */
     boolean hasSolvedTodayProblem(Long userId);
+
+    List<Integer> fetchAttendanceStatus(Long userId);
 }

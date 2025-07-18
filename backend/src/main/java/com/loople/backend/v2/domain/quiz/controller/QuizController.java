@@ -32,6 +32,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v2/quiz")
@@ -92,6 +94,14 @@ public class QuizController {
     public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto userAnswerRequestDto, HttpServletRequest request){
         Long userId = getLoggedInUserId(request);
         return quizService.saveUserAnswer(userAnswerRequestDto, userId);
+    }
+
+    @GetMapping("/getAttendanceDays")
+    public List<Integer> checkAttendanceDaysByUser(HttpServletRequest request){
+        Long userId = getLoggedInUserId(request);
+        List<Integer> integers = quizService.fetchAttendanceStatus(userId);
+        System.out.println("integers = " + integers);
+        return integers;
     }
 
     //API 문제 요청 프롬프트

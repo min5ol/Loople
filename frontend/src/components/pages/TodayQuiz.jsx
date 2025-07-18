@@ -32,7 +32,11 @@ export default function TodayQuiz() {
 
   const navigate = useNavigate(); //페이지 이동 훅
 
-  //메인 화면으로 이동
+  //월간 출석 현황 확인
+  const goToMonthlyCalendar = () => {
+    navigate("/attendanceCalendar");
+  };
+
   const goToHome = () => {
     navigate("/home");
   };
@@ -78,7 +82,7 @@ export default function TodayQuiz() {
     }
   };
 
-  //컴포넌트가 처음 렌더링 될 때 뭄ㄴ제 받아오기 실행
+  //컴포넌트가 처음 렌더링 될 때 문제 받아오기 실행
   useEffect(() => {
     handleSolve();
   }, []);
@@ -155,12 +159,13 @@ export default function TodayQuiz() {
               })()}
             </p>
           </div>
-          <div className="flex justify-center mt-4">
-            <p>
-              <button onClick={goToHome} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
-                🏠 메인으로 가기
+          <div className="flex justify-center mt-4 gap-4">
+              <button onClick={goToMonthlyCalendar} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
+                월간 출석 현황 확인하기
               </button>
-            </p>
+              <button onClick={goToHome} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
+                home
+              </button>
           </div>
         </div>
       )}

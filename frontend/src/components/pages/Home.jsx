@@ -27,7 +27,11 @@ export default function Home() {
     try {
       const { token } = await login({ email, password });
       localStorage.setItem("accessToken", token); // 토큰 저장
-      navigate("/quiz"); // 로그인 성공 시 퀴즈 페이지로 이동
+
+      //토큰 설정 후 navigate 실행(약간의 delay 추가)
+      //setTimeout(() => {
+        navigate("/quiz");  // 로그인 성공 시 퀴즈 페이지로 이동
+      //}, 1);  // 1ms 정도 지연
     } catch (err) {
       alert(err?.response?.data?.message || "로그인에 실패했습니다.");
     }

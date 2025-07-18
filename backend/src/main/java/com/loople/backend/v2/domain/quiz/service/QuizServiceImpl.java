@@ -22,10 +22,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.stream;
 
 @Service
 @RequiredArgsConstructor
@@ -132,6 +137,23 @@ public class QuizServiceImpl implements QuizService{
         return byUserIdAndSolvedDate.isPresent();
     }
 
+    @Override
+    public List<Integer> fetchAttendanceStatus(Long userId) {
+        DateRange thisMonthInfo = getThisMonthInfo();
+        System.out.println("thisMonthInfo.getStart() = " + thisMonthInfo.getStart());
+        System.out.println("thisMonthInfo = " + thisMonthInfo.getEnd());
+
+        List<UserAnswer> byUserId = userAnswerRepository.findByUserIdAndSolvedAtBetween(userId, thisMonthInfo.getStart(), thisMonthInfo.getEnd());
+
+        List<Integer> attendanceDays = new ArrayList<>();
+        for(UserAnswer userAnswer:byUserId){
+            int day = userAnswer.getSolvedAt().getDayOfMonth();
+            attendanceDays.add(day);
+        }
+
+        return attendanceDays;
+    }
+
     //db 저장용 파싱 -> OpenAPI 응답 문자열을 파싱해 ProblemRequestDto 객체 생성
     private ProblemRequestDto parseApiResponse(String response) {
         //response: "type: OX\nquestion: 순환 경제는 물건을 오래 쓰고, 다시 쓰는 것을 중요하게 생각한다.\nanswer: O"
@@ -213,13 +235,10 @@ public class QuizServiceImpl implements QuizService{
 
     //이번 달에 사용자가 매일 출석했는지 확인
     private boolean hasCheckedAttendanceForAMonth(Long userId){
-        LocalDate today = LocalDate.now();  //2025-07-18
-        YearMonth thisMonth = YearMonth.from(today);    //2025-07
-        LocalDate firstDayOfThisMonth = thisMonth.atDay(1); //2025-07-01
-        LocalDate lastDayOfThisMonth = thisMonth.atEndOfMonth();    //2025-07-31
-        int totalDayOfThisMonth = lastDayOfThisMonth.getDayOfMonth();
+        DateRange thisMonthInfo = getThisMonthInfo();
+        int totalDayOfThisMonth = thisMonthInfo.getEnd().getDayOfMonth();
 
-        Long counted = userAnswerRepository.countAttendanceByUserIdAndSolvedAtBetween(userId, firstDayOfThisMonth, lastDayOfThisMonth);
+        Long counted = userAnswerRepository.countAttendanceByUserIdAndSolvedAtBetween(userId, thisMonthInfo.getStart(), thisMonthInfo.getEnd());
 
         return totalDayOfThisMonth == counted;
     }
@@ -231,6 +250,16 @@ public class QuizServiceImpl implements QuizService{
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
         user.addPoints(request.getPoints());
+    }
+    
+    //이번 달 정보 출력
+    private DateRange getThisMonthInfo(){
+        LocalDate today = LocalDate.now();  //2025-07-18
+        YearMonth thisMonth = YearMonth.from(today);    //2025-07
+        LocalDate firstDayOfThisMonth = thisMonth.atDay(1); //2025-07-01
+        LocalDate lastDayOfThisMonth = thisMonth.atEndOfMonth();    //2025-07-31
+
+        return new DateRange(firstDayOfThisMonth, lastDayOfThisMonth);
     }
 
 }

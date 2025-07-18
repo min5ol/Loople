@@ -9,7 +9,7 @@ import SignUpStep3 from "../components/pages/SignUpStep3"; // 회원가입 3단�
 import TodayQuiz from "../components/pages/TodayQuiz";     // 오늘의 퀴즈 페이지
 import Onboarding from "../components/pages/Onboarding";   // 퀴즈 시작 전 온보딩
 import Information from "../components/pages/Information"; // 앱 기능 소개 슬라이드
-import Test from "../components/pages/Test";               // 개발용 테스트 페이지
+import AttendanceCalendar from "../components/pages/AttendanceCalendar";               // 개발용 테스트 페이지
 
 const routes = [
   { path: "/", element: <Home /> },               // 로그인 (루트)
@@ -19,7 +19,7 @@ const routes = [
   { path: "/information", element: <Information /> },   // 기능 소개 슬라이드
   { path: "/onboarding", element: <Onboarding /> },     // 퀴즈 안내
   { path: "/quiz", element: <TodayQuiz /> },            // 퀴즈 메인
-  { path: "/test", element: <Test /> },                 // 테스트용 페이지
+  { path: "/attendanceCalendar", element: <AttendanceCalendar /> },                 // 테스트용 페이지
 ];
 
 export default routes;
