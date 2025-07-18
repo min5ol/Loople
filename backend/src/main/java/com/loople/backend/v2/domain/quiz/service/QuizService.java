@@ -11,6 +11,6 @@ import java.util.List;
 public interface QuizService {
     ProblemResponseDto saveProblem(String response);
     void saveOption(List<MultipleOptionRequestDto> options, Problem problem);
-    UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto);
-    boolean hasSolvedTodayProblem();
+    UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto, Long userId);
+    boolean hasSolvedTodayProblem(Long userId);
 }

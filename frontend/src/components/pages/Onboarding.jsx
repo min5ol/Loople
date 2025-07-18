@@ -7,7 +7,7 @@ export default function Onboarding() {
   const goToQuiz = () => {
     navigate("/quiz");
   };
-
+  
   const goToHome = () => {
     navigate("/home");
   };
@@ -19,6 +19,7 @@ export default function Onboarding() {
       <p className="text-sm text-center text-[#3C3C3C] max-w-md mb-8 leading-relaxed">
         동네 분리배출 정보를 얼마나 알고 계신가요? <br />
         퀴즈를 통해 재미있게 확인해보세요!
+        하루에 한 문제씩 
       </p>
 
       <div className="flex gap-4">
@@ -29,11 +30,11 @@ export default function Onboarding() {
           ✨ 퀴즈 풀기
         </button>
         <button
-          onClick={goToHome}
-          className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105"
-        >
-          🏠 메인으로 가기
-        </button>
+              onClick={goToHome}
+              className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105"
+            >
+              🏠 메인으로 가기
+            </button>
       </div>
     </div>
   );

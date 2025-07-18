@@ -5,9 +5,14 @@ import com.loople.backend.v2.domain.quiz.dto.UserAnswerRequestDto;
 import com.loople.backend.v2.domain.quiz.dto.UserAnswerResponseDto;
 import com.loople.backend.v2.domain.quiz.service.QuizService;
 import com.loople.backend.v2.global.api.OpenApiClient;
+import com.loople.backend.v2.global.jwt.JwtProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -17,11 +22,13 @@ public class QuizController {
 
     private final OpenApiClient openApiClient;
     private final QuizService quizService;
+    private final JwtProvider jwtProvider;
 
     //문제 생성 및 db 저장 후 저장된 문제 클라이언트에게 show
     @GetMapping("/buildAndShow")
-    public Mono<ProblemResponseDto> buildQuiz() {
-        if(quizService.hasSolvedTodayProblem()){
+    public Mono<ProblemResponseDto> buildQuiz(HttpServletRequest request) {
+        Long userId = getLoggedInUserId(request);
+        if(quizService.hasSolvedTodayProblem(userId)){
             return Mono.just(new ProblemResponseDto(null, null, null, null, true));
         }
 
@@ -36,8 +43,10 @@ public class QuizController {
     }
 
     @GetMapping("/buildAndShow/test")
-    public Mono<ProblemResponseDto> testBuildQuiz(){
-        if(quizService.hasSolvedTodayProblem()){
+    public Mono<ProblemResponseDto> testBuildQuiz(HttpServletRequest request){
+        Long userId = getLoggedInUserId(request);
+
+        if(quizService.hasSolvedTodayProblem(userId)){
             return Mono.just(new ProblemResponseDto(null, null, null, null, true));
         }
 
@@ -60,8 +69,9 @@ public class QuizController {
     
     //사용자 응답 제출 비교
     @PostMapping("/submitAnswer")
-    public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto request){
-        return quizService.saveUserAnswer(request);
+    public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto userAnswerRequestDto, HttpServletRequest request){
+        Long userId = getLoggedInUserId(request);
+        return quizService.saveUserAnswer(userAnswerRequestDto, userId);
     }
 
     private String buildPrompt(){
@@ -98,6 +108,25 @@ public class QuizController {
                 "answer: A/B/C/D  \n" +
                 "\n" +
                 "이제 위 조건에 맞는 퀴즈 문제를 하나만 생성해줘.";
+    }
+
+    private Long getLoggedInUserId(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        if (!StringUtils.hasText(bearer) || !bearer.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Authorization 헤더가 존재하지 않거나 유효하지 않습니다.");
+        }
+        String token = bearer.substring(7);
+        if (!jwtProvider.validateToken(token)) {
+            throw new UnauthorizedException("JWT Token이 존재하지 않습니다.");
+        }
+        return jwtProvider.getUserId(token);
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public class UnauthorizedException extends RuntimeException {
+        public UnauthorizedException(String message) {
+            super(message);
+        }
     }
 
 }
