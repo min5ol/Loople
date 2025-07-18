@@ -13,5 +13,6 @@ public class ProblemResponseDto {
     private String question;
     private ProblemType type;
     private List<MultipleOptionResponseDto> options;
+    private boolean hasSolvedToday;
 }
 

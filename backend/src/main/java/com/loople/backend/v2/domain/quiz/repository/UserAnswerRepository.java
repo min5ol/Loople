@@ -7,5 +7,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
-    Optional<UserAnswer> findByUserIdAndSolvedDate(Long userId, LocalDate solvedDate);
+    Optional<UserAnswer> findByUserIdAndSolvedAt(Long userId, LocalDate solvedAt);
+    Long countAttendanceByUserIdAndSolvedAtBetween(Long userId, LocalDate weekAgo, LocalDate today);
 }

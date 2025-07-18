@@ -8,9 +8,15 @@ import com.loople.backend.v2.domain.quiz.entity.UserAnswer;
 import com.loople.backend.v2.domain.quiz.repository.MultipleOptionRepository;
 import com.loople.backend.v2.domain.quiz.repository.ProblemRepository;
 import com.loople.backend.v2.domain.quiz.repository.UserAnswerRepository;
+import com.loople.backend.v2.domain.users.dto.UpdatedUserPointRequest;
+import com.loople.backend.v2.domain.users.entity.User;
+import com.loople.backend.v2.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,10 +28,11 @@ public class QuizServiceImpl implements QuizService{
     private final ProblemRepository problemRepository;
     private final MultipleOptionRepository multipleOptionRepository;
     private final UserAnswerRepository userAnswerRepository;
+    private final UserRepository userRepository;
 
     @Override
     public ProblemResponseDto saveProblem(String response) {
-        ProblemRequestDto problemRequestDto = parseGptResponse(response);
+        ProblemRequestDto problemRequestDto = parseApiResponse(response);
         List<MultipleOptionRequestDto> options = problemRequestDto.getOptions();
 
         Problem problem = new Problem(problemRequestDto.getQuestion(), problemRequestDto.getType(), problemRequestDto.getAnswer());
@@ -36,7 +43,7 @@ public class QuizServiceImpl implements QuizService{
                 .map(opt -> new MultipleOptionResponseDto(opt.getContent(), opt.getOptionOrder()))
                 .toList();
 
-        return new ProblemResponseDto(problem.getNo(), problem.getQuestion(), problem.getType(), responseOptions);
+        return new ProblemResponseDto(problem.getNo(), problem.getQuestion(), problem.getType(), responseOptions, false);
     }
 
     @Override
@@ -54,31 +61,55 @@ public class QuizServiceImpl implements QuizService{
         String submittedAnswer = userAnswerRequestDto.getSubmittedAnswer();
         Long userId = getLoggedInUserId();
         boolean isCorrect = checkTheAnswer(userAnswerRequestDto);
+        boolean isWeekly=false;
+        boolean isMonthly = false;
+
+        //주간 출석 체크 - 일요일일 때 한 번에 체크
+        if (LocalDate.now().getDayOfWeek() == DayOfWeek.SUNDAY) {
+            if(hasCheckedAttendanceForAWeek(userId)){
+                isWeekly = true;
+            }
+        }
+
+        //월간 출석 체크
+        if(hasCheckedAttendanceForAMonth(userId)){
+            isMonthly = true;
+        }
+
+        int totalPoints = (isCorrect?7:3) + (isWeekly?20:0) + (isMonthly?100:0);
+        updatedUserPoints(new UpdatedUserPointRequest(userId, totalPoints));
+
         UserAnswer userAnswer = UserAnswer.builder()
                 .userId(userId)
                 .problemId(problemId)
                 .submittedAnswer(submittedAnswer)
                 .isCorrect(isCorrect?1:0)
-                .points(isCorrect?3:1)
-//                .
+                .isWeekly(isWeekly?1:0)
+                .isMonthly(isMonthly?1:0)
+                .points(totalPoints)
+                .solvedAt(LocalDate.now())
                 .build();
 
+        System.out.println("userAnswer = " + userAnswer);
         userAnswerRepository.save(userAnswer);
 
-        return new UserAnswerResponseDto(userAnswer.getIsCorrect(), isCorrect?3:1);
+        return new UserAnswerResponseDto(userAnswer.getIsCorrect(), userAnswer.getIsWeekly(), userAnswer.getIsMonthly(), totalPoints);
+
     }
 
     @Override
-    public void hasSolvedTodayProblem(Long userId) {
-//        Optional<UserAnswer> byUserIdAndSolvedDate = userAnswerRepository.findByUserIdAndSolvedDate(userId, LocalDate.now());
-//
-//        if(byUserIdAndSolvedDate.isPresent()){
-//            throw new AlreadyBoundException("오늘 이미 문제를 풀었습니다.");
-//        }
+    public boolean hasSolvedTodayProblem() {
+        Long userId = getLoggedInUserId();
+        Optional<UserAnswer> byUserIdAndSolvedDate = userAnswerRepository.findByUserIdAndSolvedAt(userId, LocalDate.now());
+
+        if(byUserIdAndSolvedDate.isPresent()){
+            return true;
+        }
+        return false;
     }
 
     //db 저장용 파싱
-    private ProblemRequestDto parseGptResponse(String response) {
+    private ProblemRequestDto parseApiResponse(String response) {
         //response: "type: OX\nquestion: 순환 경제는 물건을 오래 쓰고, 다시 쓰는 것을 중요하게 생각한다.\nanswer: O"
         // 응답을 줄 단위로 분리
         String[] lines = response.split("\n");
@@ -140,13 +171,42 @@ public class QuizServiceImpl implements QuizService{
 
     private Long getLoggedInUserId(){
         //추후 수정 예정
-        return 1L;
+        return 4L;
     }
 
     private boolean checkTheAnswer(UserAnswerRequestDto userAnswerRequestDto){
         return problemRepository.findById(userAnswerRequestDto.getProblemId())
                 .map(problem -> problem.getAnswer().equals(userAnswerRequestDto.getSubmittedAnswer()))
                 .orElseThrow(() -> new IllegalArgumentException("해당 문제는 존재하지 않습니다."));
+    }
+
+    private boolean hasCheckedAttendanceForAWeek(Long userId){
+        LocalDate today = LocalDate.now();  //2025-07-18
+        LocalDate weekAgo = today.minusDays(6); //오늘 포함 7일 -> 2025-07-12
+
+        Long counted = userAnswerRepository.countAttendanceByUserIdAndSolvedAtBetween(userId, weekAgo, today);
+
+        return counted == 7;
+    }
+
+    private boolean hasCheckedAttendanceForAMonth(Long userId){
+        LocalDate today = LocalDate.now();  //2025-07-18
+        YearMonth thisMonth = YearMonth.from(today);    //2025-07
+        LocalDate firstDayOfThisMonth = thisMonth.atDay(1); //2025-07-01
+        LocalDate lastDayOfThisMonth = thisMonth.atEndOfMonth();    //2025-07-31
+        int totalDayOfThisMonth = lastDayOfThisMonth.getDayOfMonth();
+
+        Long counted = userAnswerRepository.countAttendanceByUserIdAndSolvedAtBetween(userId, firstDayOfThisMonth, lastDayOfThisMonth);
+
+        return totalDayOfThisMonth == counted;
+    }
+
+    private void updatedUserPoints(UpdatedUserPointRequest request){
+        Long userId = getLoggedInUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        user.addPoints(request.getPoints());
     }
 
 }

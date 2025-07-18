@@ -12,5 +12,5 @@ public interface QuizService {
     ProblemResponseDto saveProblem(String response);
     void saveOption(List<MultipleOptionRequestDto> options, Problem problem);
     UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto);
-    void hasSolvedTodayProblem(Long userId);
+    boolean hasSolvedTodayProblem();
 }
