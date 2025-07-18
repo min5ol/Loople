@@ -103,4 +103,8 @@ public class User
     {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void addPoints(int pointsToAdd){
+        this.points += pointsToAdd;
+    }
 }

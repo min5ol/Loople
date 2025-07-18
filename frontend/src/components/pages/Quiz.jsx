@@ -21,7 +21,10 @@ export default function Quiz() {
       const data = await getProblem();
       setProblem(data);
       setSubmitResult(null);
-      setErrorMessage(null);  // 문제 받아오기 성공 시 에러 초기화
+      setErrorMessage(null);
+      if(data.hasSolvedToday){
+        setErrorMessage("오늘 할당된 모든 문제를 푸셨습니다.");
+      }
       console.log("문제 받아오기 성공");
     } catch (error) {
       console.log("문제 받아오기 실패 " + error);
@@ -62,7 +65,7 @@ export default function Quiz() {
         </div>
       )}
 
-      {problem && (
+      {problem && !problem.hasSolvedToday && (
         <div className="mb-6 p-4 border rounded border-gray-300 bg-gray-50 flex flex-col justify-center items-center text-center">
           <p className="text-lg font-semibold mb-4">
             {problem.question}
@@ -97,9 +100,19 @@ export default function Quiz() {
       {submitResult && (
         <div className="text-center p-4 rounded border border-green-400 bg-green-100 text-green-800">
           <p>
-            {submitResult.isCorrect
-              ? `정답! +${submitResult.points}점 획득!`
-              : `틀렸습니다. 출석 점수만 +${submitResult.points} 되었습니다.`}
+            {(() => {
+              if (submitResult.isCorrect && submitResult.isWeekly && submitResult.isMonthly) {
+                return `정답! 주간 출석 보상 및 월간 출석 보상과 함께 +${submitResult.points}점 획득!`;
+              } else if (submitResult.isCorrect && submitResult.isWeekly) {
+                return `정답! 주간 출석 보상과 함께 +${submitResult.points}점 획득!`;
+              } else if (submitResult.isCorrect && submitResult.isMonthly) {
+                return `정답! 월간 출석 보상과 함께 +${submitResult.points}점 획득!`;
+              } else if (submitResult.isCorrect) {
+                return `정답! +${submitResult.points}점 획득!`;
+              } else {
+                return `틀렸습니다. 출석 점수만 +${submitResult.points} 되었습니다.`;
+              }
+            })()}
           </p>
         </div>
       )}

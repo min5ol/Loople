@@ -21,6 +21,9 @@ public class QuizController {
     //문제 생성 및 db 저장 후 저장된 문제 클라이언트에게 show
     @GetMapping("/buildAndShow")
     public Mono<ProblemResponseDto> buildQuiz() {
+        if(quizService.hasSolvedTodayProblem()){
+            return Mono.just(new ProblemResponseDto(null, null, null, null, true));
+        }
 
         String prompt = buildPrompt();
         Mono<ProblemResponseDto> map = openApiClient.requestChatCompletion(prompt)
@@ -34,18 +37,22 @@ public class QuizController {
 
     @GetMapping("/buildAndShow/test")
     public Mono<ProblemResponseDto> testBuildQuiz(){
-        String dummyResponse = "type: OX\n" +
-                "question: 돼지는 꿀꿀\n" +
-                "answer: O";
+        if(quizService.hasSolvedTodayProblem()){
+            return Mono.just(new ProblemResponseDto(null, null, null, null, true));
+        }
 
-//        String dummyResponse = "type: MULTIPLE\n" +
-//                "question: 다음 중 우리나라의 수도는 어디인가?\n" +
-//                "answer: C\n" +
-//                "options:\n" +
-//                "A. 부산\n" +
-//                "B. 대구\n" +
-//                "C. 서울\n" +
-//                "D. 인천";
+//        String dummyResponse = "type: OX\n" +
+//                "question: 돼지는 꿀꿀\n" +
+//                "answer: O";
+
+        String dummyResponse = "type: MULTIPLE\n" +
+                "question: 다음 중 우리나라의 수도는 어디인가?\n" +
+                "answer: C\n" +
+                "options:\n" +
+                "A. 부산\n" +
+                "B. 대구\n" +
+                "C. 서울\n" +
+                "D. 인천";
 
         ProblemResponseDto problemResponseDto = quizService.saveProblem(dummyResponse);
         return Mono.just(problemResponseDto);
@@ -54,12 +61,6 @@ public class QuizController {
     //사용자 응답 제출 비교
     @PostMapping("/submitAnswer")
     public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto request){
-        System.out.println("request = " + request);
-        String SubmittedAnswer = request.getSubmittedAnswer();
-        Long problemId = request.getProblemId();
-        System.out.println("problemId = " + problemId);
-        System.out.println("SubmittedAnswer = " + SubmittedAnswer);
-
         return quizService.saveUserAnswer(request);
     }
 
