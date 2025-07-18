@@ -1,31 +1,39 @@
+// 작성일: 2025.07.15
+// 작성자: 장민솔
+// 설명: 로그인 페이지. 이메일/비밀번호 입력 받아 로그인 시도하고, 성공 시 토큰 저장
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../../apis/auth";
+
 import brandLogo from "../../assets/brandLogo.png";
 import HomeLeft from "../../assets/HomeLeft.png";
-import InputLogin from "../atoms/LoginInputField";
-import Submit from "../atoms/LoginSubmit";
 import google from "../../assets/google.png";
 import kakao from "../../assets/kakao.png";
 import naver from "../../assets/naver.png";
 import apple from "../../assets/apple.png";
+
+import InputLogin from "../atoms/LoginInputField";
+import Submit from "../atoms/LoginSubmit";
 
 export default function Home() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // 로그인 폼 제출 시 실행
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const { token } = await login({ email, password });
-      localStorage.setItem("accessToken", token);
-      navigate("/quiz");
+      localStorage.setItem("accessToken", token); // 토큰 저장
+      navigate("/quiz"); // 로그인 성공 시 퀴즈 페이지로 이동
     } catch (err) {
       alert(err?.response?.data?.message || "로그인에 실패했습니다.");
     }
   };
 
+  // 소셜 로그인 버튼 이미지 목록
   const socialIcons = [
     { src: google, alt: "Google" },
     { src: kakao, alt: "Kakao" },
@@ -34,21 +42,21 @@ export default function Home() {
   ];
 
   return (
-    <div className="bg-surface-dark w-screen flex relative">
-      {/* 로고 & 왼쪽 이미지 */}
+    <div className="bg-surface-dark flex relative">
+      {/* 왼쪽: 로고와 일러스트 */}
       <img
         src={brandLogo}
         alt="Brand Logo"
-        className="absolute top-[1.17vw] left-[1.54vw] w-[6.59vw]"
+        className="absolute top-[1.56vw] left-[1.56vw] w-[7.03vw]"
       />
-      <img src={HomeLeft} alt="Illustration" className="w-[64.13vw]" />
+      <img src={HomeLeft} alt="Illustration" className="h-1080px" />
 
-      {/* 로그인 폼 */}
+      {/* 오른쪽: 로그인 폼 */}
       <div className="flex flex-col justify-center px-[3vw] w-full max-w-[30vw]">
-        <h1 className="text-w-ground text-[4.39vw] font-ptd-600">Login</h1>
+        <h1 className="text-w-ground text-[3.91vw] font-ptd-600">Login</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col mt-[1.46vw]">
-          <label htmlFor="email" className="text-w-ground text-[1.46vw] font-ptd-500 mt-[0.73vw] mb-[0.73vw]">
+          <label htmlFor="email" className="text-w-ground text-[1.3vw] font-ptd-500 mt-[0.63vw] mb-[0.73vw]">
             Email
           </label>
           <InputLogin
@@ -58,7 +66,7 @@ export default function Home() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <label htmlFor="password" className="text-w-ground text-[1.46vw] font-ptd-500 mt-[0.73vw] mb-[0.73vw]">
+          <label htmlFor="password" className="text-w-ground text-[1.3vw] font-ptd-500 mt-[1.56vw] mb-[0.73vw]">
             Password
           </label>
           <InputLogin
@@ -68,8 +76,9 @@ export default function Home() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <div className="flex justify-end mt-[1.17vw] mb-[1.61vw]">
-            <Link to="/forgot-password" className="text-secondary text-[1.02vw] font-ptd-400 underline">
+          {/* 비밀번호 찾기 */}
+          <div className="flex justify-end mt-[1.04vw] mb-[1.56vw]">
+            <Link to="/forgot-password" className="text-secondary text-[.89vw] font-ptd-400 underline">
               비밀번호를 잊어버리셨습니까?
             </Link>
           </div>
@@ -77,19 +86,19 @@ export default function Home() {
           <Submit>Login</Submit>
         </form>
 
-        {/* 회원가입 링크 */}
-        <div className="text-w-ground text-[1.02vw] mt-[1.17vw] font-ptd-400 text-center">
+        {/* 회원가입 안내 */}
+        <div className="text-w-ground text-[.89vw] mt-[1.3vw] font-ptd-400 text-center">
           회원이 아닌가요?
         </div>
         <Link
           to="/signup"
-          className="text-secondary text-[1.02vw] mt-[0.3vw] font-ptd-400 text-center block"
+          className="text-secondary text-[.73vw] mt-[0.3vw] font-ptd-400 text-center block"
         >
           지금 회원가입 하러가기
         </Link>
 
-        {/* 소셜 로그인 */}
-        <div className="flex justify-between items-center mt-[2.93vw]">
+        {/* 구분선 + 소셜 로그인 */}
+        <div className="flex justify-between items-center mt-[2.71vw]">
           <div className="w-[9.22vw] h-[0.07vw] bg-secondary" />
           <div className="text-secondary text-[1.02vw] font-ptd-400">Or Sign Up With</div>
           <div className="w-[9.22vw] h-[0.07vw] bg-secondary" />
@@ -106,10 +115,6 @@ export default function Home() {
             </button>
           ))}
         </div>
-      </div>
-
-      <div>
-        <Link to="/test">test</Link>
       </div>
     </div>
   );

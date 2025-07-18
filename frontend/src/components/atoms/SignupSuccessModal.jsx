@@ -1,3 +1,7 @@
+// 작성일: 2025.07.16
+// 작성자: 장민솔
+// 설명: 회원가입 완료 후 띄워주는 모달창, 닉네임 보여주고 onClose 콜백 기능
+
 import React from "react";
 
 export default function SignupSuccessModal({ nickname, onClose }) {
@@ -8,7 +12,7 @@ export default function SignupSuccessModal({ nickname, onClose }) {
         <p className="text-gray-600 mb-6">회원가입이 완료되었어요 🎉</p>
         <button
           className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-xl"
-          onClick={onClose}
+          onClick={onClose} // 확인 누르면 모달 닫히는 콜백 호출
         >
           확인
         </button>
