@@ -20,7 +20,7 @@ export default function Home() {
     try {
       const { token } = await login({ email, password });
       localStorage.setItem("accessToken", token);
-      navigate("/onboarding");
+      navigate("/quiz");
     } catch (err) {
       alert(err?.response?.data?.message || "로그인에 실패했습니다.");
     }
@@ -106,11 +106,10 @@ export default function Home() {
             </button>
           ))}
         </div>
+      </div>
 
-        {/* 퀴즈 링크 */}
-        <Link to="/quiz" className="text-secondary text-[1vw] text-center mt-[2vw] underline">
-          퀴즈 풀기
-        </Link>
+      <div>
+        <Link to="/test">test</Link>
       </div>
     </div>
   );

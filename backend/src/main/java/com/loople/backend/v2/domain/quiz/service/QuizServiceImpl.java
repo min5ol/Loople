@@ -11,6 +11,7 @@ import com.loople.backend.v2.domain.quiz.repository.UserAnswerRepository;
 import com.loople.backend.v2.domain.users.dto.UpdatedUserPointRequest;
 import com.loople.backend.v2.domain.users.entity.User;
 import com.loople.backend.v2.domain.users.repository.UserRepository;
+import com.loople.backend.v2.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ public class QuizServiceImpl implements QuizService{
     private final MultipleOptionRepository multipleOptionRepository;
     private final UserAnswerRepository userAnswerRepository;
     private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
 
     @Override
     public ProblemResponseDto saveProblem(String response) {
@@ -56,10 +58,9 @@ public class QuizServiceImpl implements QuizService{
     }
 
     @Override
-    public UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto) {
+    public UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto, Long userId) {
         Long problemId = userAnswerRequestDto.getProblemId();
         String submittedAnswer = userAnswerRequestDto.getSubmittedAnswer();
-        Long userId = getLoggedInUserId();
         boolean isCorrect = checkTheAnswer(userAnswerRequestDto);
         boolean isWeekly=false;
         boolean isMonthly = false;
@@ -77,7 +78,7 @@ public class QuizServiceImpl implements QuizService{
         }
 
         int totalPoints = (isCorrect?7:3) + (isWeekly?20:0) + (isMonthly?100:0);
-        updatedUserPoints(new UpdatedUserPointRequest(userId, totalPoints));
+        updatedUserPoints(new UpdatedUserPointRequest(userId, totalPoints), userId);
 
         UserAnswer userAnswer = UserAnswer.builder()
                 .userId(userId)
@@ -98,8 +99,7 @@ public class QuizServiceImpl implements QuizService{
     }
 
     @Override
-    public boolean hasSolvedTodayProblem() {
-        Long userId = getLoggedInUserId();
+    public boolean hasSolvedTodayProblem(Long userId) {
         Optional<UserAnswer> byUserIdAndSolvedDate = userAnswerRepository.findByUserIdAndSolvedAt(userId, LocalDate.now());
 
         if(byUserIdAndSolvedDate.isPresent()){
@@ -169,11 +169,6 @@ public class QuizServiceImpl implements QuizService{
         }
     }
 
-    private Long getLoggedInUserId(){
-        //추후 수정 예정
-        return 4L;
-    }
-
     private boolean checkTheAnswer(UserAnswerRequestDto userAnswerRequestDto){
         return problemRepository.findById(userAnswerRequestDto.getProblemId())
                 .map(problem -> problem.getAnswer().equals(userAnswerRequestDto.getSubmittedAnswer()))
@@ -201,8 +196,8 @@ public class QuizServiceImpl implements QuizService{
         return totalDayOfThisMonth == counted;
     }
 
-    private void updatedUserPoints(UpdatedUserPointRequest request){
-        Long userId = getLoggedInUserId();
+    private void updatedUserPoints(UpdatedUserPointRequest request, Long userId){
+        System.out.println("userId = " + userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
