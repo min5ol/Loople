@@ -96,9 +96,11 @@ public class QuizController {
         return quizService.saveUserAnswer(userAnswerRequestDto, userId);
     }
 
+    //출석일수 구하기
     @GetMapping("/getAttendanceDays")
     public List<Integer> checkAttendanceDaysByUser(HttpServletRequest request){
         Long userId = getLoggedInUserId(request);
+        System.out.println("userId = " + userId);
         List<Integer> integers = quizService.fetchAttendanceStatus(userId);
         System.out.println("integers = " + integers);
         return integers;

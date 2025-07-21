@@ -1,5 +1,10 @@
+/*
+  작성일자: 2025-07-18
+  작성자: 백진선
+*/
 import React, { useState, useEffect } from "react";
 import instance from '../../apis/instance.js'; 
+import {useNavigate} from 'react-router-dom';
 
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -13,15 +18,16 @@ export default function AttendanceCalendar() {
   const [calendarDays, setCalendarDays] = useState([]);
   const [attendanceDays, setAttendanceDays] = useState([]);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     handleAttendance();
   }, []);
 
   useEffect(() => {
-    generateCalendarDays(today);
   }, [today, attendanceDays]);
 
-  function generateCalendarDays(date) {
+  function generateCalendarDays(date, attendanceDaysParam = attendanceDays) {
     const year = date.getFullYear();
     const month = date.getMonth();
 
@@ -41,7 +47,7 @@ export default function AttendanceCalendar() {
         month === date.getMonth() &&
         year === date.getFullYear();
 
-      const isAttendance = attendanceDays.includes(d);
+      const isAttendance = attendanceDaysParam.includes(d); 
 
       daysArray.push({ day: d, isToday, isAttendance });
     }
@@ -49,14 +55,19 @@ export default function AttendanceCalendar() {
     setCalendarDays(daysArray);
   }
 
-  const handleAttendance = async() => {
+  const handleAttendance = async () => {
     try {
       const data = await getAttendanceDays();
       setAttendanceDays(data);
+      generateCalendarDays(today, data);  // 출석 데이터 도착과 동시에 달력 생성
     } catch (error) {
       console.error("Failed to fetch attendance days:", error);
     }
   };
+
+  const handleReturn = async () =>{
+    navigate("/quiz");
+  }
 
   return (
     <div className="bg-[#FEF7E2] min-h-screen flex flex-col justify-center items-center">
@@ -92,7 +103,7 @@ export default function AttendanceCalendar() {
       </div>
     </div>
     <div className="flex justify-center mt-4">
-              <button className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
+              <button onClick = {handleReturn} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
                 되돌아가기
               </button>
           </div>

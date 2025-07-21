@@ -29,6 +29,9 @@ export default function TodayQuiz() {
   const [problem, setProblem] = useState(null); //현재 받아온 문제 정보
   const [submitResult, setSubmitResult] = useState(null); //답안 제출 결과 정보
   const [errorMessage, setErrorMessage] = useState(null); //에러 메시지 상태
+  const [loading, setLoading] = useState(true);  // 페이지 로딩 상태
+  const [isSubmitting, setIsSubmitting] = useState(false); // 정답 제출 상태
+
 
   const navigate = useNavigate(); //페이지 이동 훅
 
@@ -43,42 +46,40 @@ export default function TodayQuiz() {
 
   //문제 받아오기 처리 함수
   const handleSolve = async () => {
+    setLoading(true); // 문제 받아오기 시작할 때 로딩 ON
+
     try {
       const data = await getProblem();  //API 호출
-      setProblem(data); //문제 상태에 저장
+      setProblem(data); //문제 상태 저장
       setSubmitResult(null);  //이전 채점 결과 초기화
-      setErrorMessage(null);  //에러 메시지 초기화
-      
-      //오늘 이미 문제를 푼 경우
-      if(data.hasSolvedToday){
-        setErrorMessage("오늘 할당된 모든 문제를 푸셨습니다.");
-      }
-      console.log("문제 받아오기 성공");
+      setErrorMessage(data.hasSolvedToday ? "오늘 할당된 모든 문제를 푸셨습니다." : null);  //오늘 이미 문제 푼 경우
     } catch (error) {
-      //문제 받아오기 실패 시 처리
-      console.log("문제 받아오기 실패 " + error);
-      setErrorMessage("문제 받아오기에 실패했습니다. 다시 시도해주세요.");
+      setErrorMessage("문제 받아오기에 실패했습니다. 다시 시도해주세요.");  //문제 받아오기 실패 처리
+    } finally {
+      setLoading(false); // 문제 불러오기 끝났을 때 로딩 OFF
     }
   };
 
   //답안 제출 처리 함수
   const handleSubmit = async (answer) => {
+    setIsSubmitting(true); // 제출 시작
     try {
       const payLoad = {
         problemId: problem.no,  //문제 번호
-        submittedAnswer: answer //사용자가 선택한 답안
+        submittedAnswer: answer   //사용자가 선택한 답안
       };
 
       //비동기 API 호출로 제출
       const data = await submitAnswer(payLoad);
 
-      setSubmitResult(data);  //결과 상태 저장
+      setSubmitResult(data);  //결과 저장
       setErrorMessage(null);  //에러 메시지 초기화
-      console.log("제출 성공");
     } catch (error) {
-      //제출 실패 시 처리
+      //제출 실패 처리
       console.log("제출 실패 " + error);
       setErrorMessage("답안 제출에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false); // 제출 끝
     }
   };
 
@@ -101,14 +102,20 @@ export default function TodayQuiz() {
       </p>
 
       {/* 에러 메시지 출력 영역 - errorMessage 내부에 데이터가 있으면 아래 로직 수행 */}
-      {errorMessage && (
+      {!loading && errorMessage && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded text-center">
           {errorMessage}
         </div>
       )}
 
+      {loading && (
+          <div className="text-center text-gray-500 text-sm py-6">
+            오늘의 퀴즈를 불러오는 중입니다
+          </div>
+      )}
+
       {/* 문제 보여주기 (아직 풀지 않았을 때) */}
-      {problem && !problem.hasSolvedToday && (
+      {!loading && problem && !problem.hasSolvedToday && (
         <div className="mb-6 p-4 border rounded border-gray-300 bg-gray-50 flex flex-col justify-center items-center text-center">
           <p className="text-lg font-semibold mb-4">{problem.question}</p>
 
@@ -159,13 +166,24 @@ export default function TodayQuiz() {
               })()}
             </p>
           </div>
-          <div className="flex justify-center mt-4 gap-4">
+        </div>
+      )}
+
+      <div className="flex justify-center mt-4 gap-4">
               <button onClick={goToMonthlyCalendar} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
                 월간 출석 현황 확인하기
               </button>
               <button onClick={goToHome} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
                 home
               </button>
+          </div>
+
+      {/*제출 현황 표시*/}
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white px-6 py-4 rounded-lg shadow-md text-center">
+            <p className="text-lg font-semibold text-gray-800">제출 중입니다</p>
+            <p className="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
           </div>
         </div>
       )}
