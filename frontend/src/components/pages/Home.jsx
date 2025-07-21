@@ -3,6 +3,7 @@
 // 설명: 로그인 페이지. 이메일/비밀번호 입력 받아 로그인 시도하고, 성공 시 토큰 저장
 
 import React, { useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../../apis/auth";
 
@@ -20,6 +21,8 @@ export default function Home() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
+  const redirectUri = import.meta.env.VITE_REDIRECT_URI;
 
   // 로그인 폼 제출 시 실행
   const handleSubmit = async (e) => {
@@ -35,6 +38,34 @@ export default function Home() {
     } catch (err) {
       alert(err?.response?.data?.message || "로그인에 실패했습니다.");
     }
+  };
+
+  const handleSocialLogin = (provider) => {
+    sessionStorage.setItem("provider", provider);
+
+    let authUrl = "";
+
+    switch(provider)
+    {
+      case "google":
+        authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=profile email`;
+        break;
+      case "kakao":
+        authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${import.meta.env.VITE_KAKAO_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code`;
+        break;
+      case "naver":
+        const state = Math.random().toString(36).substring(2); // CSRF 방지용
+        sessionStorage.setItem("naverState", state);
+        authUrl = `https://nid.naver.com/oauth2.0/authorize?client_id=${import.meta.env.VITE_NAVER_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&state=${state}`;
+        break;
+      case "apple":
+        alert("애플 로그인을 아직 지원하지 않습니다.");
+        return;
+      default:
+        return;
+    }
+
+    window.location.href = authUrl;
   };
 
   // 소셜 로그인 버튼 이미지 목록
@@ -113,6 +144,7 @@ export default function Home() {
             <button
               key={alt}
               type="button"
+              onClick={() => handleSocialLogin(alt.toLowerCase())}
               className="mx-[0.37vw] bg-transparent border-none cursor-pointer"
             >
               <img src={src} alt={alt} className="w-[2.93vw]" />

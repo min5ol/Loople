@@ -8,6 +8,7 @@
 
 package com.loople.backend.v2.domain.users.service;
 
+import com.loople.backend.v2.domain.auth.dto.OAuthUserInfo;
 import com.loople.backend.v2.domain.beopjeongdong.entity.Beopjeongdong;
 import com.loople.backend.v2.domain.beopjeongdong.service.BeopjeongdongService;
 import com.loople.backend.v2.domain.userNotification.entity.UserNotification;
@@ -149,5 +150,33 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isNicknameAvailable(String nickname) {
         return !userRepository.existsByNickname(nickname);
+    }
+
+    private User registerSocialUser(OAuthUserInfo userInfo) {
+        User user = User.builder()
+                .email(userInfo.getEmail())
+                .nickname(userInfo.getNickname())
+                .profileImageUrl(userInfo.getProfileImageUrl())
+                .provider(userInfo.getProvider())
+                .socialId(userInfo.getSocialId())
+                .address(null) // 주소는 온보딩에서 등록
+                .detailAddress(null)
+                .beopjeongdong(null) // 필수지만 이후에 등록
+                .name(null)          // 이름도 이후에 설정 가능
+                .phone(null)
+                .build();
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User findOrRegister(OAuthUserInfo userInfo) {
+        return userRepository.findByProviderAndSocialId(userInfo.getProvider(),userInfo.getSocialId())
+                .orElseGet(() -> registerSocialUser(userInfo));
+    }
+
+    @Override
+    public boolean isNewUser(User user) {
+        return user.getBeopjeongdong() == null;
     }
 }
