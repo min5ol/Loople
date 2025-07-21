@@ -5,12 +5,16 @@
 */
 package com.loople.backend.v2.global.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 
 @Getter
 @NoArgsConstructor(force = true)
 public class OpenApiResponse {
-    private final Choice[] choices; //OpenAPI에서 반환된 여러 답변들
+    @JsonProperty("choices")
+    private final List<Choice> choices; //OpenAPI에서 반환된 여러 답변들
 }

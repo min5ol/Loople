@@ -6,14 +6,14 @@
         - OX 및 객관식 문제를 지원하며, 정답 여부 및 출석 보상 점수를 안내한다
         - 문제를 다 푼 경우 안내 메시지를 보여주고, 메인 페이지로 이동하는 기능 제공
 */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import instance from '../../apis/instance.js';  //axios 인스턴스 (API 호출용)
-import { useNavigate } from "react-router-dom";
 
 //백엔드에서 오늘의 문제를 받아오는 API 호출 함수
 export const getProblem = async () => {
   //비동기 API 호출
-  const res = await instance.get('/quiz/buildAndShow/test');
+  //const res = await instance.get('/quiz/buildAndShow/test');
+  const res = await instance.post('/quiz/buildAndShow');
   return res.data;  //문제 데이터 반환
 };
 
@@ -31,6 +31,7 @@ export default function TodayQuiz() {
   const [errorMessage, setErrorMessage] = useState(null); //에러 메시지 상태
   const [loading, setLoading] = useState(true);  // 페이지 로딩 상태
   const [isSubmitting, setIsSubmitting] = useState(false); // 정답 제출 상태
+  const hasFetched = useRef(false); //호출 여부 체크
 
 
   //문제 받아오기 처리 함수
@@ -74,12 +75,13 @@ export default function TodayQuiz() {
 
   //컴포넌트가 처음 렌더링 될 때 문제 받아오기 실행
   useEffect(() => {
+    if(hasFetched.current) return; //이미 호출했으면 종료
+    hasFetched.current = true;  //호출 플래그 설정
     handleSolve();
   }, []);
 
   return (
     <div>
-
       {/* 에러 메시지 출력 영역 - errorMessage 내부에 데이터가 있으면 아래 로직 수행 */}
       {!loading && errorMessage && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded text-center">
@@ -112,11 +114,13 @@ export default function TodayQuiz() {
             ) : 
              /* 객관식 문제일 때, 옵션이 존재하는 경우 */
             problem.type === "MULTIPLE" ? problem.options && problem.options.length > 0 ? (
-              problem.options.map((opt, idx) => (
-                <button key={idx} onClick={() => handleSubmit(String.fromCharCode(65 + idx))} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition whitespace-nowrap cursor-pointer">
-                  {String.fromCharCode(65 + idx)}. {opt.content}
-                </button>
-              ))
+              <div className="flex flex-col gap-3 justify-center items-center">
+                {problem.options.map((opt, idx) => (
+                  <button key={idx} onClick={() => handleSubmit(String.fromCharCode(65 + idx))} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition cursor-pointer w-full max-w-md text-left">
+                    {String.fromCharCode(65 + idx)}. {opt.content}
+                  </button>
+                ))}
+              </div>
             ) : (
               <span>문제 오류</span>
             ) : null}

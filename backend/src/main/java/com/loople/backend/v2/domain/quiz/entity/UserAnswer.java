@@ -26,6 +26,9 @@ public class UserAnswer {
     @Column(name="user_id")
     private Long userId;    //사용자 고유 번호(FK)
 
+    @Column(name="user_email")
+    private String userEmail;
+
     @Column(name="problem_id")
     private Long problemId; //문제 고유 번호(FK)
 
@@ -48,8 +51,9 @@ public class UserAnswer {
     private LocalDate solvedAt; //문제 풀이 날짜
 
     @Builder
-    public UserAnswer(Long userId, Long problemId, String submittedAnswer, int isCorrect, int isWeekly, int isMonthly, int points, LocalDate solvedAt) {
+    public UserAnswer(Long userId, String userEmail, Long problemId, String submittedAnswer, int isCorrect, int isWeekly, int isMonthly, int points, LocalDate solvedAt) {
         this.userId = userId;
+        this.userEmail = userEmail;
         this.problemId = problemId;
         this.submittedAnswer = submittedAnswer;
         this.isCorrect = isCorrect;

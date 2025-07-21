@@ -8,28 +8,25 @@ import TodayQuiz from "./TodayQuiz";
 import AttendanceCalendar from "./AttendanceCalendar";
 
 export default function Quiz() {
-  const [Quiz, setQuiz] = useState(false);
-  const [Attendance, setAttendance] = useState(true);
+  const [mode, setMode] = useState("attendance");
 
   const navigate = useNavigate();
 
   const goToHome = () => {
-    navigate("/home");
+    navigate("/looplehome");
   };
 
-  const goToQuiz = async () =>{
-    setQuiz(true);
-    setAttendance(false);
+  const goToQuiz = () =>{
+    setMode("quiz");
   }
 
-  const goToAttendance = async () => {
-    setAttendance(true);
-    setQuiz(false);
+  const goToAttendance = () => {
+    setMode("attendance");
   }
 
 return (
   <div className="bg-[#FEF7E2] min-h-screen flex flex-col justify-center items-center">
-    <div className="max-w-xl w-full bg-white rounded-lg shadow-md p-8 mb-10 text-center">
+    <div className="max-w-2xl w-full bg-white rounded-lg shadow-md p-8 mb-10 text-center">
       {/*헤더*/}
       <div>
         <div className="text-6xl mb-4">🧠</div>
@@ -43,13 +40,13 @@ return (
         </p>
       </div>
 
-      {Quiz && !Attendance && (
+      {mode == "quiz" && (
         <div>
           <TodayQuiz/>
         </div>
       )}
 
-      {!Quiz && Attendance && (
+      {mode == "attendance" && (
         <div>
           <AttendanceCalendar/>
         </div>
