@@ -144,10 +144,12 @@ public class QuizServiceImpl implements QuizService{
         System.out.println("thisMonthInfo = " + thisMonthInfo.getEnd());
 
         List<UserAnswer> byUserId = userAnswerRepository.findByUserIdAndSolvedAtBetween(userId, thisMonthInfo.getStart(), thisMonthInfo.getEnd());
-
+        System.out.println("byUserId = " + byUserId);
+        
         List<Integer> attendanceDays = new ArrayList<>();
         for(UserAnswer userAnswer:byUserId){
             int day = userAnswer.getSolvedAt().getDayOfMonth();
+            System.out.println("day = " + day);
             attendanceDays.add(day);
         }
 
