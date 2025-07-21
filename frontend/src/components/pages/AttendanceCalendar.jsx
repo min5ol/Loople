@@ -4,8 +4,6 @@
 */
 import React, { useState, useEffect } from "react";
 import instance from '../../apis/instance.js'; 
-import {useNavigate} from 'react-router-dom';
-import TodayQuiz from "./TodayQuiz";
 
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -18,18 +16,6 @@ export default function AttendanceCalendar() {
   const [today, setToday] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState([]);
   const [attendanceDays, setAttendanceDays] = useState([]);
-  const [solveQuiz, setSolveQuiz] = useState(false);
-
-  const navigate = useNavigate();
-
-    //월간 출석 현황 확인
-  const goToMonthlyCalendar = () => {
-    navigate("/attendanceCalendar");
-  };
-
-  const goToHome = () => {
-    navigate("/home");
-  };
 
   useEffect(() => {
     handleAttendance();
@@ -73,15 +59,10 @@ export default function AttendanceCalendar() {
     }
   };
 
-  const handleSolveQuiz = async () =>{
-    setSolveQuiz(true);
-  }
 
 return (
-    <div>
-
-      {/*달력*/}
-      <div>
+      //달력
+      <div className="border border-gray-300">
         {/* 요일 */}
         <div className="grid grid-cols-7 gap-x-4 mb-2 font-semibold text-gray-700 text-lg max-w-[420px] mx-auto">
           {weekdays.map((day) => (
@@ -109,6 +90,5 @@ return (
           })}
         </div>
       </div>
-    </div>
 );
 }
