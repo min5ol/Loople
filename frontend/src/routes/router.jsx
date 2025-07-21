@@ -10,6 +10,7 @@ import Quiz from "../components/pages/Quiz";     // 오늘의 퀴즈 페이지
 import Onboarding from "../components/pages/Onboarding";   // 퀴즈 시작 전 온보딩
 import Information from "../components/pages/Information"; // 앱 기능 소개 슬라이드
 import LoopleHome from "../components/pages/LoopleHome";  //웹 홈 페이지
+import OAuthCallback from "../components/pages/OAuthCallback";
 
 const routes = [
   { path: "/", element: <Home /> },               // 로그인 (루트)
@@ -19,7 +20,8 @@ const routes = [
   { path: "/information", element: <Information /> },   // 기능 소개 슬라이드
   { path: "/onboarding", element: <Onboarding /> },     // 퀴즈 안내
   { path: "/quiz", element: <Quiz /> },            // 퀴즈 메인
-  { path: "/looplehome", element: <LoopleHome />}
+  { path: "/looplehome", element: <LoopleHome />},
+  { path: "/oauth/callback", element: <OAuthCallback />}
 ];
 
 export default routes;
