@@ -7,10 +7,12 @@
 
 package com.loople.backend.v2.domain.users.service;
 
+import com.loople.backend.v2.domain.auth.dto.OAuthUserInfo;
 import com.loople.backend.v2.domain.users.dto.UserLoginRequest;
 import com.loople.backend.v2.domain.users.dto.UserLoginResponse;
 import com.loople.backend.v2.domain.users.dto.UserSignupRequest;
 import com.loople.backend.v2.domain.users.dto.UserSignupResponse;
+import com.loople.backend.v2.domain.users.entity.User;
 
 public interface UserService {
 
@@ -33,4 +35,8 @@ public interface UserService {
     boolean isEmailAvailable(String email);
 
     boolean isNicknameAvailable(String nickname);
+
+    User findOrRegister(OAuthUserInfo userInfo);
+
+    boolean isNewUser(User user);
 }
