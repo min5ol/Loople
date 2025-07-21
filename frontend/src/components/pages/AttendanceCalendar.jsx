@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from "react";
 import instance from '../../apis/instance.js'; 
 import {useNavigate} from 'react-router-dom';
+import TodayQuiz from "./TodayQuiz";
 
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -17,15 +18,22 @@ export default function AttendanceCalendar() {
   const [today, setToday] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState([]);
   const [attendanceDays, setAttendanceDays] = useState([]);
+  const [solveQuiz, setSolveQuiz] = useState(false);
 
   const navigate = useNavigate();
+
+    //월간 출석 현황 확인
+  const goToMonthlyCalendar = () => {
+    navigate("/attendanceCalendar");
+  };
+
+  const goToHome = () => {
+    navigate("/home");
+  };
 
   useEffect(() => {
     handleAttendance();
   }, []);
-
-  useEffect(() => {
-  }, [today, attendanceDays]);
 
   function generateCalendarDays(date, attendanceDaysParam = attendanceDays) {
     const year = date.getFullYear();
@@ -47,7 +55,7 @@ export default function AttendanceCalendar() {
         month === date.getMonth() &&
         year === date.getFullYear();
 
-      const isAttendance = attendanceDaysParam.includes(d); 
+      const isAttendance = attendanceDaysParam.includes(d);
 
       daysArray.push({ day: d, isToday, isAttendance });
     }
@@ -59,21 +67,23 @@ export default function AttendanceCalendar() {
     try {
       const data = await getAttendanceDays();
       setAttendanceDays(data);
-      generateCalendarDays(today, data);  // 출석 데이터 도착과 동시에 달력 생성
+      generateCalendarDays(today, data);
     } catch (error) {
       console.error("Failed to fetch attendance days:", error);
     }
   };
 
-  const handleReturn = async () =>{
-    navigate("/quiz");
+  const handleSolveQuiz = async () =>{
+    setSolveQuiz(true);
   }
 
-  return (
-    <div className="bg-[#FEF7E2] min-h-screen flex flex-col justify-center items-center">
-    <div className="flex justify-center items-center ">
-      <div className="max-w-md w-full p-6 bg-white rounded-xl shadow-lg font-['Pretendard',sans-serif]">
-        <div className="grid grid-cols-7 gap-3 mb-4 font-semibold text-gray-700 text-lg">
+return (
+    <div>
+
+      {/*달력*/}
+      <div>
+        {/* 요일 */}
+        <div className="grid grid-cols-7 gap-x-4 mb-2 font-semibold text-gray-700 text-lg max-w-[420px] mx-auto">
           {weekdays.map((day) => (
             <div key={day} className="text-center">
               {day}
@@ -81,32 +91,24 @@ export default function AttendanceCalendar() {
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-3">
+        {/* 날짜 그리드 */}
+        <div className="grid grid-cols-7 gap-x-4 gap-y-3 border border-blue-500 rounded-md p-4 max-w-[420px] mx-auto">
           {calendarDays.map(({ day, isToday, isAttendance }, idx) => {
             if (day === null) {
-              return <div key={idx} className="w-14 h-14"></div>;
+              return <div key={idx}></div>;
             }
 
             const bgClass = isToday || isAttendance ? "bg-[#5EA776]" : "bg-gray-100";
             const textClass = isToday || isAttendance ? "text-white" : "text-gray-800";
 
             return (
-              <div
-                key={idx}
-                className={`w-14 h-14 flex justify-center items-center rounded-md font-semibold text-xl select-none cursor-default ${bgClass} ${textClass}`}
-              >
-                {day}
+              <div key={idx} className={`aspect-square flex justify-center items-center rounded-md font-semibold text-lg select-none cursor-default ${bgClass} ${textClass}`}>
+               {day}
               </div>
             );
           })}
         </div>
       </div>
     </div>
-    <div className="flex justify-center mt-4">
-              <button onClick = {handleReturn} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
-                되돌아가기
-              </button>
-          </div>
-    </div>
-  );
+);
 }
