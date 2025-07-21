@@ -53,7 +53,7 @@ public class GoogleOAuthServiceImpl implements GoogleOAuthService
         try
         {
             JsonNode jsonNode = objectMapper.readTree(tokenResponse.getBody());
-            accessToken = jsonNode.get("access_toekn").asText();
+            accessToken = jsonNode.get("access_token").asText();
         }
         catch (Exception e)
         {

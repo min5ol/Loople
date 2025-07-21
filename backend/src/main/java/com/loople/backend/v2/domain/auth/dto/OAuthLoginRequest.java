@@ -6,7 +6,9 @@
 
 package com.loople.backend.v2.domain.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record OAuthLoginRequest(
-        String provider, // "kakao", "google", "naver", "apple"
-        String code // 인가 코드
+        @JsonProperty("provider") String provider, // "kakao", "google", "naver", "apple"
+        @JsonProperty("code") String code // 인가 코드
 ) {}
