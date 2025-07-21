@@ -109,9 +109,12 @@ public class QuizServiceImpl implements QuizService{
         //사용자 점수 업데이트
         updatedUserPoints(new UpdatedUserPointRequest(userId, totalPoints), userId);
 
+        User emailByNo = userRepository.findEmailByNo(userId);
+
         //사용자 답안 엔티티 생성 및 저장
         UserAnswer userAnswer = UserAnswer.builder()
                 .userId(userId)
+                .userEmail(emailByNo.getEmail())
                 .problemId(problemId)
                 .submittedAnswer(submittedAnswer)
                 .isCorrect(isCorrect?1:0)
