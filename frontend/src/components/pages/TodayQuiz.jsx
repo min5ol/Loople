@@ -33,17 +33,6 @@ export default function TodayQuiz() {
   const [isSubmitting, setIsSubmitting] = useState(false); // 정답 제출 상태
 
 
-  const navigate = useNavigate(); //페이지 이동 훅
-
-  //월간 출석 현황 확인
-  const goToMonthlyCalendar = () => {
-    navigate("/attendanceCalendar");
-  };
-
-  const goToHome = () => {
-    navigate("/home");
-  };
-
   //문제 받아오기 처리 함수
   const handleSolve = async () => {
     setLoading(true); // 문제 받아오기 시작할 때 로딩 ON
@@ -89,17 +78,7 @@ export default function TodayQuiz() {
   }, []);
 
   return (
-  <div className="min-h-screen bg-[#FEF7E2] flex flex-col items-center py-10 px-6 font-[pretendard] text-[#202020]">
-    <div className="max-w-xl w-full bg-white rounded-lg shadow-md p-8 mb-10 text-center">
-      <div className="text-6xl mb-4">🧠</div>
-      <h1 className="text-2xl font-bold text-[#264D3D] mb-4">
-        환영해요, Loople에 오신 걸!
-      </h1>
-      <p className="text-base text-[#3C3C3C] leading-relaxed mb-8">
-        동네 분리배출 정보를 얼마나 알고 계신가요? <br />
-        매일 한 문제씩 퀴즈로 확인하며 똑똑하게 분리배출하는 습관을 만들어봐요! <br />
-        <strong>매일 접속하면 깜짝 선물이 기다리고 있으니, 놓치지 마세요!</strong>
-      </p>
+    <div>
 
       {/* 에러 메시지 출력 영역 - errorMessage 내부에 데이터가 있으면 아래 로직 수행 */}
       {!loading && errorMessage && (
@@ -169,15 +148,6 @@ export default function TodayQuiz() {
         </div>
       )}
 
-      <div className="flex justify-center mt-4 gap-4">
-              <button onClick={goToMonthlyCalendar} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
-                월간 출석 현황 확인하기
-              </button>
-              <button onClick={goToHome} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
-                home
-              </button>
-          </div>
-
       {/*제출 현황 표시*/}
       {isSubmitting && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
@@ -188,6 +158,5 @@ export default function TodayQuiz() {
         </div>
       )}
     </div>
-  </div>
   );
 }
