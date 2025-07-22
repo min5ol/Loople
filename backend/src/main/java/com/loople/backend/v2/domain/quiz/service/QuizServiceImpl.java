@@ -5,6 +5,7 @@
 */
 package com.loople.backend.v2.domain.quiz.service;
 
+import com.loople.backend.v2.domain.chat.service.ChatServiceImpl;
 import com.loople.backend.v2.domain.quiz.dto.*;
 import com.loople.backend.v2.domain.quiz.entity.MultipleOption;
 import com.loople.backend.v2.domain.quiz.entity.Problem;
@@ -18,7 +19,9 @@ import com.loople.backend.v2.domain.users.entity.User;
 import com.loople.backend.v2.domain.users.repository.UserRepository;
 import com.loople.backend.v2.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -109,12 +112,12 @@ public class QuizServiceImpl implements QuizService{
         //사용자 점수 업데이트
         updatedUserPoints(new UpdatedUserPointRequest(userId, totalPoints), userId);
 
-        User emailByNo = userRepository.findEmailByNo(userId);
+        User emailById = findEmailById(userId);
 
         //사용자 답안 엔티티 생성 및 저장
         UserAnswer userAnswer = UserAnswer.builder()
                 .userId(userId)
-                .userEmail(emailByNo.getEmail())
+                .userEmail(emailById.getEmail())
                 .problemId(problemId)
                 .submittedAnswer(submittedAnswer)
                 .isCorrect(isCorrect?1:0)
@@ -267,6 +270,18 @@ public class QuizServiceImpl implements QuizService{
         return new DateRange(firstDayOfThisMonth, lastDayOfThisMonth);
     }
 
+    private User findEmailById(Long userId){
+        return userRepository.findEmailByNo(userId)
+                .orElseThrow(() -> new unFindNoException("존재하지 않는 아이디입니다."));
+
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)    //예외 발생 시 자동으로 HTTP 상태 코드 401(Unauthorized)로 응답
+    public class unFindNoException extends RuntimeException {
+        public unFindNoException(String message) {
+            super(message); //예외 메시지 부모 클래스(RuntimeException)로 전달
+        }
+    }
 }
 
 

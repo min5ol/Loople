@@ -26,6 +26,8 @@ import com.loople.backend.v2.domain.quiz.dto.UserAnswerResponseDto;
 import com.loople.backend.v2.domain.quiz.entity.ProblemType;
 import com.loople.backend.v2.domain.quiz.service.QuizService;
 import com.loople.backend.v2.global.api.OpenApiClient;
+import com.loople.backend.v2.global.exception.UnauthorizedException;
+import com.loople.backend.v2.global.getUserId.GetLoggedInUserId;
 import com.loople.backend.v2.global.jwt.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -47,13 +49,13 @@ public class QuizController {
 
     private final OpenApiClient openApiClient;
     private final QuizService quizService;
-    private final JwtProvider jwtProvider;
+    private final GetLoggedInUserId getLoggedInUserId;
 
     //문제 생성 및 db 저장 후 저장된 문제 클라이언트에게 show
     //Mono: 비동기 단일 값 컨테이너 -> 나중에 1개의 데이터를 비동기적으로 받음
     @PostMapping("/buildAndShow")
     public Mono<ProblemResponseDto> buildQuiz(HttpServletRequest request) {
-        Long userId = getLoggedInUserId(request);
+        Long userId = getLoggedInUserId.getUserId(request);
         if(quizService.hasSolvedTodayProblem(userId)){
             return Mono.just(new ProblemResponseDto(null, null, null, null, true));
         }
@@ -71,7 +73,7 @@ public class QuizController {
     //테스트용
     @GetMapping("/buildAndShow/test")
     public Mono<ProblemResponseDto> testBuildQuiz(HttpServletRequest request){
-        Long userId = getLoggedInUserId(request);
+        Long userId = getLoggedInUserId.getUserId(request);
 
         if(quizService.hasSolvedTodayProblem(userId)){
             return Mono.just(new ProblemResponseDto(null, null, null, null, true));
@@ -88,14 +90,14 @@ public class QuizController {
     //사용자 응답 제출 비교
     @PostMapping("/submitAnswer")
     public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto userAnswerRequestDto, HttpServletRequest request){
-        Long userId = getLoggedInUserId(request);
+        Long userId = getLoggedInUserId.getUserId(request);
         return quizService.saveUserAnswer(userAnswerRequestDto, userId);
     }
 
     //출석일수 구하기
     @GetMapping("/getAttendanceDays")
     public List<Integer> checkAttendanceDaysByUser(HttpServletRequest request){
-        Long userId = getLoggedInUserId(request);
+        Long userId = getLoggedInUserId.getUserId(request);
         System.out.println("userId = " + userId);
         List<Integer> integers = quizService.fetchAttendanceStatus(userId);
         System.out.println("integers = " + integers);
@@ -167,25 +169,6 @@ public class QuizController {
                 + "주어진 조건과 형식에 맞는 문제 하나 부탁해";
     }
 
-    //현재 로그인 된 사용자 ID를 JWT 토큰에서 추출
-    private Long getLoggedInUserId(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization"); //Authorization 헤더 추출
-        if (!StringUtils.hasText(bearer) || !bearer.startsWith("Bearer ")) {    //헤더 유효성 검사
-            throw new UnauthorizedException("Authorization 헤더가 존재하지 않거나 유효하지 않습니다.");
-        }
-        String token = bearer.substring(7); //JWT 토큰 추출
-        if (!jwtProvider.validateToken(token)) {    //JWT 유효성 검사
-            throw new UnauthorizedException("JWT Token이 존재하지 않습니다.");
-        }
-        return jwtProvider.getUserId(token);    //사용자 ID 추출
-    }
 
-    //인증 실패 시 사용할 커스텀 예외 클래스
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)    //예외 발생 시 자동으로 HTTP 상태 코드 401(Unauthorized)로 응답
-    public class UnauthorizedException extends RuntimeException {
-        public UnauthorizedException(String message) {
-            super(message); //예외 메시지 부모 클래스(RuntimeException)로 전달
-        }
-    }
 
 }
