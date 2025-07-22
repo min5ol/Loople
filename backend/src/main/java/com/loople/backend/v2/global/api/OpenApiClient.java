@@ -53,7 +53,10 @@ public class OpenApiClient {
         //요청 바디 생성
         OpenApiRequest requestBody = new OpenApiRequest(
                 model,
-                new Message[]{ new Message("user", userMessage) },
+                new Message[]{
+                        new Message("system", "답변은 무조건 한국어로 해주세요."),
+                        new Message("user", userMessage)
+                },
                 0.8f    //temperature 설정(출력 다양성 조절)
         );
 
