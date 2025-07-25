@@ -23,6 +23,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 소셜 로그인용 조회
     Optional<User> findByProviderAndSocialId(Provider provider, String socialId);
 
+
     // 일반 로그인용 조회
     Optional<User> findByEmail(String email);
+
+    //사용자 이메일 조회
+    Optional<User> findEmailByNo(Long userId);
 }

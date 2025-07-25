@@ -3,20 +3,25 @@ package com.loople.backend.v2.domain.chat.entity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat_rooms")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long no;
 
-    private String host;
-    private String client;
+    @Column(name="participant_a")
+    private String participantA;
+
+    @Column(name="participant_b")
+    private String participantB;
 
     @Column(name="created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -28,9 +33,9 @@ public class ChatRoom {
     private LocalDateTime deletedAt;
 
     @Builder
-    public ChatRoom(String host, String client, int isDeleted) {
-        this.host = host;
-        this.client = client;
+    public ChatRoom(String participantA, String participantB, int isDeleted) {
+        this.participantA = participantA;
+        this.participantB = participantB;
         this.isDeleted = isDeleted;
     }
 }
