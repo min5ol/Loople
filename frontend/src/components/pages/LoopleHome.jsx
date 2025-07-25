@@ -1,3 +1,7 @@
+// src/components/pages/LoopleHome.jsx
+
+import React, {useState} from "react";
+
 /* #81C784, #749E89, #3C9A5F, #264D3D, #F6F6F6, #FEF7E2, #202020 */
 
 import React, { useState, useRef, useEffect } from "react";

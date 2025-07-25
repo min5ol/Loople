@@ -6,7 +6,12 @@
 
 package com.loople.backend.v2.domain.auth.dto;
 
+import com.loople.backend.v2.domain.users.entity.Provider;
+
 public record OAuthLoginResponse(
-        String accessToken, // JWT 토큰
-        boolean isNewUser
+        String token,
+        boolean isNew,
+        String email,
+        String socialId,
+        Provider provider
 ) {}

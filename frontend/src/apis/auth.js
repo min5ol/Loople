@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 설명: 이메일과 비밀번호를 이용해 로그인 요청 보낸 후 응답 데이터 반환
 
+// src/apis/auth.js
 import axiosInstance from './instance'; // axios 설정 파일 임포트
 
 export const login = async ({ email, password }) => {

@@ -2,6 +2,8 @@
 // 작성자: 장민솔
 // 설명: 카카오 주소 검색 API를 활용하여 사용자가 입력한 주소 문자열을 위도/경도로 변환합니다.
 
+// src/services/kakaoService.js
+
 import axios from 'axios';
 
 const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY; // .env에서 API 키 불러오기

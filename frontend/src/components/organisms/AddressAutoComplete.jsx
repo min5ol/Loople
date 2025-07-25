@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 설명: 사용자가 주소 입력하면 카카오 API로 자동완성 목록 보여주고 항목 선택 시 주소+좌표+법정동코드까지 부모 컴포넌트로 넘김
 
+// src/components/organisms/AddressAutoComplete.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 

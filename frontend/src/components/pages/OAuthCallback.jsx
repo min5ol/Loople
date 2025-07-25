@@ -1,32 +1,52 @@
-// pages/OAuthCallback.jsx
+// src/components/pages/OAuthCallback.jsx
 
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { socialLogin } from "../../apis/oauth";
 
-export default function OAuthCallback()
-{
+const OAuthCallback = () => {
+  const [searchParams] = useSearchParams();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get("code");
-    const provider = sessionStorage.getItem("provider");
+  const [statusMessage, setStatusMessage] = useState("소셜 로그인 중입니다...");
 
-    if(!code || !provider) return;
+  useEffect(() => {
+    const code = searchParams.get("code");
+    const provider = pathname.split("/").pop()?.toUpperCase();
+
+    if (!code || !provider) return;
 
     (async () => {
-      try{
-        const { accessToken, isNewUser } = await socialLogin(provider, code);
-        localStorage.setItem("accessToken", accessToken);
+      try {
+        setStatusMessage("소셜 인증 처리 중...");
 
-        if(isNewUser) navigate("/signup/step3");
-        else navigate("/onboarding");
-      } catch(e) {
-        alert("로그인 실패! 다시 시도해주세요.");
-        navigate("/");
+        const res = await socialLogin(provider, code);
+
+        if (res.isRegistered) {
+          setStatusMessage("기존 유저입니다. 로그인 중입니다...");
+          localStorage.setItem("accessToken", res.accessToken);
+          setTimeout(() => navigate("/onboarding"), 800);
+        } else {
+          setStatusMessage("신규 유저입니다. 가입창으로 이동합니다...");
+          sessionStorage.setItem("provider", res.provider);
+          sessionStorage.setItem("socialId", res.socialId);
+          sessionStorage.setItem("email", res.email);
+          setTimeout(() => navigate("/signup/step2"), 1200);
+        }
+      } catch (err) {
+        console.error("소셜 로그인 실패:", err);
+        setStatusMessage("오류가 발생했습니다. 메인으로 이동합니다.");
+        setTimeout(() => navigate("/"), 1500);
       }
     })();
-  }, [navigate]);
+  }, [searchParams, pathname, navigate]);
 
-  return <p>로그인 처리 중입니다...</p>;
-}
+  return (
+    <div className="flex items-center justify-center h-screen text-xl font-semibold">
+      {statusMessage}
+    </div>
+  );
+};
+
+export default OAuthCallback;

@@ -1,4 +1,4 @@
-// utils/getCroppedImg.js
+// src/utils/getCroppedImg.js
 export default function getCroppedImg(imageSrc, pixelCrop) {
   return new Promise((resolve, reject) => {
     const image = new Image();

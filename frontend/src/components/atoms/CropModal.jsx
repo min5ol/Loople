@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 설명: 이미지 자르기 모달, 사용자가 올린 이미지를 자르도록 UI 제공 및 완료 후 Blob을 콜백으로 넘김
 
+// src/components/atoms/CropModal.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "../../utils/getCroppedImg";

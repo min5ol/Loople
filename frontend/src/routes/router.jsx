@@ -2,6 +2,8 @@
 // 작성자: 장민솔, 백진선
 // 설명: react-router-dom v6 이상에서 사용하는 라우트 설정 배열. 각 페이지 컴포넌트를 path에 매핑하여 라우팅 구성.
 
+// src/routes/router.jsx
+
 import Home from "../components/pages/Home"; // 로그인 페이지
 import SignUpStep1 from "../components/pages/SignUpStep1"; // 회원가입 1단계: 이메일/비밀번호
 import SignUpStep2 from "../components/pages/SignUpStep2"; // 회원가입 2단계: 이름/닉네임/전화번호
@@ -21,7 +23,7 @@ const routes = [
   { path: "/onboarding", element: <Onboarding /> },     // 퀴즈 안내
   { path: "/quiz", element: <Quiz /> },            // 퀴즈 메인
   { path: "/looplehome", element: <LoopleHome />},
-  { path: "/oauth/callback", element: <OAuthCallback />}
+  { path: "/oauth/callback/:provider", element: <OAuthCallback />}
 ];
 
 export default routes;

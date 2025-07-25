@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 기능설명: 사용자가 이미지 파일을 선택하면 모달에서 자를 수 있게 하고, 자른 이미지 파일을 presigned URL을 통해 업로드한 후, URL을 상위 컴포넌트에 넘김
 
+// src/components/organisms/ProfileImageUploader.jsx
 import React, { useState } from "react";
 import CropModal from "../atoms/CropModal";
 import usePresignedUpload from "../../hooks/usePresignedUpload";

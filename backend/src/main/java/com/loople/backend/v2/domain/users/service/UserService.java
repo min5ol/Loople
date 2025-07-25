@@ -8,35 +8,25 @@
 package com.loople.backend.v2.domain.users.service;
 
 import com.loople.backend.v2.domain.auth.dto.OAuthUserInfo;
-import com.loople.backend.v2.domain.users.dto.UserLoginRequest;
-import com.loople.backend.v2.domain.users.dto.UserLoginResponse;
-import com.loople.backend.v2.domain.users.dto.UserSignupRequest;
-import com.loople.backend.v2.domain.users.dto.UserSignupResponse;
-import com.loople.backend.v2.domain.users.entity.User;
+import com.loople.backend.v2.domain.users.dto.*;
 
-public interface UserService {
-
-    /**
-     * 일반 회원가입 처리
-     *
-     * @param request 회원가입 요청 DTO (이메일, 비밀번호, 이름, 주소 등 포함)
-     * @return 생성된 사용자 정보 (userId, nickname 등)
-     */
+public interface UserService
+{
+    // 일반 회원가입
     UserSignupResponse signup(UserSignupRequest request);
 
-    /**
-     * 로그인 요청 처리
-     *
-     * @param request 로그인 요청 DTO (이메일, 비밀번호)
-     * @return 로그인 성공 시 토큰 포함 응답 DTO
-     */
+    // 소셜 회원가입
+    SocialSignupResponse socialSignup(SocialSignupRequest request);
+
+    // 로그인
     UserLoginResponse login(UserLoginRequest request);
 
-    boolean isEmailAvailable(String email);
+    // 중복 확인
+    EmailCheckResponse checkEmail(String email);
+    NicknameCheckResponse checkNickname(String nickname);
 
-    boolean isNicknameAvailable(String nickname);
+    // 소셜 로그인 시 기존 유저 or 신규 유저 구분 후 redirect 여부 판단
+    UserLoginResponse socialLoginOrRedirect(OAuthUserInfo userInfo);
 
-    User findOrRegister(OAuthUserInfo userInfo);
-
-    boolean isNewUser(User user);
+    void updatePoints(UpdatedUserPointRequest request);
 }

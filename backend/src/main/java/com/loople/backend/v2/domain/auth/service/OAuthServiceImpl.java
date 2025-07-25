@@ -1,25 +1,25 @@
 package com.loople.backend.v2.domain.auth.service;
 
+import com.loople.backend.v2.domain.auth.client.OAuthClient;
 import com.loople.backend.v2.domain.auth.dto.OAuthUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service
+import java.util.List;
+
 @RequiredArgsConstructor
+@Service
 public class OAuthServiceImpl implements OAuthService
 {
-    private final KakaoOAuthService kakaoOAuthService;
-    private final GoogleOAuthService googleOAuthService;
-    private final NaverOAuthService naverOAuthService;
+    private final List<OAuthClient> oAuthClients;
 
     @Override
-    public OAuthUserInfo getUserInfo(String provider, String code) {
-        return switch(provider.toLowerCase())
-        {
-            case "kakao" -> kakaoOAuthService.getUserInfo(code);
-            case "google" -> googleOAuthService.getUserInfo(code);
-            case "naver" -> naverOAuthService.getUserInfo(code);
-            default -> throw new IllegalArgumentException("지원하지 않는 provder: " + provider);
-        };
+    public OAuthUserInfo getUserInfo(String provider, String code)
+    {
+        return oAuthClients.stream()
+                .filter(client -> client.supports(provider))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 provider"))
+                .getUserInfo(code);
     }
 }

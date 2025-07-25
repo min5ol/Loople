@@ -1,3 +1,5 @@
+// src/apis/user.js
+
 import axiosInstance from "./instance";
 
 // 이메일 중복 확인 API

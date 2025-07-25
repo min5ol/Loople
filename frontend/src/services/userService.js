@@ -2,6 +2,8 @@
 // 작성자: 장민솔
 // 설명: 사용자 회원가입 요청을 서버에 전달하는 함수입니다.
 
+// src/services/userService.js
+
 import instance from "../apis/instance";
 
 /**
@@ -23,3 +25,8 @@ export const signup = async (data) => {
     throw err;
   }
 };
+
+export const signupSocial = async (data) => {
+  const res = await instance.post("/users/social-signup", data);
+  return res.data;
+}

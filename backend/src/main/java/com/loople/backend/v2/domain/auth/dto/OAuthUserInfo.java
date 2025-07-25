@@ -12,7 +12,5 @@ public interface OAuthUserInfo
 {
     String getSocialId();
     String getEmail();
-    String getNickname();
-    String getProfileImageUrl();
     Provider getProvider();
 }

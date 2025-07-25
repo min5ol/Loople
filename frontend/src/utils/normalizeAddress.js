@@ -3,6 +3,8 @@
 // 예: '경기' → '경기도', '서울' → '서울특별시' 등
 // 주소 파싱 시 정확한 법정동 매핑을 위해 사용됨
 
+// src/utils/normalizeAddress.js
+
 export const normalizeSido = (sido) => {
   const mapping = {
     '서울': '서울특별시',

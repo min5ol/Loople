@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 설명: 소셜 로그인 요청 API - provider와 code를 백엔드에 전송하여 JWT 토큰을 발급받음
 
+// src/apis/oauth.js
 import axiosInstance from './instance';
 
 /**

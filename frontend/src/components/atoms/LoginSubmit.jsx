@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 설명: 로그인용 submit 버튼. 기본 텍스트 "로그인", props 추가 확장 가능
 
+// src/components/atoms/LoginSubmit.jsx
 export default function LoginSubmit({ children = "로그인", ...rest }) {
   return (
     <button
