@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 설명: 회원가입 완료 후 띄워주는 모달창, 닉네임 보여주고 onClose 콜백 기능
 
+// src/components/atoms/SignupSuccessModal.jsx
 import React from "react";
 
 export default function SignupSuccessModal({ nickname, onClose }) {

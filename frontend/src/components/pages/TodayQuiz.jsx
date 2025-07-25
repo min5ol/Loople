@@ -6,6 +6,9 @@
         - OX 및 객관식 문제를 지원하며, 정답 여부 및 출석 보상 점수를 안내한다
         - 문제를 다 푼 경우 안내 메시지를 보여주고, 메인 페이지로 이동하는 기능 제공
 */
+
+// src/components/pages/TodayQuiz.jsx
+
 import React, { useState, useEffect, useRef } from "react";
 import instance from '../../apis/instance.js';  //axios 인스턴스 (API 호출용)
 

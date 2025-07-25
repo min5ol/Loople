@@ -2,6 +2,8 @@
 // 작성자: 장민솔, 백진선
 // 설명: 퀴즈로 바로 들어갈지, 메인으로 갈지 선택하는 화면
 
+// src/components/pages/Onboarding.jsx
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 

@@ -2,6 +2,8 @@
 // 설명: 카카오 주소 API 응답에서 시/군/구, 읍/면/동, 리 정보를 파싱하여 동코드 조회에 필요한 행정구역 정보를 정제합니다.
 // 사용처: 회원가입 시 입력된 주소로부터 dongCode를 조회하기 위한 주소 파싱 단계에서 사용됨
 
+// src/utils/parseAddress.js
+
 import { normalizeSido } from "./normalizeAddress";
 
 export function parseAddress(address) {

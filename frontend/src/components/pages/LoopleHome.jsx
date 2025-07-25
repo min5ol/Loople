@@ -1,3 +1,5 @@
+// src/components/pages/LoopleHome.jsx
+
 import React, {useState} from "react";
 import instance from "../../apis/instance";
 

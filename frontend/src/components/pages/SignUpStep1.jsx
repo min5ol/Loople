@@ -2,6 +2,8 @@
 // 작성자: 장민솔
 // 설명: 회원가입 1단계 – 이메일 중복 확인, 입력 검증, 디자인 완전 리팩토링 (box-sizing 적용 반영)
 
+// src/components/pages/SignupStep1.jsx
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { checkEmail } from "../../apis/user";

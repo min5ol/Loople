@@ -4,6 +4,8 @@
 //       파일명을 안전하게 만들어서 백엔드에서 업로드 URL을 받아오고,
 //       해당 URL로 직접 S3에 PUT 요청을 보냄.
 
+// src/hooks/usePresignedUpload.js
+
 import { useState } from "react";
 import axios from "axios";
 import instance from "../apis/instance";

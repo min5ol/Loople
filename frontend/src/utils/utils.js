@@ -2,6 +2,8 @@
 // 설명: 주어진 이미지 URL을 기반으로 HTMLImageElement 객체를 비동기 생성합니다.
 // 사용처: react-easy-crop에서 자른 이미지 영역을 canvas에 그리기 위해, 이미지 원본을 메모리 상에 로드할 때 사용됨
 
+// utils/src/utils.js
+
 export function createImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();

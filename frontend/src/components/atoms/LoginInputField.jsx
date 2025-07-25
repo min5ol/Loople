@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 설명: 로그인 입력 필드. type, name, value, onChange 받아서 스타일 적용
 
+// src/components/atoms/LoginInputField.jsx
 export default function LoginInputField({ type, name, value, onChange }) {
   return (
     <input

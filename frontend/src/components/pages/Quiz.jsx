@@ -2,6 +2,9 @@
   작성일자: 2025-07-21
   작성자: 백진선
 */
+
+// src/components/pages/Quiz.jsx
+
 import React, { useState, useEffect } from "react";
 import {useNavigate} from 'react-router-dom';
 import TodayQuiz from "./TodayQuiz";

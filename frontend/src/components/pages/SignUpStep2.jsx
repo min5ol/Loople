@@ -1,6 +1,8 @@
 // 작성일: 2025.07.18
-// 작성자: 장민솔
-// 설명: 회원가입 2단계 – 이름/닉네임/휴대폰 + 닉네임 중복 확인 + 디자인 리팩토링 완료본
+// 작성자: 장민솔 (리팩토링 by GPT)
+// 설명: 회원가입 2단계 – 소셜/일반 회원가입 분기 포함 + 이름/닉네임/휴대폰 처리 (중복 저장 제거)
+
+// src/components/pages/SignupStep2.jsx
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,8 +24,10 @@ export default function SignUpStep2() {
   });
 
   useEffect(() => {
+    const provider = sessionStorage.getItem("provider");
     const step1 = sessionStorage.getItem("signupStep1");
-    if (!step1) {
+
+    if (!provider && !step1) {
       alert("1단계를 먼저 진행해주세요.");
       navigate("/signup/step1");
     }
@@ -86,6 +90,8 @@ export default function SignUpStep2() {
     }
 
     sessionStorage.setItem("signupStep2", JSON.stringify(form));
+
+    // 소셜이든 일반이든 signupStep2만 저장하면 step3에서 일괄 처리 가능
     navigate("/signup/step3");
   };
 

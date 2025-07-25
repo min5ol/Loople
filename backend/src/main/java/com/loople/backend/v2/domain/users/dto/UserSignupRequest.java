@@ -10,18 +10,53 @@ package com.loople.backend.v2.domain.users.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 
 public record UserSignupRequest(
 
-        @Email @NotBlank String email,            // 이메일 (형식 및 공백 체크)
-        @NotBlank String password,                // 비밀번호
-        @NotBlank String name,                    // 실명
-        @NotBlank String nickname,                // 닉네임
-        @NotBlank String phone,                   // 휴대폰 번호
-        @NotBlank String detailAddress,           // 상세 주소 (건물명, 호수 등)
-        @NotBlank String profileImageUrl,         // 프로필 이미지 S3 URL
-        @NotBlank String sido,                    // 시/도 (예: 경상남도)
-        @NotBlank String sigungu,                 // 시/군/구 (예: 창원시 마산회원구)
-        @NotBlank String eupmyun,                 // 읍/면/동 (예: 내서읍)
-        String ri                                  // 리 (nullable 허용, 예: 삼계리)
-) {}
+        @Email(message = "올바른 이메일 형식이 아닙니다.")
+        @NotBlank(message = "이메일은 필수입니다.")
+        String email,
+
+        @NotBlank(message = "비밀번호는 필수입니다.")
+        String password,
+
+        @NotBlank(message = "이름은 필수입니다.")
+        String name,
+
+        @NotBlank(message = "닉네임은 필수입니다.")
+        String nickname,
+
+        @NotBlank(message = "휴대폰 번호는 필수입니다.")
+        @Pattern(regexp = "^01[016789]-\\d{3,4}-\\d{4}$",
+        message = "휴대폰 번호 형식이 올바르지 않습니다. (예: 010-1234-5678)")
+        String phone,
+
+        String detailAddress,
+
+        String profileImageUrl,
+
+        @NotBlank(message = "시도 정보는 필수입니다.")
+        String sido,
+
+        @NotBlank(message = "시군구 정보는 필수입니다.")
+        String sigungu,
+
+        @NotBlank(message = "읍면동 정보는 필수입니다.")
+        String eupmyun,
+
+        String ri,
+
+        String looplingType
+)
+{
+        public String fullAddress()
+        {
+                if(ri != null && !ri.isBlank())
+                {
+                        return String.join(" ", sido, sigungu, eupmyun, ri);
+                }
+                return String.join(" ", sido, sigungu, eupmyun);
+        }
+}

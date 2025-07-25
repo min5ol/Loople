@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 설명: 로그인 페이지. 이메일/비밀번호 입력 받아 로그인 시도하고, 성공 시 토큰 저장
 
+// src/components/pages/Home.jsx
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -21,8 +22,6 @@ export default function Home() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
-  const redirectUri = import.meta.env.VITE_REDIRECT_URI;
 
   // 로그인 폼 제출 시 실행
   const handleSubmit = async (e) => {
@@ -44,17 +43,20 @@ export default function Home() {
     sessionStorage.setItem("provider", provider);
 
     let authUrl = "";
+    let redirectUri = "";
 
-    switch(provider)
-    {
+    switch (provider) {
       case "google":
+        redirectUri = encodeURIComponent(import.meta.env.VITE_GOOGLE_REDIRECT_URI);
         authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=profile email`;
         break;
       case "kakao":
+        redirectUri = encodeURIComponent(import.meta.env.VITE_KAKAO_REDIRECT_URI);
         authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${import.meta.env.VITE_KAKAO_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code`;
         break;
       case "naver":
-        const state = Math.random().toString(36).substring(2); // CSRF 방지용
+        redirectUri = encodeURIComponent(import.meta.env.VITE_NAVER_REDIRECT_URI);
+        const state = Math.random().toString(36).substring(2);
         sessionStorage.setItem("naverState", state);
         authUrl = `https://nid.naver.com/oauth2.0/authorize?client_id=${import.meta.env.VITE_NAVER_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&state=${state}`;
         break;

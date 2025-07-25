@@ -2,6 +2,8 @@
   작성일자: 2025-07-18
   작성자: 백진선
 */
+
+// src/components/pages/AttendanceCalendar.jsx
 import React, { useState, useEffect } from "react";
 import instance from '../../apis/instance.js'; 
 

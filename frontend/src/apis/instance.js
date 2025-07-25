@@ -2,6 +2,7 @@
 // 작성자: 백진선, 장민솔
 // 설명: 공통 axios 인스턴스 설정, 기본 주소랑 헤더 미리 지정
 
+// src/apis/instance.js
 import axios from 'axios';
 
 // 로컬 스토리지에서 accessToken 꺼내옴

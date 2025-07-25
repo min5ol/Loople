@@ -1,6 +1,8 @@
-// 작성일: 2025.07.18
+// 작성일: 2025.07.23
 // 작성자: 장민솔
-// 설명: 회원가입 3단계. 프로필 이미지 미리보기를 상단 중앙으로 이동 및 전체 UI 리팩토링 (입력 필드 스타일 통일)
+// 설명: 회원가입 3단계 – 소셜/일반 분기 완전 분리 + 주소 및 이미지 처리
+
+// src/components/pages/SignupStep3.jsx
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
 import { searchKakaoAddress } from "../../services/kakaoService";
 import { parseAddress } from "../../utils/parseAddress";
-import { signup } from "../../services/userService";
+import { signup, signupSocial } from "../../services/userService";
 import { DEFAULT_PROFILE_IMAGE_URL } from "../../constants/defaults";
 import { loadDaumPostcodeScript } from "../../utils/loadDaumPostcode";
 
@@ -16,7 +18,6 @@ import ProfileImageUploader from "../organisms/ProfileImageUploader";
 
 export default function SignUpStep3() {
   const navigate = useNavigate();
-
   const [form, setForm] = useState({
     address: "",
     detailAddress: "",
@@ -30,10 +31,18 @@ export default function SignUpStep3() {
     profileImageUrl: null,
   });
 
+  // 🔒 접근 제어
   useEffect(() => {
-    const step1 = sessionStorage.getItem("signupStep1");
+    const provider = sessionStorage.getItem("provider");
     const step2 = sessionStorage.getItem("signupStep2");
-    if (!step1 || !step2) {
+
+    if (!step2) {
+      alert("이전 단계를 먼저 진행해주세요.");
+      navigate("/signup");
+    }
+
+    // 소셜이면 step1 없이 통과
+    if (!provider && !sessionStorage.getItem("signupStep1")) {
       alert("이전 단계를 먼저 진행해주세요.");
       navigate("/signup");
     }
@@ -80,7 +89,7 @@ export default function SignUpStep3() {
         },
       }).open();
     } catch (err) {
-      console.error("주소 검색 스크립트 로딩 실패", err);
+      console.error("주소 검색 로딩 실패", err);
       alert("주소 검색 기능을 불러오는 데 실패했습니다.");
     }
   };
@@ -91,39 +100,84 @@ export default function SignUpStep3() {
   };
 
   const handleSubmit = async () => {
-    const step1 = JSON.parse(sessionStorage.getItem("signupStep1"));
-    const step2 = JSON.parse(sessionStorage.getItem("signupStep2"));
+    const provider = sessionStorage.getItem("provider");
+    const step2 = JSON.parse(sessionStorage.getItem("signupStep2") || "{}");
 
-    if (!form.address || !form.detailAddress || !form.gpsLat || !form.dong_code) {
+    const {
+      address,
+      detailAddress,
+      gpsLat,
+      dong_code,
+      profileImageUrl,
+      sido,
+      sigungu,
+      eupmyun,
+      ri,
+    } = form;
+
+    if (!address || !detailAddress || !gpsLat || !dong_code) {
       alert("주소 및 상세주소를 입력해주세요.");
       return;
     }
 
-    const payload = {
-      ...step1,
-      ...step2,
-      detailAddress: form.detailAddress,
-      profileImageUrl: form.profileImageUrl ?? DEFAULT_PROFILE_IMAGE_URL,
-      sido: form.sido,
-      sigungu: form.sigungu,
-      eupmyun: form.eupmyun,
-      ri: form.ri || "",
-    };
-
     try {
-      const res = await signup(payload);
-      localStorage.setItem("accessToken", res.token);
+      let payload;
+
+      if (provider) {
+        const email = sessionStorage.getItem("email");
+        const socialId = sessionStorage.getItem("socialId");
+
+        if (!email || !socialId || !step2.nickname || !step2.phone) {
+          alert("소셜 사용자 정보가 누락되었습니다.");
+          return;
+        }
+
+        payload = {
+          email,
+          socialId,
+          provider,
+          name: step2.name,
+          nickname: step2.nickname,
+          phone: step2.phone,
+          detailAddress,
+          profileImageUrl: profileImageUrl ?? DEFAULT_PROFILE_IMAGE_URL,
+          sido,
+          sigungu,
+          eupmyun,
+          ri: ri || "",
+        };
+
+        const res = await signupSocial(payload);
+        localStorage.setItem("accessToken", res.token);
+      } else {
+        const step1 = JSON.parse(sessionStorage.getItem("signupStep1") || "{}");
+
+        payload = {
+          ...step1,
+          ...step2,
+          detailAddress,
+          profileImageUrl: profileImageUrl ?? DEFAULT_PROFILE_IMAGE_URL,
+          sido,
+          sigungu,
+          eupmyun,
+          ri: ri || "",
+        };
+
+        const res = await signup(payload);
+        localStorage.setItem("accessToken", res.token);
+      }
+
       sessionStorage.clear();
       navigate("/information");
     } catch (err) {
       console.error("회원가입 실패", err);
-      alert("회원가입 중 문제가 발생했습니다. 다시 시도해주세요.");
+      alert("회원가입 중 문제가 발생했습니다.");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-[#F6F6F6] font-[pretendard]">
-      <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-xl box-border space-y-6">
+      <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-xl space-y-6 box-border">
         <h2 className="text-2xl font-semibold text-[#264D3D] text-center">프로필 이미지 업로드</h2>
 
         <div className="flex flex-col items-center gap-4">
@@ -147,7 +201,7 @@ export default function SignUpStep3() {
             name="address"
             value={form.address}
             readOnly
-            className="w-full h-12 px-4 rounded-lg border-none shadow-inner focus:outline-none font-ptd-400 bg-[#F0F0F0] placeholder-gray-400 box-border"
+            className="w-full h-12 px-4 rounded-lg bg-[#F0F0F0] shadow-inner font-ptd-400 box-border"
             placeholder="선택된 주소"
           />
 
@@ -156,7 +210,7 @@ export default function SignUpStep3() {
             placeholder="상세주소"
             value={form.detailAddress}
             onChange={handleChange}
-            className="w-full h-12 px-4 rounded-lg border-none shadow-inner focus:outline-none font-ptd-400 bg-[#F9F9F9] placeholder-gray-400 box-border"
+            className="w-full h-12 px-4 rounded-lg bg-[#F9F9F9] shadow-inner font-ptd-400 box-border"
           />
         </div>
 

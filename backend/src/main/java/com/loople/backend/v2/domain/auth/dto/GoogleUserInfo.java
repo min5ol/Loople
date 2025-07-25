@@ -4,9 +4,7 @@ import com.loople.backend.v2.domain.users.entity.Provider;
 
 public record GoogleUserInfo(
         String socialId,
-        String email,
-        String nickname,
-        String profileImageUrl
+        String email
 ) implements OAuthUserInfo
 {
     @Override
@@ -17,16 +15,6 @@ public record GoogleUserInfo(
     @Override
     public String getEmail() {
         return email;
-    }
-
-    @Override
-    public String getNickname() {
-        return nickname;
-    }
-
-    @Override
-    public String getProfileImageUrl() {
-        return profileImageUrl;
     }
 
     @Override

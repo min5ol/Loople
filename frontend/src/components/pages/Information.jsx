@@ -2,6 +2,7 @@
 // 작성자: 장민솔
 // 설명: 회원가입 완료 후 Loople 서비스 철학을 소개하는 슬라이드 페이지. 각 슬라이드는 이미지+텍스트로 구성. 인디케이터와 이동 버튼 포함됨.
 
+// src/components/pages/Information.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
