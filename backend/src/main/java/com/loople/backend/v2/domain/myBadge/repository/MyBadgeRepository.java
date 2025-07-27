@@ -10,8 +10,4 @@ public interface MyBadgeRepository extends JpaRepository<MyBadge, Long>
 {
     List<MyBadge> findByUser_No(Long userNo);
     MyBadge findByUser_NoAndIsEquippedTrue(Long userNo);
-
-    Long user(User user);
-
-    Long user(User user);
 }
