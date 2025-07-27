@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 // DB 초기화를 위한 러너. 운영 시 주석 해제 필요
-@Component
+// @Component
 @RequiredArgsConstructor
 public class BeopjeongdongImporterRunner implements CommandLineRunner {
 

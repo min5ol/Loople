@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface MyAvatarItemRepository extends JpaRepository<MyAvatarItem, Long>
 {
-    List<MyAvatarItem> findByUser_No(Long userId);
-    boolean existsByUser_NoAndAvatarItem_Id(Long userNo, Long avatarItemId);
+    List<MyAvatarItem> findByUser_No(Long userNo);
+    boolean existsByUser_NoAndAvatarItem_No(Long userNo, Long avatarItemNo);
 }

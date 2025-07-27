@@ -42,7 +42,7 @@ public class OAuthController
     {
         OAuthUserInfo userInfo = oAuthService.getUserInfo(request.provider(), request.code());
 
-        Optional<User> existingUser = userRepository.findBySocialIdAndProvider(userInfo.getSocialId(), userInfo.getProvider());
+        Optional<User> existingUser = userRepository.findByProviderAndSocialId(userInfo.getProvider(), userInfo.getSocialId());
 
         if(existingUser.isPresent())
         {

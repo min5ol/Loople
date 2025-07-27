@@ -1,6 +1,7 @@
 package com.loople.backend.v2.domain.myAvatar.entity;
 
 import com.loople.backend.v2.domain.avatarItem.entity.AvatarItem;
+import com.loople.backend.v2.domain.users.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,10 @@ public class MyAvatar
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long no;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_no", nullable = false)
+    private User user;
 
     @OneToOne
     @JoinColumn(name = "hair_item_id")
