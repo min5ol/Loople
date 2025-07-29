@@ -10,7 +10,9 @@
 package com.loople.backend.v2.domain.users.entity;
 
 import com.loople.backend.v2.domain.beopjeongdong.entity.Beopjeongdong;
+import com.loople.backend.v2.domain.myAvatar.entity.MyAvatar;
 import com.loople.backend.v2.domain.myBadge.entity.MyBadge;
+import com.loople.backend.v2.domain.myLoopling.entity.MyLoopling;
 import com.loople.backend.v2.domain.myRoom.entity.MyRoom;
 import com.loople.backend.v2.domain.myVillage.entity.MyVillage;
 import jakarta.persistence.*;
@@ -92,16 +94,24 @@ public class User {
     private LocalDateTime deletedAt; // 탈퇴일시
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "village_id", referencedColumnName = "no")
+    @JoinColumn(name = "village_id", referencedColumnName = "no", nullable = true)
     private MyVillage village;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", referencedColumnName = "no")
+    @JoinColumn(name = "room_id", referencedColumnName = "no", nullable = true)
     private MyRoom room;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "badge_id", referencedColumnName = "no")
+    @JoinColumn(name = "badge_id", referencedColumnName = "no", nullable = true)
     private MyBadge badge;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "avatar_id", referencedColumnName = "no", nullable = true)
+    private MyAvatar myAvatar;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "loopling_id", referencedColumnName = "no", nullable = true)
+    private MyLoopling myLoopling;
 
     @PrePersist
     protected void onCreate()

@@ -41,9 +41,7 @@ public record SocialSignupRequest(
         @NotBlank(message = "읍면동 정보는 필수입니다.")
         String eupmyun,
 
-        String ri,
-
-        String looplingType
+        String ri
 )
 {
         public String fullAddress()

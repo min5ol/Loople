@@ -1,11 +1,9 @@
 package com.loople.backend.v2.domain.myVillage.entity;
 
 import com.loople.backend.v2.domain.users.entity.User;
+import com.loople.backend.v2.domain.villageStatus.entity.VillageStatus;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "my_village")
@@ -19,9 +17,14 @@ public class MyVillage
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long no;
 
-    @Column(nullable = false, unique = true, length = 8)
-    private String dongCodePrefix;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "village_status_no", nullable = false)
+    private VillageStatus villageStatus;
 
-    @OneToMany(mappedBy = "village")
-    private List<User> users = new ArrayList<>();
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_no", nullable = false, unique = true)
+    private User user;
+
+    @Column(nullable = false)
+    private boolean isEquipped;
 }

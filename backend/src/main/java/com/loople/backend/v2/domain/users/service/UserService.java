@@ -29,4 +29,16 @@ public interface UserService
     UserLoginResponse socialLoginOrRedirect(OAuthUserInfo userInfo);
 
     void updatePoints(UpdatedUserPointRequest request);
+
+    void completeSignup(Long userId);
+
+    void assignDefaultAvatar(Long userId);
+
+    void assignDefaultBadge(Long userId);
+
+    void assignDefaultRoom(Long userId);
+
+    void assignLoopling(Long userId, Long catalogId);
+
+    void assignVillage(Long userId);
 }

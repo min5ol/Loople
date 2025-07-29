@@ -23,9 +23,10 @@ public class MyRoomServiceImpl implements MyRoomService
     }
 
     @Override
-    public MyRoom createDefaultRoom()
+    public MyRoom createDefaultRoom(User user)
     {
         MyRoom room = MyRoom.builder()
+                .user(user)
                 .roomName("나의 방")
                 .backgroundColor("#FEF7E2")
                 .build();
