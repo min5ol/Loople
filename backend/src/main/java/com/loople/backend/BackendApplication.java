@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @ComponentScan(
@@ -19,6 +20,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 )
 @EnableJpaRepositories(basePackages = "com.loople.backend.v2")
 @EntityScan(basePackages = "com.loople.backend.v2")
+@EnableScheduling
 public class BackendApplication {
 
 	public static void main(String[] args) {
