@@ -11,7 +11,7 @@ import SignUpStep3 from "../components/pages/SignUpStep3"; // 회원가입 3단�
 import Quiz from "../components/pages/Quiz";     // 오늘의 퀴즈 페이지
 import Onboarding from "../components/pages/Onboarding";   // 퀴즈 시작 전 온보딩
 import Information from "../components/pages/Information"; // 앱 기능 소개 슬라이드
-import LoopleHome from "../components/pages/LoopleHome";  //웹 홈 페이지
+import LoopleHome from "../components/pages/LoopleHomes";  //웹 홈 페이지
 import OAuthCallback from "../components/pages/OAuthCallback";
 
 const routes = [

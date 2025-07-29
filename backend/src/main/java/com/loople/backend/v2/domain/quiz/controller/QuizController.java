@@ -32,6 +32,7 @@ import com.loople.backend.v2.global.jwt.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -50,6 +51,14 @@ public class QuizController {
     private final OpenApiClient openApiClient;
     private final QuizService quizService;
     private final GetLoggedInUserId getLoggedInUserId;
+
+
+    @Scheduled(cron = "0 0 0 1 * *") // 매월 1일 00:00:00  //초 분 시 일 월 요일
+    public void generateMonthlyProblem(){
+        String prompt = buildPrompt();
+        Mono<String> stringMono = openApiClient.requestChatCompletion(prompt);
+    }
+
 
     //문제 생성 및 db 저장 후 저장된 문제 클라이언트에게 show
     //Mono: 비동기 단일 값 컨테이너 -> 나중에 1개의 데이터를 비동기적으로 받음
@@ -106,41 +115,16 @@ public class QuizController {
 
     //API 문제 요청 프롬프트
     private String buildPrompt(){
-        List<String> topics = Arrays.asList(
-                "쓰레기 종류별 분리배출",
-                "재활용 가능 vs 불가능",
-                "재사용 가능 사례",
-                "자원 절약 행동",
-                "생활 속 실천법",
-                "순환 경제",
-                "분리배출 잘못된 사례",
-                "분리배출 도구 / 표시",
-                "법과 제도",
-                "학교/지역 활동 사례",
-                "친환경 제품과 소비",
-                "환경 오염 영향",
-                "환경 캠페인"
-        );
-
-        List<ProblemType> types = Arrays.asList(ProblemType.OX, ProblemType.MULTIPLE);
-
-        List<QuizTopic> quizTopics = new ArrayList<>();
-        for(String topic : topics) {
-            for(ProblemType type : types) {
-                quizTopics.add(new QuizTopic(topic, type));
-            }
-        }
-
-        Random random = new Random();
-        int randomIndex = random.nextInt(quizTopics.size());
-        QuizTopic topic = quizTopics.get(randomIndex);
-        System.out.println("topic.getTopic() = " + topic.getTopic());
-        System.out.println("topic.getProblemType() = " + topic.getProblemType());
+        String topic = "쓰레기 종류별 분리배출 / 재활용 가능vs불가능 / 재사용 가능 사례 / 자원 절약 행동 / 생활 속 실천법 / 순환 경제 / 분리배출 잘못된 사례 / 분리배출 도구와 표시 / 법과 제도 / 학교 및 지역 활동 사례 / 친환경 제품과 소비 / 환경 오염의 영향 / 환경 캠페인";
 
         return "너는 초등학생과 중학생이 매일 순환 경제 및 분리 배출에 대해 배울 수 있도록 퀴즈 문제를 만드는 친절한 환경 교육 선생님이야\n"
-                + "다음 조건을 따라 \"퀴즈 문제 1개\"만 생성해줘\n"
-                + "오늘의 주제는 \"" + topic.getTopic() + "\" 이야\n"
-                + "문제 유형은 \"" + topic.getProblemType() + "\"이며 이 유형에 맞는 출력 형식을 따라줘\n"
+                + "다음 조건을 따라 \"퀴즈 문제 31개\"를 생성해줘\n"
+                + "문제를 모두 출제한 뒤 JSON 파일로 보내줘\n"
+                + "주어진 문제를 랜덤으로 선택하여 한 달에 한 문제씩 출제할 예정이니 겹치는 건 없도록 해줘\n"
+                + "주제는 다음과 같아\n"
+                + topic
+                + "주제는 문제 별로 골고루 들어갔으면 좋겠어\n"
+                + "문제 유형은 \"OX/MULTIPLE\"이며 해당 유형에 맞는 출력 형식을 따라줘\n"
                 + "내용, 보기, 정답 모두 중복 없이 새롭고 창의적이어야 해\n"
                 + "오답과 정답은 명확히 구분되지만 헷갈릴 수 있는 보기로 해줘\n"
                 + "정답이 항상 같은 위치에 나오지 않도록 하고, 반드시 정답 위치도 무작위로 설정해야 해\n"
@@ -154,6 +138,7 @@ public class QuizController {
                 + "(형식 1: OX 문제)\n"
                 + "type: OX\n"
                 + "question: [문제 내용]\n"
+                + "options: null\n"
                 + "answer: O/X\n\n"
                 + "(형식 2: MULTIPLE 문제)\n"
                 + "type: MULTIPLE\n"
@@ -166,7 +151,7 @@ public class QuizController {
                 + "answer: A/B/C/D\n\n"
                 + "자 이제 너의 능력을 발휘할 차례야\n"
                 + "학생들의 학습 수준을 올릴 수 있게 도와줘\n"
-                + "주어진 조건과 형식에 맞는 문제 하나 부탁해";
+                + "주어진 조건과 형식에 맞는 문제 부탁해";
     }
 
 
