@@ -12,5 +12,5 @@ public interface ChatService {
     void saveText(ChatTextRequest chatTextRequest, Long userId);
     void saveResponse(Long roomId, String response);
     List<ChatbotCategoryResponse> getCategory(String categoryType, Long parentId);
-    List<ChatbotCategoryDetailResponse> getDetail(Long parentId);
+    List<ChatbotCategoryDetailResponse> getDetail(Long parentId, Long userId);
 }

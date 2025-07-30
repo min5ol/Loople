@@ -1,17 +1,9 @@
 package com.loople.backend.v2.domain.chat.service;
 
-import com.loople.backend.v2.domain.chat.dto.ChatRoomResponse;
-import com.loople.backend.v2.domain.chat.dto.ChatTextRequest;
-import com.loople.backend.v2.domain.chat.dto.ChatbotCategoryDetailResponse;
-import com.loople.backend.v2.domain.chat.dto.ChatbotCategoryResponse;
-import com.loople.backend.v2.domain.chat.entity.ChatRoom;
-import com.loople.backend.v2.domain.chat.entity.ChatText;
-import com.loople.backend.v2.domain.chat.entity.ChatbotCategory;
-import com.loople.backend.v2.domain.chat.entity.ChatbotCategoryDetail;
-import com.loople.backend.v2.domain.chat.repository.ChatRoomRepository;
-import com.loople.backend.v2.domain.chat.repository.ChatTextRepository;
-import com.loople.backend.v2.domain.chat.repository.ChatbotCategoryDetailRepository;
-import com.loople.backend.v2.domain.chat.repository.ChatbotCategoryRepository;
+import com.loople.backend.v2.domain.beopjeongdong.repository.BeopjeongdongRepository;
+import com.loople.backend.v2.domain.chat.dto.*;
+import com.loople.backend.v2.domain.chat.entity.*;
+import com.loople.backend.v2.domain.chat.repository.*;
 import com.loople.backend.v2.domain.users.entity.User;
 import com.loople.backend.v2.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +23,12 @@ public class ChatServiceImpl implements ChatService{
     private final UserRepository userRepository;
     private final ChatbotCategoryRepository chatbotCategoryRepository;
     private final ChatbotCategoryDetailRepository chatbotCategoryDetailRepository;
+    private final LocalGovernmentWasteInfoRepository localGovernmentWasteInfoRepository;
 
     @Override
     public ChatRoomResponse buildRoomWithAI(Long userId) {
-        User emailById = findEmailById(userId);
-        String email = emailById.getEmail();
+        User ById = findById(userId);
+        String email = ById.getEmail();
         System.out.println("email = " + email);
 
         if(email == null || email.isEmpty()) {
@@ -57,11 +48,11 @@ public class ChatServiceImpl implements ChatService{
 
     @Override
     public void saveText(ChatTextRequest chatTextRequest, Long userId) {
-        User emailById = findEmailById(userId);
+        User ById = findById(userId);
 
         ChatText chatText = ChatText.builder()
                 .roomId(chatTextRequest.getRoomId())
-                .userEmail(emailById.getEmail())
+                .userEmail(ById.getEmail())
                 .content(chatTextRequest.getContent())
                 .build();
 
@@ -85,21 +76,44 @@ public class ChatServiceImpl implements ChatService{
     }
 
     @Override
-    public List<ChatbotCategoryDetailResponse> getDetail(Long parentId) {
-        if(parentId == 15L) {
-            //지역별 정보
-            //링크, 수거시간, 장소만 간단하게 보여주고 자세한 사항은 홈페이지 참조 
+    public List<ChatbotCategoryDetailResponse> getDetail(Long parentId, Long userId) {
+
+        if(parentId>=43L && parentId<=46) {
+            User byId = findById(userId);
+            List<LocalGovernmentWasteInfo> infos =
+                    localGovernmentWasteInfoRepository.findBySidoAndSigungu(byId.getBeopjeongdong().getSido(),
+                                                                            byId.getBeopjeongdong().getSigungu());
+
+            List<LocalGovenmentWasteInfoResponse> localGovens = infos.stream()
+                    .map(info -> LocalGovenmentWasteInfoResponse.builder()
+                            .homepage(info.getHomepage())
+                            .allInfoUrl(info.getAllInfoUrl())
+                            .generalUrl(info.getGeneralUrl())
+                            .foodUrl(info.getFoodUrl())
+                            .recyclingUrl(info.getRecyclingUrl())
+                            .bulkyUrl(info.getBulkyUrl())
+                            .disposalMethod(info.getDisposalMethod())
+                            .build()
+                    )
+                    .collect(Collectors.toList());
+
+
+            return infos.stream()
+                    .map(info -> {
+                        return new ChatbotCategoryDetailResponse("지역별 정보", null, localGovens);
+                    })
+                    .collect(Collectors.toList());
         }
         
         List<ChatbotCategoryDetail> byCategoryId = chatbotCategoryDetailRepository.findByCategoryId(parentId);
 
         return byCategoryId.stream()
-                .map(category -> new ChatbotCategoryDetailResponse(category.getInfoType(), category.getContent()))
+                .map(category -> new ChatbotCategoryDetailResponse(category.getInfoType(), category.getContent(), null))
                 .collect(Collectors.toList());
     }
 
-    private User findEmailById(Long userId){
-        return userRepository.findEmailByNo(userId)
+    private User findById(Long userId){
+        return userRepository.findByNo(userId)
                 .orElseThrow(() -> new unFindNoException("존재하지 않는 아이디입니다."));
     }
 
