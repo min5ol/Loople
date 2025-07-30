@@ -2,8 +2,6 @@
 // 작성자: 장민솔
 // 설명: 회원가입 완료 후 단계별 지급 슬라이드 진행 컴포넌트
 
-// src/components/pages/SignUpComplete.jsx
-
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import instance from "../../apis/instance";
@@ -30,21 +28,36 @@ export default function SignUpComplete() {
     setLoading(true);
 
     try {
-      if (step === 1) await instance.post(`/users/${userId}/avatar/default`);
-      else if (step === 2) await instance.post(`/users/${userId}/badge/default`);
-      else if (step === 3) await instance.post(`/users/${userId}/room/default`);
-      else if (step === 4 && looplingId) await instance.post(`/users/${userId}/loopling?catalogId=${looplingId}`);
-      else if (step === 5) {
-        await instance.post(`/users/${userId}/village`);
-        await instance.patch(`/users/${userId}/complete`);
-        setShowModal(true);
-        return;
+      switch (step) {
+        case 1:
+          await instance.post(`/users/${userId}/avatar/default`);
+          break;
+        case 2:
+          await instance.post(`/users/${userId}/badge/default`);
+          break;
+        case 3:
+          await instance.post(`/users/${userId}/room/default`);
+          break;
+        case 4:
+          if (!looplingId) {
+            alert("루플링을 선택해주세요!");
+            return;
+          }
+          await instance.post(`/users/${userId}/loopling?catalogId=${looplingId}`);
+          break;
+        case 5:
+          await instance.post(`/users/${userId}/village`);
+          await instance.patch(`/users/${userId}/complete`);
+          setShowModal(true);
+          return;
+        default:
+          break;
       }
 
       setStep((prev) => prev + 1);
     } catch (err) {
       alert("처리 중 오류가 발생했습니다.");
-      console.error(err);
+      console.error("🔥 API ERROR", err?.response?.status, err?.response?.data);
     } finally {
       setLoading(false);
     }
@@ -55,9 +68,10 @@ export default function SignUpComplete() {
     navigate("/looplehome");
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FEF7E2] px-6 font-[pretendard]">
-      {step === 1 && (
+  const steps = [
+    {
+      step: 1,
+      component: (
         <StepCard
           title={`앞으로 ${name}님이 루플에서 사용하게 되실 아바타입니다!`}
           imageUrl={Avatar}
@@ -65,9 +79,11 @@ export default function SignUpComplete() {
           onNext={handleNext}
           loading={loading}
         />
-      )}
-
-      {step === 2 && (
+      ),
+    },
+    {
+      step: 2,
+      component: (
         <StepCard
           title={`순환경제를 시작하게 되신 ${name}님께 Green Rookie 뱃지를 드릴게요!`}
           imageUrl={Badge}
@@ -75,9 +91,11 @@ export default function SignUpComplete() {
           onNext={handleNext}
           loading={loading}
         />
-      )}
-
-      {step === 3 && (
+      ),
+    },
+    {
+      step: 3,
+      component: (
         <StepCard
           title={`${name}님이 지내게 될 방이에요!`}
           imageUrl={Room}
@@ -85,18 +103,22 @@ export default function SignUpComplete() {
           onNext={handleNext}
           loading={loading}
         />
-      )}
-
-      {step === 4 && (
+      ),
+    },
+    {
+      step: 4,
+      component: (
         <LooplingSelector
           name={name}
           onSelect={(id) => setLooplingId(id)}
           onConfirm={handleNext}
           loading={loading}
         />
-      )}
-
-      {step === 5 && (
+      ),
+    },
+    {
+      step: 5,
+      component: (
         <StepCard
           title={`${name}님이 유저들과 함께 꾸며나갈 마을은 여기입니다!`}
           imageUrl={Village}
@@ -104,7 +126,13 @@ export default function SignUpComplete() {
           onNext={handleNext}
           loading={loading}
         />
-      )}
+      ),
+    },
+  ];
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#FEF7E2] px-6 font-[pretendard]">
+      {steps.find((s) => s.step === step)?.component}
 
       {showModal && (
         <FinalSuccessModal
