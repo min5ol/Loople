@@ -33,7 +33,12 @@ public class ChatController {
 
         System.out.println("chatTextRequest = " + chatTextRequest.toString());
 
-        return openApiClient.requestChatCompletion(chatTextRequest.getContent())
+        String prompt = chatTextRequest.getContent()
+                + " 쓰레기 처리 방법에 대해 알려줘 !\n"
+                + "두괄식으로 어떻게 할지 먼저 써주고 그 뒤에 설명 붙여줘\n"
+                + "줄글의 형식으로 보여주며 줄바꿈 적용해서 가독성 있게 답장 부탁해";
+
+        return openApiClient.requestChatCompletion(prompt)
                 .flatMap(AIResponse -> {
                     //보낸 메시지 저장
                     chatService.saveText(chatTextRequest, userId);
@@ -58,9 +63,11 @@ public class ChatController {
     }
 
     @GetMapping("/details")
-    public List<ChatbotCategoryDetailResponse> getDetails(@RequestParam Long parentId){
+    public List<ChatbotCategoryDetailResponse> getDetails(@RequestParam Long parentId, HttpServletRequest request){
         System.out.println("parentId = " + parentId);
-        return chatService.getDetail(parentId);
+        Long userId = getLoggedInUserId.getUserId(request);
+
+        return chatService.getDetail(parentId, userId);
     }
 
 }

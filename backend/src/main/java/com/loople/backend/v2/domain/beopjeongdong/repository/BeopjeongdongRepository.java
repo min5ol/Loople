@@ -19,4 +19,6 @@ public interface BeopjeongdongRepository extends JpaRepository<Beopjeongdong, Lo
             String sido, String sigungu, String eupmyun, String ri
     );
     boolean existsByDongCode(String dongCode);
+
+    Optional<Beopjeongdong> findByDongCode(String dongCode);
 }

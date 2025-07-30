@@ -112,12 +112,12 @@ public class QuizServiceImpl implements QuizService{
         //사용자 점수 업데이트
         updatedUserPoints(new UpdatedUserPointRequest(userId, totalPoints), userId);
 
-        User emailById = findEmailById(userId);
+        User ById = findById(userId);
 
         //사용자 답안 엔티티 생성 및 저장
         UserAnswer userAnswer = UserAnswer.builder()
                 .userId(userId)
-                .userEmail(emailById.getEmail())
+                .userEmail(ById.getEmail())
                 .problemId(problemId)
                 .submittedAnswer(submittedAnswer)
                 .isCorrect(isCorrect?1:0)
@@ -270,8 +270,8 @@ public class QuizServiceImpl implements QuizService{
         return new DateRange(firstDayOfThisMonth, lastDayOfThisMonth);
     }
 
-    private User findEmailById(Long userId){
-        return userRepository.findEmailByNo(userId)
+    private User findById(Long userId){
+        return userRepository.findByNo(userId)
                 .orElseThrow(() -> new unFindNoException("존재하지 않는 아이디입니다."));
 
     }
