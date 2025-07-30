@@ -9,6 +9,8 @@
 package com.loople.backend.v2.domain.users.controller;
 
 import com.loople.backend.v2.domain.users.dto.*;
+import com.loople.backend.v2.domain.users.entity.User;
+import com.loople.backend.v2.domain.users.repository.UserRepository;
 import com.loople.backend.v2.domain.users.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController
 {
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @GetMapping("/check-email")
     public ResponseEntity<EmailCheckResponse> checkEmail(@RequestParam String email)
@@ -88,7 +91,12 @@ public class UserController
     @PostMapping("/{userId}/avatar/default")
     public ResponseEntity<Void> assignDefaultAvatar(@PathVariable Long userId)
     {
+        long t0 = System.currentTimeMillis();
+        log.info("[1] API 도착");
+
         userService.assignDefaultAvatar(userId);
+
+        log.info("[2] API 처리 끝, 소요 시간: {}ms", System.currentTimeMillis() - t0);
         return ResponseEntity.ok().build();
     }
 

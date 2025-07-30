@@ -7,8 +7,14 @@ import com.loople.backend.v2.domain.myAvatar.entity.MyAvatar;
 import com.loople.backend.v2.domain.myAvatar.repository.MyAvatarRepository;
 import com.loople.backend.v2.domain.users.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MyAvatarServiceImpl implements MyAvatarService
@@ -19,35 +25,54 @@ public class MyAvatarServiceImpl implements MyAvatarService
     @Override
     public MyAvatar createDefaultAvatar(User user)
     {
-        AvatarItem hair = avatarItemRepository.findByType(AvatarItemType.HAIR).stream().findFirst().orElse(null);
-        AvatarItem hairAcc = avatarItemRepository.findByType(AvatarItemType.HAIRACC).stream().findFirst().orElse(null);
-        AvatarItem eye = avatarItemRepository.findByType(AvatarItemType.EYE).stream().findFirst().orElse(null);
-        AvatarItem top = avatarItemRepository.findByType(AvatarItemType.TOP).stream().findFirst().orElse(null);
-        AvatarItem bottom = avatarItemRepository.findByType(AvatarItemType.BOTTOM).stream().findFirst().orElse(null);
-        AvatarItem fullBody = avatarItemRepository.findByType(AvatarItemType.FULLBODY).stream().findFirst().orElse(null);
-        AvatarItem faceAcc = avatarItemRepository.findByType(AvatarItemType.FACEACC).stream().findFirst().orElse(null);
-        AvatarItem leftHand = avatarItemRepository.findByType(AvatarItemType.LEFTHAND).stream().findFirst().orElse(null);
-        AvatarItem rightHand = avatarItemRepository.findByType(AvatarItemType.RIGHTHAND).stream().findFirst().orElse(null);
-        AvatarItem bodyAcc = avatarItemRepository.findByType(AvatarItemType.BODYACC).stream().findFirst().orElse(null);
-        AvatarItem socks = avatarItemRepository.findByType(AvatarItemType.SOCKS).stream().findFirst().orElse(null);
-        AvatarItem shoes = avatarItemRepository.findByType(AvatarItemType.SHOES).stream().findFirst().orElse(null);
+        List<AvatarItemType> neededTypes = List.of(
+                AvatarItemType.HAIR,
+                AvatarItemType.HAIRACC,
+                AvatarItemType.EYE,
+                AvatarItemType.TOP,
+                AvatarItemType.BOTTOM,
+                AvatarItemType.FULLBODY,
+                AvatarItemType.FACEACC,
+                AvatarItemType.LEFTHAND,
+                AvatarItemType.RIGHTHAND,
+                AvatarItemType.BODYACC,
+                AvatarItemType.SOCKS,
+                AvatarItemType.SHOES
+        );
+
+        List<AvatarItem> items = avatarItemRepository.findByTypeIn(neededTypes);
+
+        Map<AvatarItemType, AvatarItem> itemMap = items.stream()
+                .collect(Collectors.toMap(
+                        AvatarItem::getType,
+                        item -> item,
+                        (a, b) -> a
+                ));
+
+        log.info("아바타 지급 시작");
+        long start = System.currentTimeMillis();
 
         MyAvatar avatar = MyAvatar.builder()
                 .user(user)
-                .hair(hair)
-                .hairAcc(hairAcc)
-                .eye(eye)
-                .top(top)
-                .bottom(bottom)
-                .fullBody(fullBody)
-                .faceAcc(faceAcc)
-                .leftHand(leftHand)
-                .rightHand(rightHand)
-                .bodyAcc(bodyAcc)
-                .socks(socks)
-                .shoes(shoes)
+                .hair(itemMap.get(AvatarItemType.HAIR))
+                .hairAcc(itemMap.get(AvatarItemType.HAIRACC))
+                .eye(itemMap.get(AvatarItemType.EYE))
+                .top(itemMap.get(AvatarItemType.TOP))
+                .bottom(itemMap.get(AvatarItemType.BOTTOM))
+                .fullBody(itemMap.get(AvatarItemType.FULLBODY))
+                .faceAcc(itemMap.get(AvatarItemType.FACEACC))
+                .leftHand(itemMap.get(AvatarItemType.LEFTHAND))
+                .rightHand(itemMap.get(AvatarItemType.RIGHTHAND))
+                .bodyAcc(itemMap.get(AvatarItemType.BODYACC))
+                .socks(itemMap.get(AvatarItemType.SOCKS))
+                .shoes(itemMap.get(AvatarItemType.SHOES))
                 .build();
 
-        return myAvatarRepository.save(avatar);
+        MyAvatar saved = myAvatarRepository.save(avatar);
+        user.assignAvatar(saved);
+
+        log.info("✅ 아바타 지급 완료, 소요 시간: {}ms", System.currentTimeMillis() - start);
+
+        return saved;
     }
 }
