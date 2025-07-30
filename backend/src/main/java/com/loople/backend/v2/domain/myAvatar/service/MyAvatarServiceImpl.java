@@ -5,6 +5,7 @@ import com.loople.backend.v2.domain.avatarItem.entity.AvatarItemType;
 import com.loople.backend.v2.domain.avatarItem.repository.AvatarItemRepository;
 import com.loople.backend.v2.domain.myAvatar.entity.MyAvatar;
 import com.loople.backend.v2.domain.myAvatar.repository.MyAvatarRepository;
+import com.loople.backend.v2.domain.users.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ public class MyAvatarServiceImpl implements MyAvatarService
     private final MyAvatarRepository myAvatarRepository;
 
     @Override
-    public MyAvatar createDefaultAvatar()
+    public MyAvatar createDefaultAvatar(User user)
     {
         AvatarItem hair = avatarItemRepository.findByType(AvatarItemType.HAIR).stream().findFirst().orElse(null);
         AvatarItem hairAcc = avatarItemRepository.findByType(AvatarItemType.HAIRACC).stream().findFirst().orElse(null);
@@ -32,6 +33,7 @@ public class MyAvatarServiceImpl implements MyAvatarService
         AvatarItem shoes = avatarItemRepository.findByType(AvatarItemType.SHOES).stream().findFirst().orElse(null);
 
         MyAvatar avatar = MyAvatar.builder()
+                .user(user)
                 .hair(hair)
                 .hairAcc(hairAcc)
                 .eye(eye)

@@ -28,7 +28,6 @@ public class UserController
     public ResponseEntity<EmailCheckResponse> checkEmail(@RequestParam String email)
     {
         boolean isAvailable = userService.checkEmail(email).available();
-
         return ResponseEntity.ok(new EmailCheckResponse(isAvailable));
     }
 
@@ -36,7 +35,6 @@ public class UserController
     public ResponseEntity<NicknameCheckResponse> checkNickname(@RequestParam String nickname)
     {
         boolean isAvailable = userService.checkNickname(nickname).available();
-
         return ResponseEntity.ok(new NicknameCheckResponse(isAvailable));
     }
 
@@ -46,8 +44,7 @@ public class UserController
         log.info("[로컬 회원가입 요청] email={}, nickname={}", request.email(), request.nickname());
 
         UserSignupResponse response = userService.signup(request);
-
-        log.info("[회원가입 완료] userId={}, nickname={}", response.userId(), response.nickname());
+        log.info("[로컬 회원가입 완료] userId={}, nickname={}, status={}", response.userId(), response.nickname(), response.signupStatus());
 
         return ResponseEntity.status(201).body(response);
     }
@@ -58,8 +55,7 @@ public class UserController
         log.info("[소셜 회원가입 요청] email={}, provider={}, nickname={}", request.email(), request.provider(), request.nickname());
 
         SocialSignupResponse response = userService.socialSignup(request);
-
-        log.info("[소셜 회원가입 완료] userId={}, nickname={}, tokenLength={}", response.userId(), response.nickname(), response.token());
+        log.info("[소셜 회원가입 완료] userId={}, nickname={}, status={}", response.userId(), response.nickname(), response.signupStatus());
 
         return ResponseEntity.status(201).body(response);
     }
@@ -70,15 +66,57 @@ public class UserController
         log.info("[로컬 로그인 요청] email={}", request.email());
 
         UserLoginResponse response = userService.login(request);
-
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/points")
     public ResponseEntity<Void> updatePoints(@RequestBody @Valid UpdatedUserPointRequest request)
     {
-        userService.updatePoints(request);
+        log.info("[포인트 적립 요청] points={}", request.getPoints());
 
+        userService.updatePoints(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{userId}/complete")
+    public ResponseEntity<Void> completeSignup(@PathVariable Long userId)
+    {
+        userService.completeSignup(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{userId}/avatar/default")
+    public ResponseEntity<Void> assignDefaultAvatar(@PathVariable Long userId)
+    {
+        userService.assignDefaultAvatar(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{userId}/badge/default")
+    public ResponseEntity<Void> assignDefaultBadge(@PathVariable Long userId)
+    {
+        userService.assignDefaultBadge(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{userId}/room/default")
+    public ResponseEntity<Void> assignDefaultRoom(@PathVariable Long userId)
+    {
+        userService.assignDefaultRoom(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{userId}/loopling")
+    public ResponseEntity<Void> assignLoopling(@PathVariable Long userId, @RequestParam Long catalogId)
+    {
+        userService.assignLoopling(userId, catalogId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{userId}/village")
+    public ResponseEntity<Void> assignVillage(@PathVariable Long userId)
+    {
+        userService.assignVillage(userId);
         return ResponseEntity.ok().build();
     }
 }

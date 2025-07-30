@@ -1,6 +1,5 @@
 package com.loople.backend.v2.domain.villageStatus.entity;
 
-import com.loople.backend.v2.domain.myVillage.entity.MyVillage;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,10 +15,8 @@ public class VillageStatus
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long no;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "no")
-    private MyVillage village;
+    @Column(nullable = false, unique = true, length = 8)
+    private String dongCodePrefix;
 
     @Column(nullable = false)
     private int population;

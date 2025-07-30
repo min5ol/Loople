@@ -6,6 +6,8 @@ import com.loople.backend.v2.domain.myLoopling.dto.MyLooplingResponse;
 import com.loople.backend.v2.domain.myLoopling.entity.MyLoopling;
 import com.loople.backend.v2.domain.myLoopling.repository.MyLooplingRepository;
 import com.loople.backend.v2.domain.users.entity.User;
+import com.loople.backend.v2.global.exception.CustomException;
+import com.loople.backend.v2.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -44,15 +46,14 @@ public class MyLooplingServiceImpl implements MyLooplingService
     }
 
     @Override
-    public MyLoopling create(String looplingType)
+    public MyLoopling assignLoopling(User user, Long catalogId)
     {
-        LooplingCatalog loopling = looplingCatalogRepository.findAll().stream()
-                .filter(l -> l.getName().equals(looplingType))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 루플링입니다."));
+        LooplingCatalog catalog = looplingCatalogRepository.findById(catalogId)
+                .orElseThrow(() -> new CustomException(ErrorCode.LOOPLING_NOT_FOUND));
 
         MyLoopling myLoopling = MyLoopling.builder()
-                .loopling(loopling)
+                .user(user)
+                .loopling(catalog)
                 .isEquipped(true)
                 .build();
 

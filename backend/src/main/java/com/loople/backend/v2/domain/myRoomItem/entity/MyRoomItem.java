@@ -19,7 +19,7 @@ public class MyRoomItem
     private Long no;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
+    @JoinColumn(name = "room_no", nullable = false)
     private MyRoom room;
 
     @Enumerated(EnumType.STRING)
@@ -27,7 +27,7 @@ public class MyRoomItem
     private RoomItemSlot slot;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_item_id", nullable = false)
+    @JoinColumn(name = "room_items_no", nullable = false)
     private RoomItem equippedItem;
 
     public void changeItem(RoomItem newItem)

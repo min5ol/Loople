@@ -10,5 +10,5 @@ public interface MyLooplingService
 {
     List<MyLooplingResponse> getMyLoopling(Long userNo);
     void equipLoopling(Long userNo, Long looplingId);
-    MyLoopling create(String looplingType);
+    MyLoopling assignLoopling(User user, Long catalogId);
 }

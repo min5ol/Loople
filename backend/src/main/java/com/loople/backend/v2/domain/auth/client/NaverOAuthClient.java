@@ -49,7 +49,7 @@ public class NaverOAuthClient implements OAuthClient
         try
         {
             JsonNode json = objectMapper.readTree(response.getBody());
-            return json.get("accessToken").asText();
+            return json.get("access_token").asText();
         }
         catch (Exception e)
         {

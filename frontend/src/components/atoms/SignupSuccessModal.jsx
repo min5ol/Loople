@@ -1,19 +1,19 @@
-// 작성일: 2025.07.16
-// 작성자: 장민솔
-// 설명: 회원가입 완료 후 띄워주는 모달창, 닉네임 보여주고 onClose 콜백 기능
-
-// src/components/atoms/SignupSuccessModal.jsx
+// src/components/modals/SignupSuccessModal.jsx
 import React from "react";
 
-export default function SignupSuccessModal({ nickname, onClose }) {
+export default function SignupSuccessModal({ isOpen, name, onConfirm }) {
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-2xl shadow-lg max-w-sm w-full text-center">
-        <h2 className="text-xl font-semibold mb-4">{nickname}님, 안녕하세요!</h2>
-        <p className="text-gray-600 mb-6">회원가입이 완료되었어요 🎉</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-lg p-6 max-w-sm w-full text-center shadow-xl space-y-4">
+        <h2 className="text-xl font-semibold text-[#264D3D]">{name}님, 회원가입에 성공했어요!</h2>
+        <p className="text-[#444] font-medium">
+          지금부터 루플에서 필요한 몇 가지 물품들을 지급할게요!
+        </p>
         <button
-          className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-xl"
-          onClick={onClose} // 확인 누르면 모달 닫히는 콜백 호출
+          onClick={onConfirm}
+          className="mt-4 bg-primary text-white py-2 px-6 rounded-lg hover:bg-[#2f7b4d] transition"
         >
           확인
         </button>

@@ -6,6 +6,8 @@ import com.loople.backend.v2.domain.myBadge.dto.MyBadgeResponse;
 import com.loople.backend.v2.domain.myBadge.entity.MyBadge;
 import com.loople.backend.v2.domain.myBadge.repository.MyBadgeRepository;
 import com.loople.backend.v2.domain.users.entity.User;
+import com.loople.backend.v2.global.exception.CustomException;
+import com.loople.backend.v2.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,16 +34,15 @@ public class MyBadgeServiceImpl implements MyBadgeService
     }
 
     @Override
-    public MyBadge assignDefaultBadge()
+    public MyBadge assignDefaultBadge(User user)
     {
-        BadgeCatalog defaultBadge = badgeCatalogRepository
-                .findAll()
-                .stream()
+        BadgeCatalog defaultBadge = badgeCatalogRepository.findAll().stream()
                 .filter(b -> b.getBadgeName().equals("그린 루키"))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("기본 뱃지가 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.BADGE_NOT_FOUND));
 
         MyBadge myBadge = MyBadge.builder()
+                .user(user)
                 .badgeCatalog(defaultBadge)
                 .isEquipped(true)
                 .build();
