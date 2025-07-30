@@ -12,11 +12,11 @@ import loopling4 from "../../assets/loopling4.png";
 import loopling5 from "../../assets/loopling5.png";
 
 const looplingOptions = [
-  { id: 1, name: "루플링 A", imageUrl: {loopling1} },
-  { id: 2, name: "루플링 B", imageUrl: {loopling2} },
-  { id: 3, name: "루플링 C", imageUrl: {loopling3} },
-  { id: 4, name: "루플링 D", imageUrl: {loopling4} },
-  { id: 5, name: "루플링 E", imageUrl: {loopling5} },
+  { id: 1, name: "종이 루플링", imageUrl: loopling1 },
+  { id: 2, name: "건전지 루플링", imageUrl: loopling2 },
+  { id: 3, name: "캔 루플링", imageUrl: loopling3 },
+  { id: 4, name: "유리 루플링", imageUrl: loopling4 },
+  { id: 5, name: "비닐 루플링", imageUrl: loopling5 },
 ];
 
 export default function LooplingSelector({ name, onSelect, onConfirm, loading }) {
@@ -38,8 +38,10 @@ export default function LooplingSelector({ name, onSelect, onConfirm, loading })
           <div
             key={l.id}
             onClick={() => setSelectedId(l.id)}
-            className={`cursor-pointer p-2 rounded-lg border-2 transition-all ${
-              selectedId === l.id ? "border-primary" : "border-gray-200"
+            className={`cursor-pointer p-2 rounded-lg border-2 transition-all transform ${
+              selectedId === l.id
+                ? "border-[#3C9A5F] shadow-lg scale-105"
+                : "border-gray-200"
             }`}
           >
             <img
@@ -54,7 +56,7 @@ export default function LooplingSelector({ name, onSelect, onConfirm, loading })
       <button
         onClick={handleConfirm}
         disabled={loading}
-        className="mt-4 w-full bg-primary text-white py-3 rounded-lg hover:bg-[#2f7b4d] transition font-semibold"
+        className="mt-4 w-full bg-[#3C9A5F] text-white py-3 rounded-lg hover:bg-[#2f7b4d] transition font-semibold"
       >
         {loading ? "지급 중..." : "루플링 선택 완료"}
       </button>

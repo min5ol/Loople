@@ -26,7 +26,7 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**") // /api 경로 이하 요청에만 CORS 적용
                         .allowedOrigins("http://localhost:5173") // 허용할 프론트엔드 주소
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용 HTTP 메서드
+                        .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS") // 허용 HTTP 메서드
                         .allowedHeaders("*") // 모든 헤더 허용
                         .allowCredentials(true); // 쿠키/인증정보 포함 허용
             }

@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface AvatarItemRepository extends JpaRepository<AvatarItem, Long>
 {
-    List<AvatarItem> findByType(AvatarItemType type);
+    List<AvatarItem> findByTypeIn(List<AvatarItemType> types);
 }

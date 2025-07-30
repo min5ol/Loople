@@ -127,6 +127,11 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void assignAvatar(MyAvatar avatar)
+    {
+        this.myAvatar = avatar;
+    }
+
     /*
         작성일자: 2025-07-18
         작성자: 백진선

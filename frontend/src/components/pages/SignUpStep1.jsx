@@ -63,8 +63,14 @@ export default function SignUpStep1() {
   const handleNext = () => {
     const { email, password, passwordConfirm } = form;
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!email || !password || !passwordConfirm) {
       alert("모든 항목을 입력해주세요.");
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      alert("유효한 이메일 형식을 입력해주세요.");
       return;
     }
     if (!emailStatus.checked || !emailStatus.isValid) {
