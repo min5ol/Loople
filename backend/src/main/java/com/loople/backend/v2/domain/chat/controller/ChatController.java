@@ -1,8 +1,6 @@
 package com.loople.backend.v2.domain.chat.controller;
 
-import com.loople.backend.v2.domain.chat.dto.ChatRoomRequest;
-import com.loople.backend.v2.domain.chat.dto.ChatRoomResponse;
-import com.loople.backend.v2.domain.chat.dto.ChatTextRequest;
+import com.loople.backend.v2.domain.chat.dto.*;
 import com.loople.backend.v2.domain.chat.entity.ChatRoom;
 import com.loople.backend.v2.domain.chat.service.ChatService;
 import com.loople.backend.v2.global.api.OpenApiClient;
@@ -15,6 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v2/chat/completion")
@@ -43,11 +44,23 @@ public class ChatController {
                 });
     }
 
-    @GetMapping("/withAI/room")
+    @GetMapping("/buildRoom/withAI")
     public ChatRoomResponse getRoomNum(HttpServletRequest request){
         System.out.println("채팅방 생성");
         Long userId = getLoggedInUserId.getUserId(request);
         return chatService.buildRoomWithAI(userId);
+    }
+
+    @GetMapping("/category")
+    public List<ChatbotCategoryResponse> getMainCategory(@RequestParam String categoryType, @RequestParam(required=false) Long parentId){
+        System.out.println("categoryType = " + categoryType);
+        return chatService.getCategory(categoryType, parentId);
+    }
+
+    @GetMapping("/details")
+    public List<ChatbotCategoryDetailResponse> getDetails(@RequestParam Long parentId){
+        System.out.println("parentId = " + parentId);
+        return chatService.getDetail(parentId);
     }
 
 }

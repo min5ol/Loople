@@ -9,7 +9,13 @@ import SignUpStep1 from "../components/pages/SignUpStep1"; // 회원가입 1단�
 import SignUpStep2 from "../components/pages/SignUpStep2"; // 회원가입 2단계: 이름/닉네임/전화번호
 import SignUpStep3 from "../components/pages/SignUpStep3"; // 회원가입 3단계: 주소 + 프로필
 import Quiz from "../components/pages/Quiz";     // 오늘의 퀴즈 페이지
+<<<<<<< HEAD
 import LoopleHome from "../components/pages/LoopleHome";  //웹 홈 페이지
+=======
+import Onboarding from "../components/pages/Onboarding";   // 퀴즈 시작 전 온보딩
+import Information from "../components/pages/Information"; // 앱 기능 소개 슬라이드
+import LoopleHome from "../components/pages/LoopleHomes";  //웹 홈 페이지
+>>>>>>> 1f8840e9fc9738e7f068d58539651c77e925e5f6
 import OAuthCallback from "../components/pages/OAuthCallback";
 import SignUpComplete from "../components/pages/SignUpComplete";
 
