@@ -90,24 +90,146 @@ export default function LoopleHome() {
     })));
   };
 
+  const renderLink = (url, label) => {
+    return url ? `<a href = "${url}" target="_blank" rel="noopener noreferrer" class="text-[#202020] hover:text-green-900 hover:underline">[${label}]</a>` : '';
+  }
+
+  const method = (data) => {
+    return data ? `<br/><br/><strong>📋 배출방법</strong>
+    ${data}` : '';
+  }
+
+  const localInfo = (gov, type) => {
+    if (gov.wasteType === type) {
+      switch (type) {
+        case "GENERAL": type = "일반쓰레기"; break;
+        case "FOOD": type = "음식물쓰레기"; break;
+        case "RECYCLING": type = "재활용쓰레기"; break;
+        default: break;
+      }
+
+      return `
+      <div style="font-size: 0.9rem; line-height: 1.5; color: #202020;">
+        <div style="font-weight: bold; color: #2F855A; margin-bottom: 6px;">
+          🗂️ ${type} 수거 정보
+        </div>
+
+        ${gov.disposalTime ? `<div><strong>🕒 배출 시간:</strong> ${gov.disposalTime}</div>` : ``}
+        ${gov.disposalDays ? `<div><strong>📅 배출 요일:</strong> ${gov.disposalDays}</div>` : ``}
+        ${gov.disposalLocation ? `<div><strong>📍 배출 장소:</strong> ${gov.disposalLocation}</div>` : ``}
+        ${gov.disposalMethod ? `<div><strong>📋 배출 방법:</strong><br/>${gov.disposalMethod}</div>` : ``}
+      </div>
+      `;
+
+    } else {
+      return ``;
+    }
+  };
+
+
+  const getDetailMessages = (detail, parentId) => {
+    return detail.flatMap((item) => {
+      let prefix = "";
+      switch (item.infoType) {
+        case "배출 방법": prefix = "✅ 배출 방법"; break;
+        case "주의 사항": prefix = "⚠️ 주의 사항"; break;
+        case "FAQ": prefix = "💬 FAQ"; break;
+        case "지역별 URL": prefix = ""; break;
+        case "지역별 정보": prefix = ""; break;
+        default: prefix = "";
+      }
+
+      if (!item.localGovern) { return [{ type: "AI", text: `${prefix ? prefix : ""}${item.content}` }]; }
+
+      const basicMessage = `<br/><strong class="text-[#202020]">\n🚨 참고 부탁드립니다!\n정보가 변경될 수 있으니, 정확한 사항은 홈페이지에서 확인해 주세요.</strong>`;
+
+      return item.localGovern.map((gov) => {
+        const local = `${gov.sido}` + " " + `${gov.sigungu}`;
+        let data = `<strong>📍 ${local}의 수거 정보</strong>`;
+
+        if (gov.wasteType == "GENERAL" && parentId == 43) {
+          data += `
+          ${renderLink(gov.homepage, `${local} 홈페이지 바로가기`)}
+          ${renderLink(gov.allInfoUrl, "쓰레기 수거 정보 보기")}
+          ${renderLink(gov.generalUrl, "일반쓰레기 수거 정보 보기")}
+          ${method(gov.disposalMethod)}
+          `;
+
+          return { type: "AI", text: `${data}` + `${basicMessage}`, isHtml: true };
+
+        } else if (gov.wasteType == "FOOD" && parentId == 44) {
+          data += `
+          ${renderLink(gov.homepage, `${local} 홈페이지 바로가기`)}
+          ${renderLink(gov.allInfoUrl, "쓰레기 수거 정보 보기")}
+          ${renderLink(gov.foodUrl, "음식물쓰레기 수거 정보 보기")}
+          ${method(gov.disposalMethod)}
+          `;
+
+          return { type: "AI", text: `${data}` + `${basicMessage}`, isHtml: true };
+
+        } else if (gov.wasteType == "RECYCLING" && parentId == 45) {
+          data += `
+          ${renderLink(gov.homepage, `${local} 홈페이지 바로가기`)}
+          ${renderLink(gov.allInfoUrl, "쓰레기 수거 정보 보기")}
+          ${renderLink(gov.recyclingUrl, "재활용쓰레기 수거 정보 보기")}
+          ${method(gov.disposalMethod)}
+          `;
+
+          return { type: "AI", text: `${data} ${basicMessage}`, isHtml: true };
+
+        } else if (gov.wasteType == "GENERAL" && parentId == 46) {
+          data += `
+          ${renderLink(gov.homepage, `${local} 홈페이지 바로가기`)}
+          ${renderLink(gov.allInfoUrl, "쓰레기 수거 정보 보기")}
+          ${renderLink(gov.bulkyUrl, "대형폐기물 수거 정보 보기")}
+          ${method(gov.disposalMethod)}
+          `;
+
+          return { type: "AI", text: `${data} ${basicMessage}`, isHtml: true };
+        } else if (parentId == 47) {
+          return {
+            type: "AI",
+            text: `
+              <strong>${local} 수거 정보</strong>
+              ${localInfo(gov, "GENERAL")}
+              ${localInfo(gov, "FOOD")}
+              ${localInfo(gov, "RECYCLING")}
+
+              ℹ️ 자세한 정보는 홈페이지를 참고해 주세요 !
+            `,
+            isHtml: true
+          }
+        } else {
+          data += `
+          ${renderLink(gov.homepage, `${local} 홈페이지 바로가기`)}
+          ${renderLink(gov.allInfoUrl, "쓰레기 수거 정보 보기")}
+          ${renderLink(gov.generalUrl, "일반쓰레기 수거 정보 보기")}
+          ${renderLink(gov.foodUrl, "음식물쓰레기 수거 정보 보기")}
+          ${renderLink(gov.disposalUrl, "재활용 수거 정보 보기")}
+          ${renderLink(gov.bulkyUrl, "대형폐기물 수거 정보 보기")}
+          ${method(gov.disposalMethod)}
+          `;
+
+          return { type: "AI", text: `${data} ${basicMessage}`, isHtml: true };
+        }
+
+      });
+
+    })
+  }
+
   const getDetail = async (parentId) => {
+    console.log("getDetail 호출, parentId: ", parentId);
+
     setCategory([]);
     if (parentId === 17) {
       setIsInputDisabled(false);
     }
 
     const detail = await getDetails(parentId);
+    console.log("getDetails 응답, detail: ", detail);
 
-    const detailMessages = detail.map((item) => {
-      let prefix = "";
-      switch (item.infoType) {
-        case "배출 방법": prefix = "✅ 배출 방법"; break;
-        case "주의 사항": prefix = "⚠️ 주의 사항"; break;
-        case "FAQ": prefix = "💬 FAQ"; break;
-        default: prefix = "";
-      }
-      return { type: "AI", text: prefix + item.content };
-    });
+    const detailMessages = getDetailMessages(detail, parentId);
 
     setChatHistory(prev => [...prev, ...detailMessages]);
   };
@@ -243,9 +365,39 @@ export default function LoopleHome() {
                     }}
                     className="px-4 py-2 bg-[#3C9A5F] text-white rounded-lg hover:bg-[#264D3D] text-sm cursor-pointer border-none"
                   >
+
+                    <span className="inline-block bg-[#CCE7B8] text-[#202020] px-3 py-2 rounded-xl max-w-[75%]">
+                      {msg.text}
+                    </span>
+                  </div>
+                );
+              } else {
+
+                return (
+                  <div key={idx} className="text-left">
+                    <span className="inline-block bg-[#F0F4EB] text-[#202020] px-3 py-2 rounded-xl w-[75%] whitespace-pre-line">
+                      {msg.isHtml ? (
+                        <div dangerouslySetInnerHTML={{ __html: msg.text }} />
+                      ) : (
+                        msg.text
+                      )}
+                    </span>
+                  </div>
+                );
+
+              }
+            })}
+
+            {waitingResponse && (
+              <div className="text-left">
+                <span className="inline-block bg-[#CCE7B8] text-[#202020] px-3 py-2 rounded-xl max-w-[75%] animate-pulse">
+                  ...
+                </span>
+
                     {item.name}
                   </button>
                 ))}
+
               </div>
 
               {/* 처음으로 */}
