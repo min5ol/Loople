@@ -94,23 +94,23 @@ public class User {
     private LocalDateTime deletedAt; // 탈퇴일시
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "village_id", referencedColumnName = "no", nullable = true)
+    @JoinColumn(name = "village_no", referencedColumnName = "no", nullable = true)
     private MyVillage village;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", referencedColumnName = "no", nullable = true)
+    @JoinColumn(name = "room_no", referencedColumnName = "no", nullable = true)
     private MyRoom room;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "badge_id", referencedColumnName = "no", nullable = true)
+    @JoinColumn(name = "badge_no", referencedColumnName = "no", nullable = true)
     private MyBadge badge;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "avatar_id", referencedColumnName = "no", nullable = true)
+    @JoinColumn(name = "avatar_no", referencedColumnName = "no", nullable = true)
     private MyAvatar myAvatar;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "loopling_id", referencedColumnName = "no", nullable = true)
+    @JoinColumn(name = "loopling_no", referencedColumnName = "no", nullable = true)
     private MyLoopling myLoopling;
 
     @PrePersist
