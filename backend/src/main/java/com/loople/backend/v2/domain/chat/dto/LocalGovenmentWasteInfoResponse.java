@@ -6,6 +6,9 @@ import lombok.Data;
 
 @Data
 public class LocalGovenmentWasteInfoResponse {
+    private String sido;
+    private String sigungu;
+
     private String homepage;
     private String allInfoUrl;
     private String generalUrl;
@@ -24,14 +27,28 @@ public class LocalGovenmentWasteInfoResponse {
 
     private String imgUrl;
 
-    @Builder
-    public LocalGovenmentWasteInfoResponse(String homepage, String allInfoUrl, String generalUrl, String foodUrl, String recyclingUrl, String bulkyUrl, String disposalMethod) {
+    @Builder(builderMethodName = "builderForUrl")
+    public LocalGovenmentWasteInfoResponse(String sido, String sigungu, String homepage, String allInfoUrl, String generalUrl, String foodUrl, String recyclingUrl, String bulkyUrl, String wasteType, String disposalMethod) {
+        this.sido = sido;
+        this.sigungu = sigungu;
         this.homepage = homepage;
         this.allInfoUrl = allInfoUrl;
         this.generalUrl = generalUrl;
         this.foodUrl = foodUrl;
         this.recyclingUrl = recyclingUrl;
         this.bulkyUrl = bulkyUrl;
+        this.wasteType = wasteType;
+        this.disposalMethod = disposalMethod;
+    }
+
+    @Builder(builderMethodName = "builderForInfo")
+    public LocalGovenmentWasteInfoResponse(String sido, String sigungu, String wasteType, String disposalTime, String disposalDays, String disposalLocation, String disposalMethod) {
+        this.sido = sido;
+        this.sigungu = sigungu;
+        this.wasteType = wasteType;
+        this.disposalTime = disposalTime;
+        this.disposalDays = disposalDays;
+        this.disposalLocation = disposalLocation;
         this.disposalMethod = disposalMethod;
     }
 }
