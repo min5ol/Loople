@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -97,7 +98,7 @@ public class ChatServiceImpl implements ChatService{
         List<LocalGovernmentWasteInfo> infos = getLocalGovernmentWasteInfos(userId);
 
         List<LocalGovenmentWasteInfoResponse> localGovernsInfo = infos.stream()
-                .map(info -> LocalGovenmentWasteInfoResponse.builderForInfo()
+                .map(info -> LocalGovenmentWasteInfoResponse.builder()
                         .sido(info.getSido())
                         .sigungu(info.getSigungu())
                         .homepage(info.getHomepage())
@@ -117,7 +118,7 @@ public class ChatServiceImpl implements ChatService{
         List<LocalGovernmentWasteInfo> infos = getLocalGovernmentWasteInfos(userId);
 
         List<LocalGovenmentWasteInfoResponse> localGovernsUrl = infos.stream()
-                .map(info -> LocalGovenmentWasteInfoResponse.builderForUrl()
+                .map(info -> LocalGovenmentWasteInfoResponse.builder()
                         .sido(info.getSido())
                         .sigungu(info.getSigungu())
                         .homepage(info.getHomepage())
@@ -131,7 +132,6 @@ public class ChatServiceImpl implements ChatService{
                         .build()
                 )
                 .collect(Collectors.toList());
-
 
         return List.of(new ChatbotCategoryDetailResponse("지역별 URL", null, localGovernsUrl));
     }

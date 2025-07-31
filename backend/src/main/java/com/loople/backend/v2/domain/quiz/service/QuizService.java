@@ -6,6 +6,7 @@
 */
 package com.loople.backend.v2.domain.quiz.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.loople.backend.v2.domain.quiz.dto.MultipleOptionRequestDto;
 import com.loople.backend.v2.domain.quiz.dto.ProblemResponseDto;
 import com.loople.backend.v2.domain.quiz.dto.UserAnswerRequestDto;
@@ -20,14 +21,8 @@ public interface QuizService {
         @param response: OpenAPI에서 받은 문제 생성 결과 문자열
         @return 저장된 문제 정보를 담은 ProblemResponseDto
      */
-    ProblemResponseDto saveProblem(String response);
+    void saveProblem(String response);
 
-    /**
-     * 문제와 연관된 선택지 목록을 데이터베이스에 저장
-     * @param options: 문제의 선택지 리스트
-     * @param problem: 문제 엔티티
-     */
-    void saveOption(List<MultipleOptionRequestDto> options, Problem problem);
 
     /**
      * 사용자가 제출한 답안을 저장하고 정답 여부, 점수 등의 결과 반환
@@ -45,4 +40,6 @@ public interface QuizService {
     boolean hasSolvedTodayProblem(Long userId);
 
     List<Integer> fetchAttendanceStatus(Long userId);
+
+    ProblemResponseDto getProblem(Long userId);
 }

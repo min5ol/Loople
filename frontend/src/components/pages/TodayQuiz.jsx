@@ -16,7 +16,7 @@ import instance from '../../apis/instance.js';  //axios 인스턴스 (API 호출
 export const getProblem = async () => {
   //비동기 API 호출
   //const res = await instance.get('/quiz/buildAndShow/test');
-  const res = await instance.post('/quiz/buildAndShow');
+  const res = await instance.post('/quiz/getProblem');
   return res.data;  //문제 데이터 반환
 };
 

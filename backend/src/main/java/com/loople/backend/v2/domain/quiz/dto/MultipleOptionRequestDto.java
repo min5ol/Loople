@@ -7,9 +7,11 @@ package com.loople.backend.v2.domain.quiz.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class MultipleOptionRequestDto {
     private String content; //보기 내용("서울", "부산", ...)
     private int optionOrder;    //보기 순서(A=1, B=2, ...)

@@ -31,4 +31,6 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
     Long countAttendanceByUserIdAndSolvedAtBetween(Long userId, LocalDate start, LocalDate end);
 
     List<UserAnswer> findByUserIdAndSolvedAtBetween(Long userId, LocalDate start, LocalDate end);
+
+    List<Long> findProblemIdByUserId(Long userId);
 }

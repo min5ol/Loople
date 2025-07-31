@@ -8,11 +8,13 @@ package com.loople.backend.v2.domain.quiz.dto;
 import com.loople.backend.v2.domain.quiz.entity.ProblemType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProblemRequestDto {
     private String question;    //퀴즈 문제
     private ProblemType type;   //퀴즈 유형(OX/MULTIPLE)
