@@ -77,6 +77,7 @@ public class ChatServiceImpl implements ChatService{
 
     @Override
     public List<ChatbotCategoryDetailResponse> getDetail(Long parentId, Long userId) {
+        System.out.println("userId = " + userId);
         if(parentId>=43L && parentId<=46L) {
             return getLocalInfoUrl(userId);
         }
@@ -99,6 +100,7 @@ public class ChatServiceImpl implements ChatService{
                 .map(info -> LocalGovenmentWasteInfoResponse.builderForInfo()
                         .sido(info.getSido())
                         .sigungu(info.getSigungu())
+                        .homepage(info.getHomepage())
                         .wasteType(info.getWasteType())
                         .disposalTime(info.getDisposalTime())
                         .disposalDays(info.getDisposalDays())

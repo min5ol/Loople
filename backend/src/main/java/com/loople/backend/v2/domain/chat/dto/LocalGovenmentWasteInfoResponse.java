@@ -42,13 +42,15 @@ public class LocalGovenmentWasteInfoResponse {
     }
 
     @Builder(builderMethodName = "builderForInfo")
-    public LocalGovenmentWasteInfoResponse(String sido, String sigungu, String wasteType, String disposalTime, String disposalDays, String disposalLocation, String disposalMethod) {
+    public LocalGovenmentWasteInfoResponse(String sido, String sigungu, String homepage, String wasteType, String disposalTime, String disposalDays, String disposalLocation, String disposalMethod) {
         this.sido = sido;
         this.sigungu = sigungu;
+        this.homepage = homepage;
         this.wasteType = wasteType;
         this.disposalTime = disposalTime;
         this.disposalDays = disposalDays;
         this.disposalLocation = disposalLocation;
         this.disposalMethod = disposalMethod;
     }
+
 }
