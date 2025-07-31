@@ -95,15 +95,12 @@ export default function LoopleHome() {
   }
 
   const method = (data) => {
-    return data ? `<br/><br/><strong>📋 배출방법</strong>
+    return data ? `<br/><br/><strong>📋 배출 방법</strong>
     ${data}` : null;
   }
 
   const renderItem = (icon, label, value) => {
-    return value ? `<div>
-      <span class="font-medium">${icon} ${label}:</span>
-      <span>${value}</span>
-    </div>` : null;
+    return value ? `<span class="mt-4 mb-4">&nbsp;${icon} ${label}: ${value}</span><br/>` : null;
   }
 
   const localInfo = (gov, type) => {
@@ -174,7 +171,7 @@ export default function LoopleHome() {
               localInfo(gov, "GENERAL"),
               localInfo(gov, "FOOD"),
               localInfo(gov, "RECYCLING")
-            ].filter(Boolean).join('<br/>');
+            ].filter(Boolean).join('');
 
             return {
               type: "AI",

@@ -27,8 +27,9 @@ public class LocalGovenmentWasteInfoResponse {
 
     private String imgUrl;
 
-    @Builder(builderMethodName = "builderForUrl")
-    public LocalGovenmentWasteInfoResponse(String sido, String sigungu, String homepage, String allInfoUrl, String generalUrl, String foodUrl, String recyclingUrl, String bulkyUrl, String wasteType, String disposalMethod) {
+
+    @Builder
+    public LocalGovenmentWasteInfoResponse(String sido, String sigungu, String homepage, String allInfoUrl, String generalUrl, String foodUrl, String recyclingUrl, String bulkyUrl, String wasteType, String disposalTime, String disposalDays, String disposalLocation, String disposalMethod) {
         this.sido = sido;
         this.sigungu = sigungu;
         this.homepage = homepage;
@@ -38,19 +39,9 @@ public class LocalGovenmentWasteInfoResponse {
         this.recyclingUrl = recyclingUrl;
         this.bulkyUrl = bulkyUrl;
         this.wasteType = wasteType;
-        this.disposalMethod = disposalMethod;
-    }
-
-    @Builder(builderMethodName = "builderForInfo")
-    public LocalGovenmentWasteInfoResponse(String sido, String sigungu, String homepage, String wasteType, String disposalTime, String disposalDays, String disposalLocation, String disposalMethod) {
-        this.sido = sido;
-        this.sigungu = sigungu;
-        this.homepage = homepage;
-        this.wasteType = wasteType;
         this.disposalTime = disposalTime;
         this.disposalDays = disposalDays;
         this.disposalLocation = disposalLocation;
         this.disposalMethod = disposalMethod;
     }
-
 }

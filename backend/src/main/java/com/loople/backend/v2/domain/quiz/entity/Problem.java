@@ -31,8 +31,8 @@ public class Problem {
     @Column(name="answer")
     private String answer;  //문제 정답 정보
 
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private LocalDateTime createdAt;    //생성 시간: DB에서 자동으로 설정됨
+    @Column(name="created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Builder
     public Problem(String question, ProblemType type, String answer) {
