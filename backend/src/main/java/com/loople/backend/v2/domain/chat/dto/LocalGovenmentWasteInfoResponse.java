@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class LocalGovenmentWasteInfoResponse {
     private String sido;
     private String sigungu;
@@ -26,22 +27,4 @@ public class LocalGovenmentWasteInfoResponse {
     private String notes;
 
     private String imgUrl;
-
-
-    @Builder
-    public LocalGovenmentWasteInfoResponse(String sido, String sigungu, String homepage, String allInfoUrl, String generalUrl, String foodUrl, String recyclingUrl, String bulkyUrl, String wasteType, String disposalTime, String disposalDays, String disposalLocation, String disposalMethod) {
-        this.sido = sido;
-        this.sigungu = sigungu;
-        this.homepage = homepage;
-        this.allInfoUrl = allInfoUrl;
-        this.generalUrl = generalUrl;
-        this.foodUrl = foodUrl;
-        this.recyclingUrl = recyclingUrl;
-        this.bulkyUrl = bulkyUrl;
-        this.wasteType = wasteType;
-        this.disposalTime = disposalTime;
-        this.disposalDays = disposalDays;
-        this.disposalLocation = disposalLocation;
-        this.disposalMethod = disposalMethod;
-    }
 }

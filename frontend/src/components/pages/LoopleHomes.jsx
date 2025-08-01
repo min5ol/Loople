@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
 
+//#81C784, #749E89, #3C9A5F, #264D3D, #F6F6F6, #FEF7E2, #202020
+
 export const buildRoom = async () => {
   const res = await instance.get("/chat/completion/buildRoom/withAI");
   return res.data;
@@ -253,6 +255,7 @@ export default function LoopleHome() {
         <button onClick={() => navigate("/myloopling")} className="text-sm text-[#264D3D] font-medium hover:underline">마이루플링</button>
         <button onClick={() => navigate("/myvillage")} className="text-sm text-[#264D3D] font-medium hover:underline">마이빌리지</button>
         <button onClick={() => navigate("/quiz")} className="text-sm text-[#264D3D] font-medium hover:underline">퀴즈 풀기</button>
+        <button onClick={() => navigate("/rule")} className="text-sm text-[#264D3D] font-medium hover:underline">지역별 규칙 조회</button>
       </div>
 
       {/* 💬 AI 챗봇 플로팅 버튼 */}
