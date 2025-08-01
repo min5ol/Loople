@@ -9,9 +9,10 @@ import SignUpStep1 from "../components/pages/SignUpStep1"; // 회원가입 1단�
 import SignUpStep2 from "../components/pages/SignUpStep2"; // 회원가입 2단계: 이름/닉네임/전화번호
 import SignUpStep3 from "../components/pages/SignUpStep3"; // 회원가입 3단계: 주소 + 프로필
 import Quiz from "../components/pages/Quiz";     // 오늘의 퀴즈 페이지
-import LoopleHome from "../components/pages/LoopleHomes";  //웹 홈 페이지
+import LoopleHomes from "../components/pages/LoopleHomes";  //웹 홈 페이지
 import OAuthCallback from "../components/pages/OAuthCallback";
 import SignUpComplete from "../components/pages/SignUpComplete";
+import RegionalRules from "../components/pages/RegionalRules";
 
 const routes = [
   { path: "/", element: <Home /> },               // 로그인 (루트)
@@ -19,9 +20,10 @@ const routes = [
   { path: "/signup/step2", element: <SignUpStep2 /> },  // 회원가입 2단계
   { path: "/signup/step3", element: <SignUpStep3 /> },  // 회원가입 3단계
   { path: "/quiz", element: <Quiz /> },            // 퀴즈 메인
-  { path: "/looplehome", element: <LoopleHome />},
+  { path: "/looplehome", element: <LoopleHomes />},
   { path: "/oauth/callback/:provider", element: <OAuthCallback />},
-  { path: "/signup/complete", element: <SignUpComplete /> }
+  { path: "/signup/complete", element: <SignUpComplete /> },
+  { path: "/rule", element: <RegionalRules /> }
 ];
 
 export default routes;

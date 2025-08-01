@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Table(name="quiz_user_answer")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Data
 public class UserAnswer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
