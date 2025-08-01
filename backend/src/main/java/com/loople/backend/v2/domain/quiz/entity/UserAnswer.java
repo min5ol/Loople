@@ -6,10 +6,7 @@
 package com.loople.backend.v2.domain.quiz.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,6 +15,7 @@ import java.time.LocalDateTime;
 @Table(name="quiz_user_answer")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Data
 public class UserAnswer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
