@@ -251,16 +251,19 @@ public class QuizServiceImpl implements QuizService {
         long count = problemRepository.count();
         Random random = new Random();
 
-
-        if(hasSolvedTodayProblem(userId)){
+        if (hasSolvedTodayProblem(userId)) {
             return new ProblemResponseDto(null, null, null, null, true);
-        } else{
+        } else {
             //전체 말고 안 푼 문제 리스트(푼 문제? 안 푼 문제?)
             List<Problem> allProblem = problemRepository.findAll();
-            List<Long> solvedProblem = userAnswerRepository.findProblemIdByUserId(userId);
+            List<UserAnswer> solvedProblem = userAnswerRepository.findByUserId(userId);
+
+            List<Long> solvedProblemIds = solvedProblem.stream()
+                    .map(userAnswer -> userAnswer.getProblemId())
+                    .collect(Collectors.toList());
 
             List<Problem> unsolvedProblems = allProblem.stream()
-                    .filter(problem -> !solvedProblem.contains(problem.getNo()))
+                    .filter(problem -> !solvedProblemIds.contains(problem.getNo()))
                     .collect(Collectors.toList());
 
             if (unsolvedProblems.isEmpty()) {
@@ -271,22 +274,6 @@ public class QuizServiceImpl implements QuizService {
             Problem unsolved = unsolvedProblems.get(randomUnsolvedProblem);
             List<MultipleOptionResponseDto> multipleOptionResponseDtos = multipleOptionRepository.findByProblem(unsolved);
             return new ProblemResponseDto(unsolved.getNo(), unsolved.getQuestion(), unsolved.getType(), multipleOptionResponseDtos, false);
-        }
-    }
-
-    //현재 옵션 라벨(A~D)을 숫자(1~4)로 변환
-    private int convertLabelToNumber(String label) {
-        switch (label.toUpperCase()) {
-            case "A":
-                return 1;
-            case "B":
-                return 2;
-            case "C":
-                return 3;
-            case "D":
-                return 4;
-            default:
-                throw new IllegalArgumentException("Invalid label: " + label);
         }
     }
 
