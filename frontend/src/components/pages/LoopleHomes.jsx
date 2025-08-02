@@ -143,14 +143,14 @@ export default function LoopleHome() {
 
       if (!item.localGovern) { return [{ type: "AI", text: `${prefix ? prefix : ""}${item.content}` }]; }
 
-      const basicMessage = `<br/><strong class="text-[#202020]">\n🚨 참고 부탁드립니다!\n정보가 변경될 수 있으니, 정확한 사항은 홈페이지에서 확인해 주세요.</strong>`;
+      const basicMessage = `<br/><strong class="text-[#202020]">\n🚨 참고 부탁드립니다!</strong>\n정보가 변경될 수 있으니, 정확한 사항은 홈페이지에서 확인해 주세요.`;
 
       return item.localGovern
         .filter((gov) => {
-          if (parentId == 43) return gov.wasteType === "GENERAL";
-          if (parentId == 44) return gov.wasteType === "FOOD";
-          if (parentId == 45) return gov.wasteType === "RECYCLING";
-          if (parentId == 46) return gov.wasteType === "GENERAL";
+          if (parentId == 43) return gov.wasteType === "GENERAL"  || gov.wasteType === null;
+          if (parentId == 44) return gov.wasteType === "FOOD"  || gov.wasteType === null;
+          if (parentId == 45) return gov.wasteType === "RECYCLING"  || gov.wasteType === null;
+          if (parentId == 46) return gov.wasteType === "GENERAL"  || gov.wasteType === null;
           return true;
         })
         .map((gov) => {
