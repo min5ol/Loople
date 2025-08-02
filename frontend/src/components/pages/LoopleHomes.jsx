@@ -97,8 +97,7 @@ export default function LoopleHome() {
   }
 
   const method = (data) => {
-    return data ? `<br/><br/><strong>📋 배출 방법</strong>
-    ${data}` : null;
+    return data ? `<br/><br/><strong>📋 배출 방법</strong>${data}` : null;
   }
 
   const renderItem = (icon, label, value) => {

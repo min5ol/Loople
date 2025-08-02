@@ -55,15 +55,14 @@ public class QuizController {
     private final GetLoggedInUserId getLoggedInUserId;
 
 
-    @Scheduled(cron = "0 0 0 1 * *") // 매월 1일 00:00:00  //초 분 시 일 월 요일
-//    @PostMapping("/getProblem")
+//    @Scheduled(cron = "0 0 0 1 * *") // 매월 1일 00:00:00  //초 분 시 일 월 요일
+    @PostMapping("/temp")
     public void generateMonthlyProblem(){
-
+        System.out.println("임시문제생성");
         String prompt = buildPrompt();
 
         Mono<String> stringMono = openApiClient.requestChatCompletion(prompt);
         stringMono.subscribe(response -> {
-//            System.out.println("Controllerresponse = " + response);
             quizService.saveProblem(response);
         });
     }
