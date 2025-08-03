@@ -180,6 +180,7 @@ public class QuizServiceImpl implements QuizService {
 
         //주간 출석 체크 - 일요일인 경우 한 번에 체크
         if (LocalDate.now().getDayOfWeek() == DayOfWeek.SUNDAY) {
+            System.out.println("일요일입니다");
             if (hasCheckedAttendanceForAWeek(userId)) {
                 isWeekly = true;
             }
@@ -287,21 +288,25 @@ public class QuizServiceImpl implements QuizService {
     //이번 주에 사용자가 매일 출석했는지 확인
     private boolean hasCheckedAttendanceForAWeek(Long userId) {
         LocalDate today = LocalDate.now();  //2025-07-18
+        System.out.println("today = " + today);
         LocalDate weekAgo = today.minusDays(6); //오늘 포함 7일 -> 2025-07-12
+        System.out.println("weekAgo = " + weekAgo);
 
         Long counted = userAnswerRepository.countAttendanceByUserIdAndSolvedAtBetween(userId, weekAgo, today);
+        System.out.println("counted = " + counted);
 
-        return counted == 7;
+        return counted == 6;    //일요일 당일 문제 풀이 제외하고
     }
 
     //이번 달에 사용자가 매일 출석했는지 확인
     private boolean hasCheckedAttendanceForAMonth(Long userId) {
         DateRange thisMonthInfo = getThisMonthInfo();
         int totalDayOfThisMonth = thisMonthInfo.getEnd().getDayOfMonth();
+        System.out.println("totalDayOfThisMonth = " + totalDayOfThisMonth);
 
         Long counted = userAnswerRepository.countAttendanceByUserIdAndSolvedAtBetween(userId, thisMonthInfo.getStart(), thisMonthInfo.getEnd());
 
-        return totalDayOfThisMonth == counted;
+        return totalDayOfThisMonth == (counted+1);
     }
 
     //사용자 점수 업데이트

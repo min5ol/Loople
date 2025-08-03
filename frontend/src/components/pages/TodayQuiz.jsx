@@ -78,7 +78,7 @@ export default function TodayQuiz() {
 
   //컴포넌트가 처음 렌더링 될 때 문제 받아오기 실행
   useEffect(() => {
-    if(hasFetched.current) return; //이미 호출했으면 종료
+    if (hasFetched.current) return; //이미 호출했으면 종료
     hasFetched.current = true;  //호출 플래그 설정
     handleSolve();
   }, []);
@@ -93,9 +93,9 @@ export default function TodayQuiz() {
       )}
 
       {loading && (
-          <div className="text-center text-gray-500 text-sm py-6">
-            오늘의 퀴즈를 불러오는 중입니다
-          </div>
+        <div className="text-center text-gray-500 text-sm py-6">
+          오늘의 퀴즈를 불러오는 중입니다
+        </div>
       )}
 
       {/* 문제 보여주기 (아직 풀지 않았을 때) */}
@@ -114,19 +114,19 @@ export default function TodayQuiz() {
                   X
                 </button>
               </>
-            ) : 
-             /* 객관식 문제일 때, 옵션이 존재하는 경우 */
-            problem.type === "MULTIPLE" ? problem.options && problem.options.length > 0 ? (
-              <div className="flex flex-col gap-3 justify-center items-center">
-                {problem.options.map((opt, idx) => (
-                  <button key={idx} onClick={() => handleSubmit(String.fromCharCode(65 + idx))} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition cursor-pointer w-full max-w-md text-left">
-                    {String.fromCharCode(65 + idx)}. {opt.content}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <span>문제 오류</span>
-            ) : null}
+            ) :
+              /* 객관식 문제일 때, 옵션이 존재하는 경우 */
+              problem.type === "MULTIPLE" ? problem.options && problem.options.length > 0 ? (
+                <div className="flex flex-col gap-3 justify-center items-center">
+                  {problem.options.map((opt, idx) => (
+                    <button key={idx} onClick={() => handleSubmit(String.fromCharCode(65 + idx))} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition cursor-pointer w-full max-w-md text-left">
+                      {String.fromCharCode(65 + idx)}. {opt.content}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <span>문제 오류</span>
+              ) : null}
           </div>
         </div>
       )}
@@ -137,19 +137,24 @@ export default function TodayQuiz() {
           <div className="text-center p-4 rounded border border-green-400 bg-green-100 text-green-800">
             <p>
               {(() => {
-                // 제출 결과에 따른 안내 문구 분기
-                if (submitResult.isCorrect && submitResult.isWeekly && submitResult.isMonthly) {
-                  return `정답! 주간 출석 보상 및 월간 출석 보상과 함께 +${submitResult.points}점 획득!`;
-                } else if (submitResult.isCorrect && submitResult.isWeekly) {
-                  return `정답! 주간 출석 보상과 함께 +${submitResult.points}점 획득!`;
-                } else if (submitResult.isCorrect && submitResult.isMonthly) {
-                  return `정답! 월간 출석 보상과 함께 +${submitResult.points}점 획득!`;
-                } else if (submitResult.isCorrect) {
-                  return `정답! +${submitResult.points}점 획득!`;
+                const { isCorrect, isWeekly, isMonthly, points } = submitResult;
+                
+                const bonusText = [
+                  isWeekly ? '주간 출석 보상' : '',
+                  isMonthly ? '월간 출석 보상' : ''
+                ].filter(Boolean).join(' 및 ');
+
+                if (isCorrect) {
+                  return bonusText
+                    ? `정답! ${bonusText}과 함께 +${points}점 획득!`
+                    : `정답! +${points}점 획득!`;
                 } else {
-                  return `틀렸습니다. 출석 점수만 +${submitResult.points} 되었습니다.`;
+                  return bonusText
+                    ? `틀렸습니다. ${bonusText}과 함께 기본 출석 점수로 +${points}점이 지급되었습니다.`
+                    : `틀렸습니다. 기본 출석 점수로 +${points}점이 지급되었습니다.`;
                 }
               })()}
+
             </p>
           </div>
         </div>
