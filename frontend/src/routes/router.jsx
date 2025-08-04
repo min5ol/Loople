@@ -13,6 +13,8 @@ import LoopleHomes from "../components/pages/LoopleHomes";  //웹 홈 페이지
 import OAuthCallback from "../components/pages/OAuthCallback";
 import SignUpComplete from "../components/pages/SignUpComplete";
 import RegionalRules from "../components/pages/RegionalRules";
+import NewPost from "../components/pages/NewPost";
+import CommunityPost from "../components/pages/CommunityPost";
 
 const routes = [
   { path: "/", element: <Home /> },               // 로그인 (루트)
@@ -23,7 +25,9 @@ const routes = [
   { path: "/looplehome", element: <LoopleHomes />},
   { path: "/oauth/callback/:provider", element: <OAuthCallback />},
   { path: "/signup/complete", element: <SignUpComplete /> },
-  { path: "/rule", element: <RegionalRules /> }
+  { path: "/rule", element: <RegionalRules /> },
+  { path: "/newPost", element: <NewPost/> },
+  { path: "/communityPost", element: <CommunityPost/> },
 ];
 
 export default routes;
