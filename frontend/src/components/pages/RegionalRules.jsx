@@ -3,25 +3,10 @@ import instance from "../../apis/instance";
 import { useNavigate } from "react-router-dom";
 
 // API functions
-export const getSido = async () => {
-  const res = await instance.get("/regionalRules/sido");
+export const getRegion = async (data) => {
+  const res = await instance.post("/regionalRules/region", data);
   return res.data;
-};
-
-export const getSigungu = async (sido) => {
-  const res = await instance.get("/regionalRules/sigungu", { params: { sido } });
-  return res.data;
-};
-
-export const getEupmyun = async (sigungu) => {
-  const res = await instance.get("/regionalRules/eupmyun", { params: { sigungu } });
-  return res.data;
-};
-
-export const getRi = async (eupmyun) => {
-  const res = await instance.get("/regionalRules/ri", { params: { eupmyun } });
-  return res.data;
-};
+}
 
 export const getRuleByAddress = async (selected) => {
   const res = await instance.post("/regionalRules/getRule", selected);
@@ -49,30 +34,36 @@ export default function RegionalRules() {
 
 
   useEffect(() => {
-    const fetchSido = async () => {
-      const sido = await getSido();
+    const fetchRegions = async () => {
+      const sido = await getRegion({});
       setSidoList(sido);
     };
-    fetchSido();
+    fetchRegions();
   }, []);
 
-  const fetchSigungu = async (sido) => {
-    const sigungu = await getSigungu(sido);
-    const filtered = sigungu.filter((item) => item && item.trim() !== "");
-    setSigunguList(filtered.length > 0 ? filtered : [" "]);
+  const handleRegionChange = async (level, value) => {
+    let updatedAddr = { ...selectedAddr, [level]: value };
+
+    // 하위 레벨 초기화
+    if (level === "sido") {
+      updatedAddr = { sido: value, sigungu: "", eupmyun: "", ri: "" };
+      setSigunguList(await getRegion({ sido: value }));
+      setEupmyunList([]);
+      setRiList([]);
+    } else if (level === "sigungu") {
+      updatedAddr = { ...updatedAddr, eupmyun: "", ri: "" };
+      setEupmyunList(await getRegion({ sido: updatedAddr.sido, sigungu: value }));
+      setRiList([]);
+    } else if (level === "eupmyun") {
+      updatedAddr = { ...updatedAddr, ri: "" };
+      setRiList(await getRegion({ sido: updatedAddr.sido, sigungu: updatedAddr.sigungu, eupmyun: value }));
+    }
+
+    setSelectedAddr(updatedAddr);
+    setIsResult(null);
+    setWasteInfo([]);
   };
 
-  const fetchEupmyun = async (sigungu) => {
-    const eupmyun = await getEupmyun(sigungu);
-    const filtered = eupmyun.filter((item) => item && item.trim() !== "");
-    setEupmyunList(filtered.length > 0 ? filtered : [" "]);
-  };
-
-  const fetchRi = async (eupmyun) => {
-    const ri = await getRi(eupmyun);
-    const filtered = ri.filter((item) => item && item.trim() !== "");
-    setRiList(filtered.length > 0 ? filtered : [" "]);
-  };
 
   const fetchRuleByAddress = async () => {
     const rules = await getRuleByAddress(selectedAddr);
@@ -132,6 +123,14 @@ export default function RegionalRules() {
     );
   };
 
+  const dropdownConfig = [
+    { label: "시도", level: "sido", options: sidoList },
+    { label: "시군구", level: "sigungu", options: sigunguList },
+    { label: "읍면", level: "eupmyun", options: eupmyunList },
+    { label: "리", level: "ri", options: riList }
+  ];
+
+
   return (
     <div className="mb-10 mt-10">
       <button onClick={() => navigate("/looplehome")} className="text-sm text-[#264D3D] font-medium hover:underline">
@@ -139,59 +138,15 @@ export default function RegionalRules() {
       </button>
 
       <div className="flex justify-center flex-wrap gap-4">
-        {/* 시도 */}
-        <CustomDropdown
-          label="시도"
-          options={sidoList}
-          selected={selectedAddr.sido}
-          onSelect={(sido) => {
-            setSelectedAddr({ sido, sigungu: "", eupmyun: "", ri: "" });
-            fetchSigungu(sido);
-            setWasteInfo([]);
-            setSigunguList([]);
-            setEupmyunList([]);
-            setRiList([]);
-            setIsResult(null);
-          }}
-        />
-
-        {/* 시군구 */}
-        <CustomDropdown
-          label="시군구"
-          options={sigunguList}
-          selected={selectedAddr.sigungu}
-          onSelect={(sigungu) => {
-            setSelectedAddr((prev) => ({ ...prev, sigungu, eupmyun: "", ri: "" }));
-            fetchEupmyun(sigungu);
-            setEupmyunList([]);
-            setRiList([]);
-            setIsResult(null);
-          }}
-        />
-
-        {/* 읍면 */}
-        <CustomDropdown
-          label="읍면"
-          options={eupmyunList}
-          selected={selectedAddr.eupmyun}
-          onSelect={(eupmyun) => {
-            setSelectedAddr((prev) => ({ ...prev, eupmyun, ri: "" }));
-            fetchRi(eupmyun);
-            setRiList([]);
-            setIsResult(null);
-          }}
-        />
-
-        {/* 리 */}
-        <CustomDropdown
-          label="리"
-          options={riList}
-          selected={selectedAddr.ri}
-          onSelect={(ri) => {
-            setSelectedAddr((prev) => ({ ...prev, ri }));
-            setIsResult(null);
-          }}
-        />
+        {dropdownConfig.map(({ label, level, options }) => (
+          <CustomDropdown
+            key={level}
+            label={label}
+            options={options}
+            selected={selectedAddr[level]}
+            onSelect={(value) => handleRegionChange(level, value)}
+          />
+        ))}
 
         {/* 조회 버튼 */}
         <button onClick={fetchRuleByAddress} className="bg-[#3C9A5F] hover:bg-[#264D3D] text-white px-6 py-2 rounded shadow-md transition-all border-none cursor-pointer">

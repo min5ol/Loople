@@ -18,26 +18,17 @@ public class RuleServiceImpl implements RuleService{
     private final LocalGovernmentWasteInfoRepository localGovernmentWasteInfoRepository;
 
     @Override
-    public List<String> getSido() {
-//        List<String> tempSido = localGovernmentWasteInfoRepository.findDistinctSido();
-//        tempSido.forEach(t -> System.out.println("t = " + t));
-
-        return beopjeongdongRepository.findDistinctSido();
-    }
-
-    @Override
-    public List<String> getSigungu(String sido) {
-        return beopjeongdongRepository.findDistinctSigunguBySido(sido);
-    }
-
-    @Override
-    public List<String> getEupmyun(String sigungu) {
-        return beopjeongdongRepository.findDistinctEupmyunBySigungu(sigungu);
-    }
-
-    @Override
-    public List<String> getRi(String eupmyun) {
-        return beopjeongdongRepository.findDistinctRiByEupmyun(eupmyun);
+    public List<String> getRegion(RegionRequest regionRequest) {
+        System.out.println("regionRequest = " + regionRequest);
+        if (regionRequest.getSido() == null) {
+            return beopjeongdongRepository.findDistinctSido();
+        } else if (regionRequest.getSigungu() == null) {
+            return beopjeongdongRepository.findDistinctSigunguBySido(regionRequest.getSido());
+        } else if (regionRequest.getEupmyun() == null) {
+            return beopjeongdongRepository.findDistinctEupmyunBySigungu(regionRequest.getSigungu());
+        } else {
+            return beopjeongdongRepository.findDistinctRiByEupmyun(regionRequest.getEupmyun());
+        }
     }
 
     @Override
@@ -67,4 +58,5 @@ public class RuleServiceImpl implements RuleService{
                 )
                 .collect(Collectors.toList());
     }
+
 }

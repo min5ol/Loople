@@ -151,7 +151,7 @@ export default function LoopleHome() {
           if (parentId == 43) return gov.wasteType === "GENERAL" || gov.wasteType === null;
           if (parentId == 44) return gov.wasteType === "FOOD" || gov.wasteType === null;
           if (parentId == 45) return gov.wasteType === "RECYCLING" || gov.wasteType === null;
-          if (parentId == 46) return gov.wasteType === "GENERAL" || gov.wasteType === null;
+            if (parentId == 46) return gov.wasteType === "GENERAL" || gov.wasteType === null;
           return true;
         })
         .map((gov) => {
