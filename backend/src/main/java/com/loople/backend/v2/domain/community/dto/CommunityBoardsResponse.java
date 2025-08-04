@@ -1,0 +1,21 @@
+package com.loople.backend.v2.domain.community.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@AllArgsConstructor
+public class CommunityBoardsResponse {
+    private Long no;
+    private String nickname;
+    private String dongCode;
+    private String title;
+    private String content;
+    private String category;
+    private String attachedFile;
+    private LocalDateTime createdAt;
+}

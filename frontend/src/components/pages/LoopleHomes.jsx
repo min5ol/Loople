@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
+import Community from "./Community";
 
 //#81C784, #749E89, #3C9A5F, #264D3D, #F6F6F6, #FEF7E2, #202020
 
@@ -147,10 +148,10 @@ export default function LoopleHome() {
 
       return item.localGovern
         .filter((gov) => {
-          if (parentId == 43) return gov.wasteType === "GENERAL"  || gov.wasteType === null;
-          if (parentId == 44) return gov.wasteType === "FOOD"  || gov.wasteType === null;
-          if (parentId == 45) return gov.wasteType === "RECYCLING"  || gov.wasteType === null;
-          if (parentId == 46) return gov.wasteType === "GENERAL"  || gov.wasteType === null;
+          if (parentId == 43) return gov.wasteType === "GENERAL" || gov.wasteType === null;
+          if (parentId == 44) return gov.wasteType === "FOOD" || gov.wasteType === null;
+          if (parentId == 45) return gov.wasteType === "RECYCLING" || gov.wasteType === null;
+          if (parentId == 46) return gov.wasteType === "GENERAL" || gov.wasteType === null;
           return true;
         })
         .map((gov) => {
@@ -256,6 +257,13 @@ export default function LoopleHome() {
         <button onClick={() => navigate("/quiz")} className="text-sm text-[#264D3D] font-medium hover:underline">퀴즈 풀기</button>
         <button onClick={() => navigate("/rule")} className="text-sm text-[#264D3D] font-medium hover:underline">지역별 규칙 조회</button>
       </div>
+
+      {/* 지역 커뮤니티 */}
+      <div className="mt-20 px-6 py-10 max-w-4xl mx-auto bg-[#FEF7E2] border border-[#264D3D] rounded-xl shadow-lg">
+        <Community />
+      </div>
+
+
 
       {/* 💬 AI 챗봇 플로팅 버튼 */}
       <button
@@ -368,8 +376,8 @@ export default function LoopleHome() {
                 disabled={isInputDisabled}
                 onClick={sendMessage}
                 className={`px-4 py-2 rounded-lg text-sm border-none bg-[#3C9A5F] ${isInputDisabled
-                    ? "text-gray-700 cursor-not-allowed"
-                    : "text-white cursor-pointer hover:bg-[#264D3D]"
+                  ? "text-gray-700 cursor-not-allowed"
+                  : "text-white cursor-pointer hover:bg-[#264D3D]"
                   }`}
               >
                 전송
