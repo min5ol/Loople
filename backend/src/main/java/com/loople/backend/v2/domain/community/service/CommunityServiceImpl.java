@@ -37,8 +37,14 @@ public class CommunityServiceImpl implements CommunityService{
         User user = getUser(userId);
         String dongCodePrefix = user.getBeopjeongdong().getDongCode().substring(0, 5);
         System.out.println("dongCodePrefix = " + dongCodePrefix);
+        if(category.equals("NOTICE")){
+            System.out.println("notice");
+            return communityRepository.findByCategoryStartingWithOrderByNoDesc(category);
+        } else{
+            System.out.println("free, used");
+            return communityRepository.findByCategoryAndDongCodeStartingWithOrderByNoDesc(category, dongCodePrefix);
+        }
 
-        return communityRepository.findByCategoryAndDongCodeStartingWithOrderByNoDesc(category, dongCodePrefix);
     }
 
     @Override

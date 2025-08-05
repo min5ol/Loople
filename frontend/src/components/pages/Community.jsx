@@ -19,12 +19,13 @@ export default function Community() {
   const [selectedBoard, setSelectedBoard] = useState("FREE");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage=10;
-
-  const indexOfLastPost = currentPage * postsPerPage;
-  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  
+  const generalPostsPerPage = postsPerPage - noticePosts.length;
+  const indexOfLastPost = currentPage * generalPostsPerPage;
+  const indexOfFirstPost = indexOfLastPost - generalPostsPerPage;
   const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
 
-  const totalPages = Math.ceil(posts.length / postsPerPage);
+  const totalPages = Math.ceil(posts.length / generalPostsPerPage);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,11 +92,11 @@ export default function Community() {
       <div className="mx-auto p-4">
         {noticePosts.length>0 && (
           noticePosts.map((notice) => (
-            <div key={notice.no} onClick={() => fetchDetailPost(notice.no)} className="p-3 flex justify-between items-center bg-white mb-3 cursor-pointer">
+            <div key={notice.no} onClick={() => fetchDetailPost(notice.no)} className="p-3 flex justify-between items-center bg-white mb-3 cursor-pointer bg-yellow-100">
               <div>📢</div>
               <div className="flex-1 font-medium truncate px-2">{notice.title}</div>
               <div className="w-48 text-gray-500 text-xs whitespace-nowrap text-right">
-                {new Date(notice.createdAt).toLocaleDateString()}
+                {notice.nickname} | {new Date(notice.createdAt).toLocaleDateString()}
               </div>
             </div>
           ))
@@ -124,7 +125,7 @@ export default function Community() {
       {/* 페이지네이션 */}
       <div className="flex justify-center gap-2 mt-6">
         {[...Array(totalPages)].map((_, idx) => (
-          <button key={idx} className={`px-3 py-1 rounded-md border hover:bg-[#3C9A5F] hover:text-white cursor-pointer
+          <button key={idx} className={`px-3 py-1 rounded-md border hover:bg-[#3C9A5F] hover:text-white cursor-pointer border-none
             ${
               currentPage === idx + 1
                 ? "bg-[#3C9A5F] text-white"
