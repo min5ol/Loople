@@ -3,23 +3,33 @@ import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
 
 export const getPostByCategory = async (category) => {
-  const res = await instance.post("/community/posts", {category});
+  const res = await instance.post("/community/posts", { category });
   return res.data;
 }
 
-export const getDetailPost = async(no) => {
-  const res = await instance.post("/community/post", {no})
+export const getDetailPost = async (no) => {
+  const res = await instance.post("/community/post", { no })
   return res.data;
 }
 
 export default function Community() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
+  const [noticePosts, setNoticePosts] = useState([]);
+  const [selectedBoard, setSelectedBoard] = useState("FREE");
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage=10;
+
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
+
+  const totalPages = Math.ceil(posts.length / postsPerPage);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 기본 카테고리 "FREE"로 게시글 불러오기
+        await handlePost("NOTICE");
         await handlePost("FREE");
       } catch (err) {
         console.error("게시글 불러오기 실패:", err);
@@ -31,51 +41,102 @@ export default function Community() {
 
   const handlePost = async (category) => {
     const res = await getPostByCategory(category);
-    console.log(res);
-    setPosts(res);
+
+    if(category === "FREE" || category === "USED"){
+      setSelectedBoard(category);
+      setPosts(res);
+      console.log("free, used", res);
+    } else{
+      setNoticePosts(res);
+      console.log("notice", res);
+    }
   }
 
   const fetchDetailPost = async (no) => {
-    console.log(no);
-
     const res = await getDetailPost(no);
-    console.log(res);
-
     navigate("/communityPost", {
       state: { res }
     });
   };
 
   return (
-    <>
-      <p>Loople의 게시판은 동네 기반 게시판입니다 !</p>
-      <div className="flex justify-between">
+    <div className="mt-20 px-6 py-10 max-w-4xl mx-auto bg-[#D9E6D4] border border-[#4A7C59] rounded-xl shadow-lg">
+      <p className="text-center text-green-700 text-xl font-semibold mb-6">
+        🌿 Loople 동네 게시판에 오신 걸 환영합니다!<br />
+        여러분의 소소한 이야기와 나눔을 함께해요.
+      </p>
 
-        <div>
-          <button onClick={() => handlePost("FREE")}>자유게시판</button>
-          <button onClick={() => handlePost("USED")}>중고나눔게시판</button>
+      <div className="flex justify-between mb-4">
+        <div className="space-x-3">
+          <button onClick={() => handlePost("FREE")} className={`px-4 py-2 rounded-md shadow transition border-none hover:bg-[#3C9A5F] hover:text-white cursor-pointer
+              ${selectedBoard === "FREE"
+                ? "bg-[#3C9A5F] text-white "
+                : "bg-[#C7E6C9]"
+              }`}>
+            자유게시판
+          </button>
+          <button onClick={() => handlePost("USED")} className={`px-4 py-2 rounded-md shadow transition border-none hover:bg-[#3C9A5F] hover:text-white cursor-pointer
+              ${selectedBoard === "USED"
+                ? "bg-[#3C9A5F] text-white"
+                : "bg-[#C7E6C9]"
+              }`}>
+            중고나눔게시판
+          </button>
         </div>
-        <button onClick={() => navigate("/newPost")}>글쓰기</button>
+        <button onClick={() => navigate("/newPost")} className="px-5 py-2 rounded-md shadow bg-[#C7E6C9] text-[#264D3D] hover:bg-[#3C9A5F] hover:text-white transition border-none cursor-pointer">
+          글쓰기
+        </button>
       </div>
 
-      <div className="mx-auto p-4 bg-white">
-        {posts && posts.length > 0 ? (
-          posts.map((post) => (
-            <div key={post.no} className="flex justify-between items-center" onClick={() => { fetchDetailPost(post.no); }}>
-              <div className="w-8 text-center text-gray-600"></div>
-              <div className="flex-1 font-medium truncate px-2">{post.title}</div>
+      <div className="mx-auto p-4">
+        {noticePosts.length>0 && (
+          noticePosts.map((notice) => (
+            <div key={notice.no} onClick={() => fetchDetailPost(notice.no)} className="p-3 flex justify-between items-center bg-white mb-3 cursor-pointer">
+              <div>📢</div>
+              <div className="flex-1 font-medium truncate px-2">{notice.title}</div>
               <div className="w-48 text-gray-500 text-xs whitespace-nowrap text-right">
-                {post.nickname} | {new Date(post.createdAt).toLocaleDateString()}
+                {new Date(notice.createdAt).toLocaleDateString()}
               </div>
             </div>
-
           ))
-        ) : (
-          <div className="text-center text-gray-400 py-8">게시글이 없습니다.</div>
         )}
+
+
+      {currentPosts.length > 0 && (
+        currentPosts.map((post, index) => (
+          <div
+            key={post.no}
+            className="p-3 flex justify-between items-center bg-white mb-3 cursor-pointer"
+            onClick={() => fetchDetailPost(post.no)}
+          >
+            {/* 페이지별 인덱스 다시 계산 (전체에서 번호를 매기려면) */}
+            <div className="w-8 text-center text-gray-600">
+              {posts.length - (indexOfFirstPost + index)}
+            </div>
+            <div className="flex-1 font-medium truncate px-2">{post.title}</div>
+            <div className="w-48 text-gray-500 text-xs whitespace-nowrap text-right">
+              {post.nickname} | {new Date(post.createdAt).toLocaleDateString()}
+            </div>
+          </div>
+        ))
+      )}
+
+      {/* 페이지네이션 */}
+      <div className="flex justify-center gap-2 mt-6">
+        {[...Array(totalPages)].map((_, idx) => (
+          <button key={idx} className={`px-3 py-1 rounded-md border hover:bg-[#3C9A5F] hover:text-white cursor-pointer
+            ${
+              currentPage === idx + 1
+                ? "bg-[#3C9A5F] text-white"
+                : "bg-white text-gray-700"
+            }`}
+            onClick={() => setCurrentPage(idx + 1)}
+          >
+            {idx + 1}
+          </button>
+        ))}
       </div>
-
-    </>
+    </div>
+    </div>
   );
-
 }
