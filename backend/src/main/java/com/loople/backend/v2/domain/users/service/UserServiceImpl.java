@@ -32,6 +32,7 @@ import com.loople.backend.v2.global.exception.ErrorCode;
 import com.loople.backend.v2.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -409,5 +410,12 @@ public class UserServiceImpl implements UserService
                 .build();
 
         userRepository.save(updated);
+    }
+
+    //현재 인증된 유저 정보 가져오기
+    @Override
+    public UserInfoResponse getMyInfo(UserDetails user) {
+        System.out.println("user = " + user.getUsername());
+        return null;
     }
 }

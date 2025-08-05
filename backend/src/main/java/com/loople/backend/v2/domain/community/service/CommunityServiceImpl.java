@@ -1,15 +1,15 @@
 package com.loople.backend.v2.domain.community.service;
 
-import com.loople.backend.v2.domain.community.dto.CommunityBoardsRequest;
-import com.loople.backend.v2.domain.community.dto.CommunityBoardsResponse;
-import com.loople.backend.v2.domain.community.dto.CommunityCommentRequest;
-import com.loople.backend.v2.domain.community.dto.CommunityCommentResponse;
+import com.loople.backend.v2.domain.community.dto.*;
 import com.loople.backend.v2.domain.community.entity.CommunityBoards;
 import com.loople.backend.v2.domain.community.entity.CommunityComment;
+import com.loople.backend.v2.domain.community.entity.CommunityReports;
 import com.loople.backend.v2.domain.community.repository.CommunityBoardsRepository;
 import com.loople.backend.v2.domain.community.repository.CommunityCommentRepository;
+import com.loople.backend.v2.domain.community.repository.CommunityReportsRepository;
 import com.loople.backend.v2.domain.users.entity.User;
 import com.loople.backend.v2.domain.users.repository.UserRepository;
+import com.loople.backend.v2.global.exception.UnauthorizedException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -27,6 +27,7 @@ public class CommunityServiceImpl implements CommunityService{
     private final UserRepository userRepository;
     private final CommunityBoardsRepository communityBoardsRepository;
     private final CommunityCommentRepository communityCommentRepository;
+    private final CommunityReportsRepository communityReportsRepository;
 
     @Override
     public CommunityBoardsResponse savePost(CommunityBoardsRequest communityBoardsRequest) {
@@ -77,10 +78,9 @@ public class CommunityServiceImpl implements CommunityService{
                 .build();
 
         CommunityComment saved = communityCommentRepository.save(communityComment);
-        CommunityComment getFromDB = getByNo(saved.getNo());
-        System.out.println("getFromDB.getUpdatedAt() = " + getFromDB.getUpdatedAt());
+        CommunityComment updatedComment = getByNo(saved.getNo());
 
-        return getBuildComment(getFromDB);
+        return getBuildComment(updatedComment);
     }
 
     @Override
@@ -92,14 +92,31 @@ public class CommunityServiceImpl implements CommunityService{
 
     @Override
     @Transactional
-    public CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest) {
+    public CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest, Long userId) {
         CommunityComment byNo = getByNo(communityCommentRequest.getNo());
 
-        byNo.setComment(communityCommentRequest.getComment());
-        CommunityComment getFromDB = getByNo(byNo.getNo());
-        System.out.println("getFromDB.getUpdatedAt() = " + getFromDB.getUpdatedAt());
+        if (!byNo.getUserId().equals(userId)) {
+            throw new UnauthorizedException("해당 글 작성자만 수정할 수 있습니다.");
+        }
 
-        return getBuildComment(getFromDB);
+        byNo.setComment(communityCommentRequest.getComment());
+        CommunityComment updatedComment = getByNo(byNo.getNo());
+
+        return getBuildComment(updatedComment);
+
+    }
+
+    @Override
+    public void submitReport(CommunityReportsRequest communityReportsRequest, Long userId) {
+        CommunityReports build = CommunityReports.builder()
+                .userId(userId)
+                .target(communityReportsRequest.getTarget())
+                .targetId(communityReportsRequest.getTargetId())
+                .category(communityReportsRequest.getCategory())
+                .reason(communityReportsRequest.getReason())
+                .build();
+
+        communityReportsRepository.save(build);
     }
 
     private CommunityComment getByNo(Long no) {
@@ -132,7 +149,6 @@ public class CommunityServiceImpl implements CommunityService{
                 .createdAt(communityBoards.getCreatedAt())
                 .build();
     }
-
 
     private User getUser(Long userId) {
         return userRepository.findByNo(userId)

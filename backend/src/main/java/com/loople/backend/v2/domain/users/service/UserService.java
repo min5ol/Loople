@@ -9,6 +9,8 @@ package com.loople.backend.v2.domain.users.service;
 
 import com.loople.backend.v2.domain.auth.dto.OAuthUserInfo;
 import com.loople.backend.v2.domain.users.dto.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService
 {
@@ -41,4 +43,7 @@ public interface UserService
     void assignLoopling(Long userId, Long catalogId);
 
     void assignVillage(Long userId);
+
+    //현재 로그인 된 사용자 정보
+    UserInfoResponse getMyInfo(@AuthenticationPrincipal UserDetails user);
 }

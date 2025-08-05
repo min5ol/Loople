@@ -1,86 +1,148 @@
 import React, { useState } from "react";
 import Header from "../templates/Header";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import instance from "../../apis/instance";
+
+const submitReport = async (formData) => {
+  const res = await instance.post("/community/reports", formData);
+  return res.data;
+};
+
+const deleteContent = async (type, contentId) => {
+  const res = await instance.post("/community/delete", {params: {type, contentId}});
+  return res.data;
+}
 
 export default function ReportPage() {
+  const navigate = useNavigate();
   const location = useLocation();
   const target = location.state;
-
   const [formData, setFormData] = useState({
-    targetId: target.targetId,
     target: target.target,
+    targetId: target.targetId,
     category: "",
     reason: ""
   });
-
-  console.log(location.state.target);
-  console.log(location.state.targetId);
+  const [reportResult, setReportResult] = useState(false);
 
   const CustomDropdown = () => {
-    const categorys = ["스팸/광고", "욕설/비방", "음란물", "개인정보 노출", "허위사실", "기타"];
+    const categories = ["스팸/광고", "욕설/비방", "음란물", "개인정보 노출", "허위사실", "기타"];
     const [isShowDropdown, setIsShowDropdown] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(formData.category);
 
     return (
       <div className="relative">
-        <p onClick={() => setIsShowDropdown(!isShowDropdown)} className="cursor-pointer bg-white">
+        <div
+          onClick={() => setIsShowDropdown(!isShowDropdown)}
+          className="block border border-[#81C784] border-solid rounded py-2 px-3 cursor-pointer select-none text-[#264D3D] bg-white focus:ring-2 focus:ring-[#3C9A5F] text-base"
+        >
           {selectedCategory || "신고 사유"}
-        </p>
+        </div>
         {isShowDropdown && (
-          <div className="absolute bg-white">
-            {categorys.map((category, idx) => (
-              <p name="category" key={idx} value={category} onClick={(e) => {
-                setFormData(prev => ({ ...prev, category }));
-                setSelectedCategory(category);
-                setIsShowDropdown(false);
-              }} className="cursor-pointer">
+          <div className="absolute z-20 w-full bg-white border border-[#81C784] rounded mt-1 shadow-md text-base">
+            {categories.map((category, idx) => (
+              <p
+                key={idx}
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, category }));
+                  setSelectedCategory(category);
+                  setIsShowDropdown(false);
+                }}
+                className="px-3 py-2 cursor-pointer"
+              >
                 {category}
               </p>
             ))}
           </div>
         )}
-
       </div>
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+
+    if (!formData.category) {
+      alert("신고 사유를 선택해 주세요.");
+      return;
+    }
+
+    if (!formData.reason.trim()) {
+      alert("상세 사유를 입력해 주세요.");
+      return;
+    }
+
+    try {
+      await submitReport(formData);
+      setReportResult(true);
+    } catch (error) {
+      console.log(error);
+      setReportResult(false);
+    }
+  };
+
+  const handleDelete = async (type) => {
+    await deleteContent(type);
+
   }
 
   return (
     <>
       <Header />
-      <div className="pt-14 px-4"> {/* pt-14 = padding-top: 3.5rem = 56px */}
-        <form onSubmit={handleSubmit}>
-          <table border="1">
+      <div className="pt-20 px-6 max-w-xl mx-auto">
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md space-y-4">
+          <table className="w-full table-fixed border border-gray-300">
             <tbody>
               <tr>
-                <td>신고대상</td>
-                <td>{target.target}</td>
+                <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89] w-28">신고 대상</td>
+                <td className="py-2 px-3 select-none text-[#264D3D] bg-white focus:ring-2 focus:ring-[#3C9A5F] text-base">
+                  {target.target == "post" ? "게시글" : "댓글"}
+                </td>
               </tr>
               <tr>
-                <td>신고사유</td>
+                <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89] w-28">신고 사유 <span className="text-red-500">*</span></td>
                 <td><CustomDropdown /></td>
               </tr>
               <tr>
-                <td colSpan={2}>상세 사유</td>
+                <td colSpan={2} className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89] w-28">상세 사유 <span className="text-red-500">*</span></td>
               </tr>
               <tr>
-                <td colSpan={2}>
+                <td colSpan={2} className="px-4 pb-4">
                   <textarea
                     name="reason"
+                    value={formData.reason}
                     onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
+                    rows={5}
+                    className="w-full px-3 py-2 border border-[#81C784] rounded focus:outline-none focus:ring-2 focus:ring-[#3C9A5F] box-border resize-none"
+                    placeholder="상세한 신고 사유를 입력해 주세요."
                   />
                 </td>
               </tr>
               <tr>
-                <td colSpan={2}><button type="submit">제출</button></td>
+                <td colSpan={2} className="text-center px-4 py-2">
+                  <button type="submit" className="bg-[#3C9A5F] text-[#FEF7E2] px-5 py-2 rounded hover:bg-[#264D3D] transition-colors whitespace-nowrap border-none">
+                    제출
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
         </form>
+
+        {reportResult && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full text-center">
+              <h2 className="text-lg font-semibold text-green-600 mb-4">신고가 정상적으로 이루어졌습니다.</h2>
+              <button className="bg-[#3C9A5F] text-[#FEF7E2] px-5 py-2 rounded hover:bg-[#264D3D] transition-colors whitespace-nowrap border-none" onClick={() => {
+                setReportResult(false);
+                navigate("/loopleHome");
+              }}>
+                확인
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </>
   );

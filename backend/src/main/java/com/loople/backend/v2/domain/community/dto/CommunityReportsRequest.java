@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 public class CommunityReportsRequest {
     private Long no;
     private Long userId;
-    private Long boardId;
-    private Long commentId;
+    private String target;
+    private Long targetId;
     private String category;
     private String reason;
 }

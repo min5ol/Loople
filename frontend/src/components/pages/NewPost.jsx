@@ -5,7 +5,7 @@ import usePresignedUpload from "../../hooks/usePresignedUpload";
 import Header from "../templates/Header";
 
 export const createPost = async (postData) => {
-  const res = await instance.post("/community/create", postData, {
+  const res = await instance.post("/community/addPost", postData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -105,7 +105,7 @@ export default function NewPost() {
         <form onSubmit={handleCreatePost} className="max-w-md mx-auto mt-10 p-6 bg-[#F6F6F6] rounded-lg shadow-md flex justify-center item-center text-base mt-20">
           <table className="w-full">
             <tbody>
-              <tr className="border-b border-[#749E89]">
+              <tr>
                 <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89] w-28">제목</td>
                 <td className="p-3 m-0">
                   <input
@@ -119,13 +119,13 @@ export default function NewPost() {
                   />
                 </td>
               </tr>
-              <tr className="border-b border-[#749E89]">
+              <tr>
                 <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89]">카테고리</td>
                 <td className="p-3">
                   <CustomDropdown />
                 </td>
               </tr>
-              <tr className="border-b border-[#749E89]">
+              <tr>
                 <td
                   colSpan={2}
                   className="pt-3 px-3 font-semibold text-[#264D3D] border-b border-[#749E89]"
@@ -133,7 +133,7 @@ export default function NewPost() {
                   내용
                 </td>
               </tr>
-              <tr className="border-b border-[#749E89]">
+              <tr>
                 <td colSpan={2} className="p-3">
                   <textarea
                     name="content"
@@ -146,7 +146,7 @@ export default function NewPost() {
                   />
                 </td>
               </tr>
-              <tr className="border-b border-[#749E89]">
+              <tr>
                 <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89]">첨부파일</td>
                 <td className="p-3">
                   <input
