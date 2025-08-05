@@ -17,14 +17,18 @@ public class RuleServiceImpl implements RuleService{
     private final BeopjeongdongRepository beopjeongdongRepository;
     private final LocalGovernmentWasteInfoRepository localGovernmentWasteInfoRepository;
 
+    private boolean isNullOrEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
     @Override
     public List<String> getRegion(RegionRequest regionRequest) {
         System.out.println("regionRequest = " + regionRequest);
-        if (regionRequest.getSido() == null) {
+        if (isNullOrEmpty(regionRequest.getSido())) {
             return beopjeongdongRepository.findDistinctSido();
-        } else if (regionRequest.getSigungu() == null) {
+        } else if (isNullOrEmpty(regionRequest.getSigungu())) {
             return beopjeongdongRepository.findDistinctSigunguBySido(regionRequest.getSido());
-        } else if (regionRequest.getEupmyun() == null) {
+        } else if (isNullOrEmpty(regionRequest.getEupmyun())) {
             return beopjeongdongRepository.findDistinctEupmyunBySigungu(regionRequest.getSigungu());
         } else {
             return beopjeongdongRepository.findDistinctRiByEupmyun(regionRequest.getEupmyun());
