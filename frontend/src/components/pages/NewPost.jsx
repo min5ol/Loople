@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
 import usePresignedUpload from "../../hooks/usePresignedUpload";
-import Header from "./Header";
+import Header from "../templates/Header";
 
 export const createPost = async (postData) => {
   const res = await instance.post("/community/create", postData, {

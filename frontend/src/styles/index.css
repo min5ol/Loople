@@ -6,6 +6,15 @@ body {
   color: #202020; /* 텍스트 컬러 기본 */
 }
 
+/* global.css */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 
 @font-face {
   font-family: 'pretendard';

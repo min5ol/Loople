@@ -248,7 +248,7 @@ export default function Chatbot() {
       </button>
 
       {/* 🧾 콘텐츠 영역 */}
-      <div div className="pt-16" >
+      <div className="pt-16" >
         {showChatRoom && (
           <div
             ref={chatContainerRef}

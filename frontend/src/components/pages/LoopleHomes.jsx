@@ -1,28 +1,23 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import instance from "../../apis/instance";
+// src/components/pages/LoopleHome.jsx
+
+import React from "react";
 import Community from "./Community";
-import Header from "./Header";
+import Header from "../templates/Header";
 import Chatbot from "./Chatbot";
 
-// #81C784, #749E89, #3C9A5F, #264D3D, #F6F6F6, #FEF7E2, #202020
-
-
 export default function LoopleHome() {
-
   return (
-    <div className="relative w-full min-h-screen">
-
+    <div className="relative min-h-screen bg-[#FEF7E2] pt-20 pb-10">
       {/* 🧭 상단 네비게이션 탭 */}
       <Header />
 
-      {/* 게시판 */}
+      {/* 🧾 게시판 */}
+      <div className="max-w-5xl mx-auto px-4">
+        <Community />
+      </div>
 
-      <Community />
-
+      {/* 💬 챗봇 플로팅 */}
       <Chatbot />
-
     </div>
   );
-
 }
