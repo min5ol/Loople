@@ -248,7 +248,7 @@ export default function Chatbot() {
       </button>
 
       {/* 🧾 콘텐츠 영역 */}
-      <div div className="pt-16" >
+      <div className="pt-16" >
         {showChatRoom && (
           <div
             ref={chatContainerRef}
@@ -257,11 +257,7 @@ export default function Chatbot() {
             {/* 챗봇 헤더 */}
             <div className="flex justify-between items-center p-3 bg-[#3C9A5F] border-b border-[#264D3D] text-[#FEF7E2] rounded-t-lg">
               <span className="font-semibold">AI 챗봇</span>
-              <button
-                onClick={() => setShowChatRoom(false)}
-                className="hover:text-[#81C784] bg-transparent border-none p-0 m-0 focus:outline-none text-2xl cursor-pointer text-[#FEF7E2]"
-                aria-label="Close Chat"
-              >
+              <button onClick={() => setShowChatRoom(false)} className="hover:text-[#81C784] bg-transparent border-none p-0 m-0 focus:outline-none text-2xl cursor-pointer text-[#FEF7E2]">
                 ×
               </button>
             </div>

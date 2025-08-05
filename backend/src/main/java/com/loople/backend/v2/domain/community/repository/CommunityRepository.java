@@ -9,4 +9,5 @@ import java.util.List;
 public interface CommunityRepository extends JpaRepository<CommunityBoards, Long> {
     List<CommunityBoardsResponse> findByCategoryAndDongCodeStartingWithOrderByNoDesc(String category, String dongCodePrefix);
     CommunityBoardsResponse findByNo(Long no);
+    List<CommunityBoardsResponse> findByCategoryStartingWithOrderByNoDesc(String category);
 }
