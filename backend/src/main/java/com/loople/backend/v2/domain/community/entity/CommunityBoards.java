@@ -41,7 +41,7 @@ public class CommunityBoards {
     private LocalDateTime updatedAt;
 
     @Column(name="is_deleted")
-    private int isDeleted;
+    private Integer isDeleted;
 
     @Column(name="deleted_at", updatable = false, insertable = false)
     private LocalDateTime deletedAt;

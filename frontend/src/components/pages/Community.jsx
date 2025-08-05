@@ -8,7 +8,7 @@ export const getPostByCategory = async (category) => {
 }
 
 export const getDetailPost = async (no) => {
-  const res = await instance.post("/community/post", { no })
+  const res = await instance.get(`/community/post/${no}`)
   return res.data;
 }
 
@@ -16,7 +16,7 @@ export default function Community() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [noticePosts, setNoticePosts] = useState([]);
-  const [selectedBoard, setSelectedBoard] = useState("FREE");
+  const [selectedBoard, setSelectedBoard] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage=10;
   
@@ -31,7 +31,7 @@ export default function Community() {
     const fetchData = async () => {
       try {
         await handlePost("NOTICE");
-        await handlePost("FREE");
+        await handlePost("ALL");
       } catch (err) {
         console.error("게시글 불러오기 실패:", err);
       }
@@ -42,11 +42,12 @@ export default function Community() {
 
   const handlePost = async (category) => {
     const res = await getPostByCategory(category);
+    setCurrentPage(1);
 
-    if(category === "FREE" || category === "USED"){
+    if(category === "FREE" || category === "USED" || category === "ALL"){
       setSelectedBoard(category);
       setPosts(res);
-      console.log("free, used", res);
+      console.log("free, used, all", res);
     } else{
       setNoticePosts(res);
       console.log("notice", res);
@@ -69,12 +70,19 @@ export default function Community() {
 
       <div className="flex justify-between mb-4">
         <div className="space-x-3">
+          <button onClick={() => handlePost("ALL")} className={`px-4 py-2 rounded-md shadow transition border-none hover:bg-[#3C9A5F] hover:text-white cursor-pointer
+              ${selectedBoard === "ALL"
+                ? "bg-[#3C9A5F] text-white "
+                : "bg-[#C7E6C9]"
+              }`}>
+            자유게시판
+          </button>
           <button onClick={() => handlePost("FREE")} className={`px-4 py-2 rounded-md shadow transition border-none hover:bg-[#3C9A5F] hover:text-white cursor-pointer
               ${selectedBoard === "FREE"
                 ? "bg-[#3C9A5F] text-white "
                 : "bg-[#C7E6C9]"
               }`}>
-            자유게시판
+            우리동네게시판
           </button>
           <button onClick={() => handlePost("USED")} className={`px-4 py-2 rounded-md shadow transition border-none hover:bg-[#3C9A5F] hover:text-white cursor-pointer
               ${selectedBoard === "USED"
