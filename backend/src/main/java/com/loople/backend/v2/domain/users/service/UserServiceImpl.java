@@ -32,6 +32,7 @@ import com.loople.backend.v2.global.exception.ErrorCode;
 import com.loople.backend.v2.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -132,8 +133,9 @@ public class UserServiceImpl implements UserService
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
 
         String token = jwtProvider.createToken(user.getNo(), user.getRole());
+        String nickname = user.getNickname();
 
-        return new UserLoginResponse(token);
+        return new UserLoginResponse(token, nickname);
     }
 
     @Override
@@ -153,9 +155,13 @@ public class UserServiceImpl implements UserService
     @Override
     public UserLoginResponse socialLoginOrRedirect(OAuthUserInfo userInfo)
     {
-        return userRepository.findByProviderAndSocialId(userInfo.getProvider(), userInfo.getSocialId())
-                .map(user -> new UserLoginResponse(jwtProvider.createToken(user.getNo(), user.getRole())))
-                .orElse(null);
+        User user = userRepository.findByEmail(userInfo.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String token = jwtProvider.createToken(user.getNo(), user.getRole());
+        String nickname = user.getNickname();
+
+        return new UserLoginResponse(token, nickname);
     }
 
     @Override
