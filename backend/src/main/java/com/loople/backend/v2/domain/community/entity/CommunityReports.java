@@ -19,11 +19,10 @@ public class CommunityReports {
     @Column(name="user_id")
     private Long userId;
 
-    @Column(name="board_id")
-    private Long boardId;
+    private String target;
 
-    @Column(name="comment_id")
-    private Long commentId;
+    @Column(name="target_id")
+    private Long targetId;
 
     private String category;
 
@@ -34,10 +33,10 @@ public class CommunityReports {
     private LocalDateTime createdAt;
 
     @Builder
-    public CommunityReports(Long userId, Long boardId, Long commentId, String category, String reason) {
+    public CommunityReports(Long userId, String target, Long targetId, String category, String reason) {
         this.userId = userId;
-        this.boardId = boardId;
-        this.commentId = commentId;
+        this.target = target;
+        this.targetId = targetId;
         this.category = category;
         this.reason = reason;
     }

@@ -1,9 +1,6 @@
 package com.loople.backend.v2.domain.community.service;
 
-import com.loople.backend.v2.domain.community.dto.CommunityBoardsRequest;
-import com.loople.backend.v2.domain.community.dto.CommunityBoardsResponse;
-import com.loople.backend.v2.domain.community.dto.CommunityCommentRequest;
-import com.loople.backend.v2.domain.community.dto.CommunityCommentResponse;
+import com.loople.backend.v2.domain.community.dto.*;
 
 import java.util.List;
 
@@ -13,5 +10,6 @@ public interface CommunityService {
     CommunityBoardsResponse getPost(Long no);
     CommunityCommentResponse addComment(Long userId, CommunityCommentRequest communityCommentRequest);
     List<CommunityCommentResponse> getComments(Long boardId);
-    CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest);
+    CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest, Long userId);
+    void submitReport(CommunityReportsRequest communityReportsRequest, Long userId);
 }

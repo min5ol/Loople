@@ -15,7 +15,11 @@ import com.loople.backend.v2.domain.users.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -126,5 +130,17 @@ public class UserController
     {
         userService.assignVillage(userId);
         return ResponseEntity.ok().build();
+    }
+
+
+    //현재 로그인 된 사용자 정보 가져오기
+//    @GetMapping("/auth/me")
+    public UserInfoResponse getMyInfo(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("인증 정보가 없습니다.");
+        }
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return userService.getMyInfo(userDetails);
     }
 }

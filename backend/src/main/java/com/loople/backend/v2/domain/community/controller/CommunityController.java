@@ -1,9 +1,7 @@
 package com.loople.backend.v2.domain.community.controller;
 
-import com.loople.backend.v2.domain.community.dto.CommunityBoardsRequest;
-import com.loople.backend.v2.domain.community.dto.CommunityBoardsResponse;
-import com.loople.backend.v2.domain.community.dto.CommunityCommentRequest;
-import com.loople.backend.v2.domain.community.dto.CommunityCommentResponse;
+import com.loople.backend.v2.domain.community.dto.*;
+import com.loople.backend.v2.domain.community.entity.CommunityReports;
 import com.loople.backend.v2.domain.community.service.CommunityService;
 import com.loople.backend.v2.global.getUserId.GetLoggedInUserId;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +18,7 @@ public class CommunityController {
     private final GetLoggedInUserId getLoggedInUserId;
     private final CommunityService communityService;
 
-    @PostMapping("/create")
+    @PostMapping("/addPost")
     public CommunityBoardsResponse createPost(@RequestPart("title") String title,
                            @RequestPart("category") String category,
                            @RequestPart("content") String content,
@@ -65,10 +63,19 @@ public class CommunityController {
     }
 
     @PostMapping("/comment/edit")
-    public CommunityCommentResponse editComment(@RequestBody CommunityCommentRequest communityCommentRequest){
-        System.out.println("communityCommentRequest = " + communityCommentRequest);
-        return communityService.editComment(communityCommentRequest);
+    public CommunityCommentResponse editComment(@RequestBody CommunityCommentRequest communityCommentRequest, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return communityService.editComment(communityCommentRequest, userId);
     }
 
+    @PostMapping("/reports")
+    public void submitReport(@RequestBody CommunityReportsRequest communityReportsRequest, HttpServletRequest request){
+        System.out.println("communityReports = " + communityReportsRequest);
+        Long userId = getLoggedInUserId.getUserId(request);
+        communityService.submitReport(communityReportsRequest, userId);
+    }
+//
+//    @GetMapping("/delete")
+//    public void deleteContent(@RequestParam )
 
 }

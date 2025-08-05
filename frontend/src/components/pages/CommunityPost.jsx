@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import useCurrentUser from "../../hooks/useCurrentUser";
 import Header from "../templates/Header";
 import instance from "../../apis/instance";
 
@@ -39,6 +40,10 @@ export default function CommunityPost() {
 
   // 댓글 입력창 input에 대한 ref (상태 대신 ref로 값 읽기)
   const commentInputRef = useRef(null);
+
+  //현재 유저 정보
+  const currentUserId = useCurrentUser();
+  console.log("냠", currentUserId);
 
   // 컴포넌트가 처음 렌더링되거나 post.no가 바뀔 때 댓글 목록을 가져옴
   useEffect(() => {
@@ -151,15 +156,17 @@ export default function CommunityPost() {
       <div className="max-w-3xl mx-auto mt-20 p-6 bg-white rounded-lg">
         {/* 게시글 제목 및 작성자 정보 */}
         <div>
+
           <div className="flex justify-between items-center">
             <h2 className="text-3xl font-bold text-[#264D3D] mb-4">{post.title}</h2>
+
             <div className="relative group inline-block">
-              <div className="border border-gray-300 w-6 h-6 cursor-pointer flex items-center justify-center rounded">
+              <div className="w-6 h-6 cursor-pointer flex items-center justify-center rounded">
                 <span className="select-none text-lg">⋮</span>
               </div>
 
               {/* 옵션 메뉴 (수정, 삭제, 신고) */}
-              <div className="absolute top-full right-0 mt-1 group-hover:block hidden w-32 bg-white rounded-md shadow-lg border border-gray-300 z-50">
+              <div className="absolute top-[110%] right-0 group-hover:block hidden w-32 bg-white rounded-md shadow-lg z-50 text-[#3C9A5F] text-sm">
                 <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-1 mb-0">게시글 수정</p>
                 <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-3 mb-3">게시글 삭제</p>
                 <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-0 mb-1" onClick={() => navigate("/reportPage", {
@@ -197,19 +204,9 @@ export default function CommunityPost() {
           {post.attachedFile && (
             <div className="mt-4">
               {isImageFile(post.attachedFile) ? (
-                <img
-                  src={post.attachedFile}
-                  alt="첨부 이미지"
-                  className="max-w-full rounded-lg shadow-md border border-[#81C784]"
-                />
+                <img src={post.attachedFile} alt="첨부 이미지" className="max-w-full rounded-lg shadow-md border border-[#81C784]" />
               ) : isDocumentFile(post.attachedFile) ? (
-                <a
-                  href={post.attachedFile}
-                  download
-                  className="text-[#3C9A5F] hover:underline font-medium"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={post.attachedFile} download className="text-[#3C9A5F] hover:underline font-medium" target="_blank" rel="noopener noreferrer" >
                   첨부파일 다운로드
                 </a>
               ) : (
@@ -250,12 +247,19 @@ export default function CommunityPost() {
 
                       {/* 댓글 옵션 버튼 */}
                       <div className="relative group inline-block">
-                        <div className="border border-gray-300 w-5 h-5 cursor-pointer flex items-center justify-center">
+                        <div className="w-5 h-5 cursor-pointer flex items-center justify-center">
                           <span className="select-none">⋮</span>
                         </div>
 
                         {/* 옵션 메뉴 (수정, 삭제, 신고) */}
-                        <div className="absolute top-full right-0 mt-0 group-hover:block hidden w-28 bg-white rounded shadow-lg border border-gray-300 z-50">
+
+                        {
+                          comment.userId === currentUserId && (
+                            <button onClick={() => handleEdit(comment)}>수정</button>
+                          )
+                        }
+
+                        <div className="absolute top-full right-0 mt-0 group-hover:block hidden w-28 bg-white rounded shadow-lg z-50">
                           <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-1 mb-0" onClick={() => handleEditClick(comment)}>댓글 수정</p>
                           <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-3 mb-3">댓글 삭제</p>
                           <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-0 mb-1" onClick={() => navigate("/reportPage", {
