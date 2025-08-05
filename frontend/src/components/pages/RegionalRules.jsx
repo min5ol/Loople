@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import instance from "../../apis/instance";
-import Header from "./Header";
+import Header from "../templates/Header";
 
 // API functions
 export const getRegion = async (data) => {

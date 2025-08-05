@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Header from "./Header";
+import Header from "../templates/Header";
 
 export default function CommunityPost() {
   const location = useLocation();
