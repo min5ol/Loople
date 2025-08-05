@@ -11,35 +11,31 @@ export function parseAddress(address) {
     throw new Error("올바른 주소 객체가 아님");
   }
 
-  // 시/도: "서울", "경기" 등 → 정규화 필요
   const rawSido = address.region_1depth_name?.trim() ?? "";
-
-  // 시/군/구: "성남시 분당구" → 공백 제거 후 사용
   const sigungu = address.region_2depth_name?.replace(/\s/g, "") ?? "";
+  const region3 = address.region_3depth_name?.replace(/\s/g, "") ?? "";
+  const region4 = address.region_4depth_name?.replace(/\s/g, "") ?? "";
 
-  // 읍/면/동 + 리 가 합쳐져 있는 값 (예: "내서읍삼계리")
-  const eupmyunRi = address.region_3depth_name?.replace(/\s/g, "") ?? "";
+  let eupmyun = region3;
+  let ri = region4; // ← 핵심: region_4depth_name 활용
 
-  let eupmyun = eupmyunRi;
-  let ri = "";
-
-  // 예외 처리: "리"로 끝나면 "읍/면/동"과 "리"를 구분함
-  if (eupmyunRi.endsWith("리")) {
+  // Kakao가 리 정보를 region4에 안 주는 경우만 fallback 처리
+  if (!ri && region3.endsWith("리")) {
     const idx =
-      eupmyunRi.lastIndexOf("읍") >= 0
-        ? eupmyunRi.lastIndexOf("읍")
-        : eupmyunRi.lastIndexOf("면") >= 0
-        ? eupmyunRi.lastIndexOf("면")
-        : eupmyunRi.lastIndexOf("동");
+      region3.lastIndexOf("읍") >= 0
+        ? region3.lastIndexOf("읍")
+        : region3.lastIndexOf("면") >= 0
+        ? region3.lastIndexOf("면")
+        : region3.lastIndexOf("동");
 
     if (idx > 0) {
-      eupmyun = eupmyunRi.slice(0, idx + 1); // 읍/면/동까지 추출
-      ri = eupmyunRi.slice(idx + 1);         // 이후 문자열은 '리'
+      eupmyun = region3.slice(0, idx + 1);
+      ri = region3.slice(idx + 1);
     }
   }
 
   return {
-    sido: normalizeSido(rawSido), // 약칭 시도명 → 전체 행정명으로 변환
+    sido: normalizeSido(rawSido),
     sigungu,
     eupmyun,
     ri,
