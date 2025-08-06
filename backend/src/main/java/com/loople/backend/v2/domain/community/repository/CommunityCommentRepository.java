@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CommunityCommentRepository extends JpaRepository<CommunityComment, Long> {
-    List<CommunityComment> findByBoardId(Long boardId);
-    Optional<CommunityComment> findByNo(Long no);
+    List<CommunityComment> findByBoardIdAndIsDeletedNot(Long boardId, int isDeleted);
+    Optional<CommunityComment> findByNoAndIsDeletedNot(Long no, int isDeleted);
 }

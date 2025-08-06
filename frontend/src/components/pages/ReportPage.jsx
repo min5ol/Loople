@@ -8,11 +8,6 @@ const submitReport = async (formData) => {
   return res.data;
 };
 
-const deleteContent = async (type, contentId) => {
-  const res = await instance.post("/community/delete", {params: {type, contentId}});
-  return res.data;
-}
-
 export default function ReportPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -80,11 +75,6 @@ export default function ReportPage() {
       setReportResult(false);
     }
   };
-
-  const handleDelete = async (type) => {
-    await deleteContent(type);
-
-  }
 
   return (
     <>

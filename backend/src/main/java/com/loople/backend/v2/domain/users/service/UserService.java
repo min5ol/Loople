@@ -44,6 +44,5 @@ public interface UserService
 
     void assignVillage(Long userId);
 
-    //현재 로그인 된 사용자 정보
-    UserInfoResponse getMyInfo(@AuthenticationPrincipal UserDetails user);
+    UserInfoResponse getUserInfo(Long userId);
 }

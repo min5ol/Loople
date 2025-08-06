@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CommunityBoardsResponse {
     private Long no;
+    private Long userId;
     private String nickname;
     private String dongCode;
     private String title;
@@ -18,4 +19,5 @@ public class CommunityBoardsResponse {
     private String category;
     private String attachedFile;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

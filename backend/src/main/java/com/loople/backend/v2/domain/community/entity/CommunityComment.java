@@ -29,7 +29,7 @@ public class CommunityComment {
     private LocalDateTime updatedAt;
     @Column(name="is_deleted")
     private int isDeleted;
-    @Column(name="deleted_at", insertable = false, updatable = false)
+    @Column(name="deleted_at")
     private LocalDateTime deletedAt;
 
     @Builder

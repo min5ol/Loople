@@ -12,7 +12,7 @@ export const getDetailPost = async (no) => {
   return res.data;
 }
 
-export default function Community() {
+export default function Community({currentUserInfo}) {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [noticePosts, setNoticePosts] = useState([]);
@@ -57,7 +57,7 @@ export default function Community() {
   const fetchDetailPost = async (no) => {
     const res = await getDetailPost(no);
     navigate("/communityPost", {
-      state: { res }
+      state: { res, currentUserInfo }
     });
   };
 
