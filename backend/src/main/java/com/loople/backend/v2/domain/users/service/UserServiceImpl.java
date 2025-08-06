@@ -36,6 +36,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -412,10 +415,10 @@ public class UserServiceImpl implements UserService
         userRepository.save(updated);
     }
 
-    //현재 인증된 유저 정보 가져오기
     @Override
-    public UserInfoResponse getMyInfo(UserDetails user) {
-        System.out.println("user = " + user.getUsername());
-        return null;
+    public UserInfoResponse getUserInfo(Long userId) {
+        User user = userRepository.findByNo(userId).orElseThrow(() -> new NoSuchElementException("해당 사용자가 존재하지 않습니다."));
+
+        return new UserInfoResponse(user.getNo(), user.getNickname(), user.getEmail());
     }
 }

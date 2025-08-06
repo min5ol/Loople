@@ -30,15 +30,39 @@ public class CommunityServiceImpl implements CommunityService{
     private final CommunityReportsRepository communityReportsRepository;
 
     @Override
-    public CommunityBoardsResponse savePost(CommunityBoardsRequest communityBoardsRequest) {
-        User user = getUser(communityBoardsRequest.getUserId());
+    @Transactional
+    public CommunityBoardsResponse addPost(CommunityBoardsRequest communityBoardsRequest, Long userId, String type) {
+        if(type.equals("수정")){
+            CommunityBoards before = getBoardsByNo(communityBoardsRequest.getNo());
 
-        CommunityBoards communityBoards = new CommunityBoards(communityBoardsRequest.getUserId(), user.getNickname(), user.getBeopjeongdong().getDongCode(),
-                communityBoardsRequest.getTitle(), communityBoardsRequest.getContent(), communityBoardsRequest.getCategory(), communityBoardsRequest.getAttachedFile(), LocalDateTime.now());
+            if(!before.getTitle().equals(communityBoardsRequest.getTitle())) {
+                before.setTitle(communityBoardsRequest.getTitle());
+            }
+            if(!before.getCategory().equals(communityBoardsRequest.getCategory())){
+                before.setCategory(communityBoardsRequest.getCategory());
+            }
 
-        CommunityBoards save = communityBoardsRepository.save(communityBoards);
+            if(!before.getContent().equals(communityBoardsRequest.getContent())){
+                before.setContent(communityBoardsRequest.getContent());
+            }
 
-        return new CommunityBoardsResponse(save.getNo(), save.getNickname(), save.getDongCode(), save.getTitle(), save.getContent(), save.getCategory(), save.getAttachedFile(), save.getCreatedAt());
+            if(communityBoardsRequest.isFileChanged()){
+                before.setAttachedFile(communityBoardsRequest.getAttachedFile());
+            }
+
+            CommunityBoards updated = getBoardsByNo(communityBoardsRequest.getNo());
+
+            return getBuildBoards(updated);
+        } else {
+            User user = getUser(communityBoardsRequest.getUserId());
+
+            CommunityBoards communityBoards = new CommunityBoards(communityBoardsRequest.getUserId(), user.getNickname(), user.getBeopjeongdong().getDongCode(),
+                    communityBoardsRequest.getTitle(), communityBoardsRequest.getContent(), communityBoardsRequest.getCategory(), communityBoardsRequest.getAttachedFile(), LocalDateTime.now());
+
+            CommunityBoards save = communityBoardsRepository.save(communityBoards);
+
+            return getBuildBoards(save);
+        }
     }
 
     @Override
@@ -48,9 +72,9 @@ public class CommunityServiceImpl implements CommunityService{
         String dongCodePrefix = user.getBeopjeongdong().getDongCode().substring(0, 5);
         List<CommunityBoards> byCategory = null;
 
-        if(category.equals("NOTICE")){ byCategory = communityBoardsRepository.findByCategoryStartingWithOrderByNoDesc(category); }
-        else if(category.equals("ALL")) { byCategory = communityBoardsRepository.findByCategoryNotOrderByNoDesc("NOTICE"); }
-        else{ byCategory = communityBoardsRepository.findByCategoryAndDongCodeStartingWithOrderByNoDesc(category, dongCodePrefix); }
+        if(category.equals("NOTICE")){ byCategory = communityBoardsRepository.findByCategoryStartingWithAndIsDeletedNotOrderByNoDesc(category, 1); }
+        else if(category.equals("ALL")) { byCategory = communityBoardsRepository.findByCategoryNotAndIsDeletedNotOrderByNoDesc("NOTICE", 1); }
+        else{ byCategory = communityBoardsRepository.findByCategoryAndDongCodeStartingWithAndIsDeletedNotOrderByNoDesc(category, dongCodePrefix, 1); }
 
         return byCategory.stream()
                 .map(communityBoards -> getBuildBoards(communityBoards))
@@ -59,8 +83,7 @@ public class CommunityServiceImpl implements CommunityService{
 
     @Override
     public CommunityBoardsResponse getPost(Long no) {
-        CommunityBoards communityBoards = communityBoardsRepository.findByNo(no)
-                .orElseThrow(() -> new NoSuchElementException("해당 게시물이 존재하지 않습니다."));
+        CommunityBoards communityBoards = getBoardsByNo(no);
 
         System.out.println("communityBoards.getCreatedAt() = " + communityBoards.getCreatedAt());
         return getBuildBoards(communityBoards);
@@ -78,14 +101,14 @@ public class CommunityServiceImpl implements CommunityService{
                 .build();
 
         CommunityComment saved = communityCommentRepository.save(communityComment);
-        CommunityComment updatedComment = getByNo(saved.getNo());
+        CommunityComment updatedComment = getCommentByNo(saved.getNo());
 
         return getBuildComment(updatedComment);
     }
 
     @Override
     public List<CommunityCommentResponse> getComments(Long boardId) {
-        return communityCommentRepository.findByBoardId(boardId).stream()
+        return communityCommentRepository.findByBoardIdAndIsDeletedNot(boardId, 1).stream()
                 .map(board -> getBuildComment(board))
                 .collect(Collectors.toList());
     }
@@ -93,14 +116,12 @@ public class CommunityServiceImpl implements CommunityService{
     @Override
     @Transactional
     public CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest, Long userId) {
-        CommunityComment byNo = getByNo(communityCommentRequest.getNo());
+        CommunityComment byNo = getCommentByNo(communityCommentRequest.getNo());
 
-        if (!byNo.getUserId().equals(userId)) {
-            throw new UnauthorizedException("해당 글 작성자만 수정할 수 있습니다.");
-        }
+        validateTargetOwner(byNo.getUserId(), userId);
 
         byNo.setComment(communityCommentRequest.getComment());
-        CommunityComment updatedComment = getByNo(byNo.getNo());
+        CommunityComment updatedComment = getCommentByNo(byNo.getNo());
 
         return getBuildComment(updatedComment);
 
@@ -119,10 +140,39 @@ public class CommunityServiceImpl implements CommunityService{
         communityReportsRepository.save(build);
     }
 
-    private CommunityComment getByNo(Long no) {
-        return communityCommentRepository.findByNo(no)
+
+    @Override
+    @Transactional
+    public void deleteContent(String target, Long targetId, Long userId) {
+        if (target.equals("post")) {
+            CommunityBoards boardsByNo = getBoardsByNo(targetId);
+            validateTargetOwner(boardsByNo.getUserId(), userId);
+            boardsByNo.setIsDeleted(1);
+            boardsByNo.setDeletedAt(LocalDateTime.now());
+        } else if (target.equals("comment")) {
+            CommunityComment commentByNo = getCommentByNo(targetId);
+            validateTargetOwner(commentByNo.getUserId(), userId);
+            commentByNo.setIsDeleted(1);
+            commentByNo.setDeletedAt(LocalDateTime.now());
+        }
+    }
+
+    private static void validateTargetOwner(Long targetNo, Long userId) {
+        if (!targetNo.equals(userId)) {
+            throw new UnauthorizedException("해당 글 작성자만 수정할 수 있습니다.");
+        }
+    }
+
+    private CommunityComment getCommentByNo(Long no) {
+        return communityCommentRepository.findByNoAndIsDeletedNot(no, 1)
                 .orElseThrow(() -> new NoSuchElementException("해당 댓글이 존재하지 않습니다."));
     }
+
+    private CommunityBoards getBoardsByNo(Long no) {
+        return communityBoardsRepository.findByNoAndIsDeletedNot(no, 1)
+                .orElseThrow(() -> new NoSuchElementException("해당 게시물이 존재하지 않습니다."));
+    }
+
 
     private static CommunityCommentResponse getBuildComment(CommunityComment entity) {
         return CommunityCommentResponse.builder()
@@ -140,6 +190,7 @@ public class CommunityServiceImpl implements CommunityService{
     private static CommunityBoardsResponse getBuildBoards(CommunityBoards communityBoards) {
         return CommunityBoardsResponse.builder()
                 .no(communityBoards.getNo())
+                .userId(communityBoards.getUserId())
                 .nickname(communityBoards.getNickname())
                 .dongCode(communityBoards.getDongCode())
                 .title(communityBoards.getTitle())
@@ -147,6 +198,7 @@ public class CommunityServiceImpl implements CommunityService{
                 .category(communityBoards.getCategory())
                 .attachedFile(communityBoards.getAttachedFile())
                 .createdAt(communityBoards.getCreatedAt())
+                .updatedAt(communityBoards.getUpdatedAt())
                 .build();
     }
 

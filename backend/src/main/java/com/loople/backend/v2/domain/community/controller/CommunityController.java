@@ -3,6 +3,7 @@ package com.loople.backend.v2.domain.community.controller;
 import com.loople.backend.v2.domain.community.dto.*;
 import com.loople.backend.v2.domain.community.entity.CommunityReports;
 import com.loople.backend.v2.domain.community.service.CommunityService;
+import com.loople.backend.v2.domain.users.service.UserService;
 import com.loople.backend.v2.global.getUserId.GetLoggedInUserId;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,24 +19,11 @@ public class CommunityController {
     private final GetLoggedInUserId getLoggedInUserId;
     private final CommunityService communityService;
 
-    @PostMapping("/addPost")
-    public CommunityBoardsResponse createPost(@RequestPart("title") String title,
-                           @RequestPart("category") String category,
-                           @RequestPart("content") String content,
-                           @RequestPart(value="attachedFile", required=false) String attachedFile,
+    @PostMapping("/post/submit/{type}")
+    public CommunityBoardsResponse handlePostSubmit(@RequestBody CommunityBoardsRequest communityBoardsRequest, @PathVariable String type,
                            HttpServletRequest request){
-        String presignedUrl;
-        if(attachedFile != null && !attachedFile.isEmpty()){
-            presignedUrl = attachedFile;
-        } else{
-            presignedUrl = null;
-        }
-
         Long userId = getLoggedInUserId.getUserId(request);
-
-        CommunityBoardsRequest communityBoardsRequest = new CommunityBoardsRequest(
-                userId, null, null, title, content, category, presignedUrl);
-        return communityService.savePost(communityBoardsRequest);
+        return communityService.addPost(communityBoardsRequest, userId, type);
     }
 
     @PostMapping("/posts")
@@ -56,7 +44,7 @@ public class CommunityController {
         return communityService.getComments(boardId);
     }
 
-    @PostMapping("/comment")
+    @PostMapping("/comment/add")
     public CommunityCommentResponse addComment(@RequestBody CommunityCommentRequest communityCommentRequest, HttpServletRequest request){
         Long userId = getLoggedInUserId.getUserId(request);
         return communityService.addComment(userId, communityCommentRequest);
@@ -74,8 +62,10 @@ public class CommunityController {
         Long userId = getLoggedInUserId.getUserId(request);
         communityService.submitReport(communityReportsRequest, userId);
     }
-//
-//    @GetMapping("/delete")
-//    public void deleteContent(@RequestParam )
 
+    @GetMapping("/delete")
+    public void deleteContent(@RequestParam String target, @RequestParam Long targetId, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        communityService.deleteContent(target, targetId, userId);
+    }
 }

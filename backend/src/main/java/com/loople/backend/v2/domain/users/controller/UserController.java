@@ -12,6 +12,8 @@ import com.loople.backend.v2.domain.users.dto.*;
 import com.loople.backend.v2.domain.users.entity.User;
 import com.loople.backend.v2.domain.users.repository.UserRepository;
 import com.loople.backend.v2.domain.users.service.UserService;
+import com.loople.backend.v2.global.getUserId.GetLoggedInUserId;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,7 @@ public class UserController
 {
     private final UserService userService;
     private final UserRepository userRepository;
+    private final GetLoggedInUserId getLoggedInUserId;
 
     @GetMapping("/check-email")
     public ResponseEntity<EmailCheckResponse> checkEmail(@RequestParam String email)
@@ -132,15 +135,10 @@ public class UserController
         return ResponseEntity.ok().build();
     }
 
-
-    //현재 로그인 된 사용자 정보 가져오기
-//    @GetMapping("/auth/me")
-    public UserInfoResponse getMyInfo(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("인증 정보가 없습니다.");
-        }
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return userService.getMyInfo(userDetails);
+    //유저 정보 가져오기
+    @GetMapping("/userInfo")
+    public UserInfoResponse getUserInfo(HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return userService.getUserInfo(userId);
     }
 }
