@@ -14,5 +14,6 @@ public class ChatTextResponse {
     private Long roomId;
     private String nickname;
     private String content;
+    private String type;
     private LocalDateTime createdAt;
 }

@@ -28,6 +28,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatbotCategoryDetailRepository chatbotCategoryDetailRepository;
     private final LocalGovernmentWasteInfoRepository localGovernmentWasteInfoRepository;
 
+    //chatbot
     @Override
     public ChatRoomResponse buildRoomWithAI(Long userId) {
         User ById = findById(userId);
@@ -62,7 +63,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void saveResponse(Long roomId, String response) {
-        ChatText ai = new ChatText(roomId, "AI", response, LocalDateTime.now());
+        ChatText ai = new ChatText(roomId, "AI", response, null, LocalDateTime.now());
         chatTextRepository.save(ai);
     }
 
@@ -92,6 +93,10 @@ public class ChatServiceImpl implements ChatService {
                 .collect(Collectors.toList());
     }
 
+
+
+
+    //user
     @Override
     public ChatRoomResponse buildRoom(ChatRoomRequest chatRoomRequest) {
         String participantA = chatRoomRequest.getParticipantA();
@@ -137,7 +142,6 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public ChatTextResponse sendMessage(ChatTextRequest chatTextRequest) {
-        System.out.println("chatTextRequest = " + chatTextRequest);
         ChatText chatText = ChatText.builder()
                 .roomId(chatTextRequest.getRoomId())
                 .nickname(chatTextRequest.getNickname())
@@ -159,14 +163,18 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<ChatTextResponse> viewRoomText(Long roomId) {
 
-        List<ChatText> atDesc = chatTextRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
+        List<ChatText> atDesc = chatTextRepository.findAllByRoomIdOrderByCreatedAtAsc(roomId);
         return atDesc.stream()
                 .map(this::getChatTextResponse)
                 .collect(Collectors.toList());
     }
 
+
+
+
+
     private ChatTextResponse getChatTextResponse(ChatText text){
-        return new ChatTextResponse(text.getNo(), text.getRoomId(), text.getNickname(), text.getContent(), text.getCreatedAt());
+        return new ChatTextResponse(text.getNo(), text.getRoomId(), text.getNickname(), text.getContent(), text.getType(), text.getCreatedAt());
     }
 
     private ChatRoomResponse getChatRoomResponse(ChatRoom room) {

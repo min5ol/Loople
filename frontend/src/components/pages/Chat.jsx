@@ -33,7 +33,7 @@ export default function Chat() {
   const [chatUserInfo, setChatUserInfo] = useState(null);
   const [message, setMessage] = useState("");
   const [currentRoom, setCurrentRoom] = useState([]);
-  const [beforeText, setBeforeText] = useState([]);
+  const [textHistory, setTextHistory] = useState([]);
 
 
   useEffect(() => {
@@ -105,15 +105,23 @@ export default function Chat() {
 
     const res = await sendMessage(payLoad);
     console.log("send", res);
+    setTextHistory((prev) => [...prev, res]);
     setMessage("");
   }
 
-  const fetchRoom = async(chat) => {
+  const fetchRoom = async (chat) => {
+    setCurrentRoom(chat);
     const res = await viewRoomText(chat.no);
     console.log(res);
-    setBeforeText(res);
+    setTextHistory(res);
   }
 
+  const formatTime = (isoString) => {
+    const date = new Date(isoString);
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
 
   return (
     <>
@@ -141,27 +149,54 @@ export default function Chat() {
 
         {/* 채팅 디테일 */}
         <div className="flex flex-col w-[70%] bg-[#F9FDF7]">
-          {/* beforeText && () */}
-          {receiver && (
+          {textHistory.length > 0 && (
             <>
-              <div className="p-4  font-bold text-center text-2xl bg-[#C7E6C9]">
-                {receiver.nickname}
+              {/* 채팅방 타이틀 (닉네임) */}
+              <div className="p-4 font-bold text-center text-2xl bg-[#C7E6C9]">
+                {currentUserInfo.nickname === currentRoom.participantA ? currentRoom.participantB : currentRoom.participantA}
               </div>
 
-              {/* 메시지 리스트 영역 */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {beforeText>0 && beforeText.map((text, idx) => {
-                  <h2>{text.content}</h2>
-                  // <h2>{text.createdAt}</h2>
+              {/* 채팅 메시지 목록 */}
+              <div className="flex flex-col gap-2 p-4 overflow-y-auto flex-1">
+                {textHistory.map((text, idx) => {
+                  const isCurrentUser = text.nickname === currentUserInfo.nickname;
+
+                  return (
+                    <div key={idx} className={`flex items-center ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
+                      {isCurrentUser && (
+                        <span className="text-xs text-gray-500 mr-3">{formatChatTime(text.createdAt)}</span>
+                      )}
+                      <span className={`max-w-xs px-4 py-2 rounded-lg text-sm break-words ${isCurrentUser
+                        ? 'bg-blue-500 text-white rounded-br-none'
+                        : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                        }`}
+                      >
+                        {text.content}
+                      </span>
+                      {!isCurrentUser && (
+                        <span className="text-xs text-gray-500 ml-3">{formatChatTime(text.createdAt)}</span>
+                      )}
+                    </div>
+                  );
                 })}
               </div>
 
-              {/* 입력창 */}
-              <div className="p-3 flex">
-                <input type="text" className="flex-1 border rounded px-3 py-2 focus:outline-none" placeholder="메시지를 입력하세요" value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSend();
-                }} />
-                <button className="ml-3 bg-[#3C9A5F] text-white px-5 py-2 rounded hover:bg-[#264D3D] transition-colors border-none" onClick={handleSend}>
+              {/* 메시지 입력창 */}
+              <div className="p-3 flex border-t">
+                <input
+                  type="text"
+                  className="flex-1 border rounded px-3 py-2 focus:outline-none"
+                  placeholder="메시지를 입력하세요"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSend();
+                  }}
+                />
+                <button
+                  className="ml-3 bg-[#3C9A5F] text-white px-5 py-2 rounded hover:bg-[#264D3D] transition-colors border-none"
+                  onClick={handleSend}
+                >
                   전송
                 </button>
               </div>

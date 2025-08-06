@@ -1,6 +1,7 @@
 package com.loople.backend.v2.domain.chat.service;
 
 import com.loople.backend.v2.domain.chat.dto.*;
+import com.loople.backend.v2.domain.chat.entity.ChatText;
 
 import java.util.List;
 
