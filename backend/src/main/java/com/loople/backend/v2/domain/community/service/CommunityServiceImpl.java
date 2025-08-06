@@ -73,7 +73,7 @@ public class CommunityServiceImpl implements CommunityService{
         List<CommunityBoards> byCategory = null;
 
         if(category.equals("NOTICE")){ byCategory = communityBoardsRepository.findByCategoryStartingWithAndIsDeletedNotOrderByNoDesc(category, 1); }
-        else if(category.equals("ALL")) { byCategory = communityBoardsRepository.findByCategoryNotAndIsDeletedNotOrderByNoDesc("NOTICE", 1); }
+        else if(category.equals("ALL")) { byCategory = communityBoardsRepository.findByCategoryAndIsDeletedNotOrderByNoDesc("FREE", 1); }
         else{ byCategory = communityBoardsRepository.findByCategoryAndDongCodeStartingWithAndIsDeletedNotOrderByNoDesc(category, dongCodePrefix, 1); }
 
         return byCategory.stream()
@@ -84,8 +84,6 @@ public class CommunityServiceImpl implements CommunityService{
     @Override
     public CommunityBoardsResponse getPost(Long no) {
         CommunityBoards communityBoards = getBoardsByNo(no);
-
-        System.out.println("communityBoards.getCreatedAt() = " + communityBoards.getCreatedAt());
         return getBuildBoards(communityBoards);
     }
 

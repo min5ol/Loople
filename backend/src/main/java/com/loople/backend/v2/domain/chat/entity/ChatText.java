@@ -26,14 +26,17 @@ public class ChatText {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    private String type;
+
     @Column(name="created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public ChatText(Long roomId, String nickname, String content, LocalDateTime createdAt) {
+    public ChatText(Long roomId, String nickname, String content, String type, LocalDateTime createdAt) {
         this.roomId = roomId;
         this.nickname = nickname;
         this.content = content;
+        this.type = type;
         this.createdAt = createdAt;
     }
 }

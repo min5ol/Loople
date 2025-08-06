@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface ChatTextRepository extends JpaRepository<ChatText, Long> {
     Optional<ChatText> findTopByRoomIdOrderByCreatedAtDesc(Long roomId);
-    List<ChatText> findByRoomIdOrderByCreatedAtDesc(Long roomId);
+    List<ChatText> findAllByRoomIdOrderByCreatedAtAsc(Long roomId);
 }

@@ -10,4 +10,5 @@ public class ChatTextRequest {
     private String nickname;
     private Long roomId;
     private String content;
+    private String type;
 }

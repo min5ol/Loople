@@ -24,10 +24,9 @@ public class ChatController {
 
     private final OpenApiClient openApiClient;
     private final ChatService chatService;
-    private final GetLoggedInUserId getLoggedInUserId;
 
     // POST 방식으로 메시지 받아 OpenAI 응답 반환
-    @PostMapping(value = "/chatbot/text")
+    @PostMapping("/chatbot/text")
     public Mono<String> sendMessageToAI(@RequestBody ChatTextRequest chatTextRequest){
         String prompt = chatTextRequest.getContent()
                 + " 쓰레기 처리 방법에 대해 알려줘 !\n"
