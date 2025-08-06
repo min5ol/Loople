@@ -2,21 +2,21 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
 
-export const buildRoom = async () => {
-  const res = await instance.get("/chat/completion/buildRoom/withAI");
+export const buildRoom = async (userId) => {
+  const res = await instance.get("/chat/completion/chatbot/buildRoom", {params: {userId}});
   return res.data;
 };
 
 export const getCategory = async (categoryType, parentId) => {
-  const res = await instance.get("/chat/completion/category", {
+  const res = await instance.get("/chat/completion/chatbot/category", {
     params: { categoryType, parentId },
   });
   return res.data;
 };
 
-export const getDetails = async (parentId) => {
-  const res = await instance.get("/chat/completion/details", {
-    params: { parentId },
+export const getDetails = async (parentId, userId) => {
+  const res = await instance.get("/chat/completion/chatbot/details", {
+    params: { parentId, userId },
   });
   return res.data;
 };
@@ -26,8 +26,7 @@ export const sendMessages = async (userMessage) => {
   return res.data;
 };
 
-export default function Chatbot() {
-  const navigate = useNavigate();
+export default function Chatbot({currentUserInfo}) {
   const [room, setRoom] = useState(null);
   const [showChatRoom, setShowChatRoom] = useState(false);
   const [chatHistory, setChatHistory] = useState([
@@ -48,7 +47,7 @@ export default function Chatbot() {
     setUserMessage('');
     setIsInputDisabled(true);
 
-    const room = await buildRoom();
+    const room = await buildRoom(currentUserInfo.no);
     setRoom(room);
     setShowChatRoom(true);
 
@@ -201,7 +200,7 @@ export default function Chatbot() {
       setIsInputDisabled(false);
     }
 
-    const detail = await getDetails(parentId);
+    const detail = await getDetails(parentId, currentUserInfo.no);
     console.log("getDetails 응답, detail: ", detail);
 
     const detailMessages = getDetailMessages(detail, parentId);
@@ -215,7 +214,7 @@ export default function Chatbot() {
     setChatHistory(prev => [...prev, { type: "USER", text: userMessage }]);
     setWaitingResponse(true);
 
-    const payLoad = { roomId: room.no, content: userMessage };
+    const payLoad = { roomId: room.no, content: userMessage, userId: currentUserInfo.no };
     setUserMessage('');
 
     try {

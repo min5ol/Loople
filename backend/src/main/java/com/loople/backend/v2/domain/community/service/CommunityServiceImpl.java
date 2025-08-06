@@ -32,7 +32,7 @@ public class CommunityServiceImpl implements CommunityService{
     @Override
     @Transactional
     public CommunityBoardsResponse addPost(CommunityBoardsRequest communityBoardsRequest, Long userId, String type) {
-        if(type.equals("수정")){
+        if(type.equals("update")){
             CommunityBoards before = getBoardsByNo(communityBoardsRequest.getNo());
 
             if(!before.getTitle().equals(communityBoardsRequest.getTitle())) {
@@ -54,9 +54,9 @@ public class CommunityServiceImpl implements CommunityService{
 
             return getBuildBoards(updated);
         } else {
-            User user = getUser(communityBoardsRequest.getUserId());
+            User user = getUser(userId);
 
-            CommunityBoards communityBoards = new CommunityBoards(communityBoardsRequest.getUserId(), user.getNickname(), user.getBeopjeongdong().getDongCode(),
+            CommunityBoards communityBoards = new CommunityBoards(userId, user.getNickname(), user.getBeopjeongdong().getDongCode(),
                     communityBoardsRequest.getTitle(), communityBoardsRequest.getContent(), communityBoardsRequest.getCategory(), communityBoardsRequest.getAttachedFile(), LocalDateTime.now());
 
             CommunityBoards save = communityBoardsRepository.save(communityBoards);

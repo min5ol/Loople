@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ChatRoomRequest {
-    private String host;
-    private String client;
+    private String participantA;
+    private String participantB;
 }

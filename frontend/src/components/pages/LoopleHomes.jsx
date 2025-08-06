@@ -26,10 +26,11 @@ export default function LoopleHome() {
     };
     fetchInit();
   }, []);
+
   return (
     <div className="relative min-h-screen bg-[#FEF7E2] pt-20 pb-10">
       {/* 🧭 상단 네비게이션 탭 */}
-      <Header />
+      <Header currentUserInfo={currentUserInfo} />
 
       {/* 🧾 게시판 */}
       <div className="max-w-5xl mx-auto px-4">
@@ -37,7 +38,7 @@ export default function LoopleHome() {
       </div>
 
       {/* 💬 챗봇 플로팅 */}
-      <Chatbot />
+      <Chatbot currentUserInfo={currentUserInfo}/>
     </div>
   );
 }

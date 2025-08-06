@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function Header() {
+export default function Header({currentUserInfo}) {
   const navigate = useNavigate();
 
   const menuItems = [
@@ -14,6 +14,7 @@ export default function Header() {
     { label: "마이빌리지", path: "/myvillage", emoji: "🏡" },
     { label: "퀴즈 풀기", path: "/quiz", emoji: "🧠" },
     { label: "지역별 규칙", path: "/rule", emoji: "📜" },
+    { label: "채팅하기", path: "/chat"},
   ];
 
   return (
@@ -22,7 +23,7 @@ export default function Header() {
         {menuItems.map((item) => (
           <button
             key={item.path}
-            onClick={() => navigate(item.path)}
+            onClick={() => navigate(item.path, {state: {currentUserInfo}})}
             className="flex items-center gap-1 px-4 py-1.5 text-sm bg-white border border-[#3C9A5F] text-[#264D3D] rounded-full shadow-sm hover:bg-[#CCE7B8] transition"
           >
             <span>{item.emoji}</span>

@@ -22,6 +22,7 @@ public class CommunityController {
     @PostMapping("/post/submit/{type}")
     public CommunityBoardsResponse handlePostSubmit(@RequestBody CommunityBoardsRequest communityBoardsRequest, @PathVariable String type,
                            HttpServletRequest request){
+        System.out.println("communityBoardsRequest = " + communityBoardsRequest);
         Long userId = getLoggedInUserId.getUserId(request);
         return communityService.addPost(communityBoardsRequest, userId, type);
     }

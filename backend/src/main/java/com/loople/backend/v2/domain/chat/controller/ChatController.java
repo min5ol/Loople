@@ -27,12 +27,8 @@ public class ChatController {
     private final GetLoggedInUserId getLoggedInUserId;
 
     // POST 방식으로 메시지 받아 OpenAI 응답 반환
-    @PostMapping(value = "/withAI/text")
-    public Mono<String> chatWithAI(@RequestBody ChatTextRequest chatTextRequest, HttpServletRequest request){
-        Long userId = getLoggedInUserId.getUserId(request);
-
-        System.out.println("chatTextRequest = " + chatTextRequest.toString());
-
+    @PostMapping(value = "/chatbot/text")
+    public Mono<String> sendMessageToAI(@RequestBody ChatTextRequest chatTextRequest){
         String prompt = chatTextRequest.getContent()
                 + " 쓰레기 처리 방법에 대해 알려줘 !\n"
                 + "두괄식으로 어떻게 할지 먼저 써주고 그 뒤에 설명 붙여줘\n"
@@ -41,7 +37,7 @@ public class ChatController {
         return openApiClient.requestChatCompletion(prompt)
                 .flatMap(AIResponse -> {
                     //보낸 메시지 저장
-                    chatService.saveText(chatTextRequest, userId);
+                    chatService.saveText(chatTextRequest);
 
                     //응답 메시지 저장
                     chatService.saveResponse(chatTextRequest.getRoomId(), AIResponse);
@@ -49,25 +45,40 @@ public class ChatController {
                 });
     }
 
-    @GetMapping("/buildRoom/withAI")
-    public ChatRoomResponse getRoomNum(HttpServletRequest request){
-        System.out.println("채팅방 생성");
-        Long userId = getLoggedInUserId.getUserId(request);
+    @GetMapping("/chatbot/buildRoom")
+    public ChatRoomResponse getRoomNum(@RequestParam Long userId){
         return chatService.buildRoomWithAI(userId);
     }
 
-    @GetMapping("/category")
+    @GetMapping("/chatbot/category")
     public List<ChatbotCategoryResponse> getMainCategory(@RequestParam String categoryType, @RequestParam(required=false) Long parentId){
         System.out.println("categoryType = " + categoryType);
         return chatService.getCategory(categoryType, parentId);
     }
 
-    @GetMapping("/details")
-    public List<ChatbotCategoryDetailResponse> getDetails(@RequestParam Long parentId, HttpServletRequest request){
-        System.out.println("parentId = " + parentId);
-        Long userId = getLoggedInUserId.getUserId(request);
-
+    @GetMapping("/chatbot/details")
+    public List<ChatbotCategoryDetailResponse> getDetails(@RequestParam Long parentId, @RequestParam Long userId){
         return chatService.getDetail(parentId, userId);
+    }
+
+    @PostMapping("user/buildRoom")
+    public ChatRoomResponse getRoomListByUser(@RequestBody ChatRoomRequest chatRoomRequest){
+        return chatService.buildRoom(chatRoomRequest);
+    }
+
+    @GetMapping("user/allRoom/{nickname}")
+    public List<ChatRoomResponse> getAllRooms(@PathVariable String nickname){
+        return chatService.getAllRooms(nickname);
+    }
+
+    @PostMapping("/user/send")
+    public ChatTextResponse sendMessage(@RequestBody ChatTextRequest chatTextRequest){
+        return chatService.sendMessage(chatTextRequest);
+    }
+
+    @GetMapping("/user/{roomId}/text")
+    public List<ChatTextResponse> viewRoomText(@PathVariable Long roomId){
+        return chatService.viewRoomText(roomId);
     }
 
 }
