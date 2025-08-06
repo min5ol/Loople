@@ -92,7 +92,7 @@ export default function Community({currentUserInfo}) {
             중고나눔게시판
           </button>
         </div>
-        <button onClick={() => navigate("/newPost")} className="px-5 py-2 rounded-md shadow bg-[#C7E6C9] text-[#264D3D] hover:bg-[#3C9A5F] hover:text-white transition border-none cursor-pointer">
+        <button onClick={() => navigate("/newPost", {state: {currentUserInfo}})} className="px-5 py-2 rounded-md shadow bg-[#C7E6C9] text-[#264D3D] hover:bg-[#3C9A5F] hover:text-white transition border-none cursor-pointer">
           글쓰기
         </button>
       </div>

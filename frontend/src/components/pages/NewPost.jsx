@@ -22,13 +22,14 @@ export default function NewPost() {
   const { upload, isLoading, error } = usePresignedUpload();
 
   const location = useLocation();
-  const post = location.state.post;
+  const post = location.state?.post;
+  const currentUserInfo = location.state?.currentUserInfo;
   const [isEditMode, setIsEditMode] = useState(false);
 
   const [isFileChanged, setIsFileChanged] = useState(false);
 
   useEffect(() => {
-    console.log(post);
+    console.log("post", post);
     if (post != null) {
       setIsEditMode(true);
       setFormData({
@@ -91,7 +92,7 @@ export default function NewPost() {
     }
 
     const data = new FormData();
-    data.append("no", post.no || "");
+    data.append("no", post?.no || "");
     data.append("title", formData.title);
     data.append("category", formData.category);
     data.append("content", formData.content);
@@ -110,10 +111,10 @@ export default function NewPost() {
 
     try {
       let type;
-      isEditMode ? type = "수정" : type = "등록";
+      isEditMode ? type = "update" : type = "create";
       const res = await submitPost(data, type);
       navigate("/communityPost", {
-        state: { res },
+        state: { res, currentUserInfo },
       });
 
       console.log("성공", res);

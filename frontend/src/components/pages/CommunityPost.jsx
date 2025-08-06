@@ -198,7 +198,7 @@ export default function CommunityPost() {
     }
   }
 
-  const handleDeleteCancel = () => {
+  const handleDeleteCancel = async () => {
     setDeleteTarget(null);
     setDeleteTargetId(null);
     setShowDeleteConfirm(false);
