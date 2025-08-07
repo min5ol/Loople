@@ -1,14 +1,19 @@
 package com.loople.backend.v2.domain.chat.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class ChatTextRequest {
-    private Long userId;
-    private String nickname;
+@Builder
+public class ChatTextResponse {
+    private Long no;
     private Long roomId;
+    private String nickname;
     private String content;
     private String type;
+    private LocalDateTime createdAt;
 }

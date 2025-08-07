@@ -1,5 +1,6 @@
 package com.loople.backend.v2.domain.community.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,17 +8,15 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
 @AllArgsConstructor
-public class CommunityBoardsResponse {
+@Builder
+public class CommunityCommentResponse {
     private Long no;
     private Long userId;
     private String nickname;
-    private String dongCode;
-    private String title;
-    private String content;
-    private String category;
-    private String attachedFile;
+    private Long boardId;
+    private Long parentId;
+    private String comment;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

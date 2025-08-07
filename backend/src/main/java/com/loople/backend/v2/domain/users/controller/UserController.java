@@ -12,10 +12,16 @@ import com.loople.backend.v2.domain.users.dto.*;
 import com.loople.backend.v2.domain.users.entity.User;
 import com.loople.backend.v2.domain.users.repository.UserRepository;
 import com.loople.backend.v2.domain.users.service.UserService;
+import com.loople.backend.v2.global.getUserId.GetLoggedInUserId;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,6 +32,7 @@ public class UserController
 {
     private final UserService userService;
     private final UserRepository userRepository;
+    private final GetLoggedInUserId getLoggedInUserId;
 
     @GetMapping("/check-email")
     public ResponseEntity<EmailCheckResponse> checkEmail(@RequestParam String email)
@@ -126,5 +133,12 @@ public class UserController
     {
         userService.assignVillage(userId);
         return ResponseEntity.ok().build();
+    }
+
+    //유저 정보 가져오기
+    @GetMapping("/userInfo")
+    public UserInfoResponse getUserInfo(HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return userService.getUserInfo(userId);
     }
 }

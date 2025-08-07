@@ -1,16 +1,14 @@
 package com.loople.backend.v2.domain.community.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name="community_boards")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommunityBoards {
     @Id
@@ -43,7 +41,7 @@ public class CommunityBoards {
     @Column(name="is_deleted")
     private int isDeleted;
 
-    @Column(name="deleted_at", updatable = false, insertable = false)
+    @Column(name="deleted_at")
     private LocalDateTime deletedAt;
 
     @Builder

@@ -7,17 +7,13 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
 @AllArgsConstructor
-public class CommunityBoardsResponse {
+@Builder
+public class CommunityReportsRequest {
     private Long no;
     private Long userId;
-    private String nickname;
-    private String dongCode;
-    private String title;
-    private String content;
+    private String target;
+    private Long targetId;
     private String category;
-    private String attachedFile;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String reason;
 }

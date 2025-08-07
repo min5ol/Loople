@@ -15,6 +15,8 @@ import SignUpComplete from "../components/pages/SignUpComplete";
 import RegionalRules from "../components/pages/RegionalRules";
 import NewPost from "../components/pages/NewPost";
 import CommunityPost from "../components/pages/CommunityPost";
+import ReportPage from "../components/pages/ReportPage";
+import Chat from "../components/pages/Chat";
 
 const routes = [
   { path: "/", element: <Home /> },               // 로그인 (루트)
@@ -28,6 +30,8 @@ const routes = [
   { path: "/rule", element: <RegionalRules /> },
   { path: "/newPost", element: <NewPost/> },
   { path: "/communityPost", element: <CommunityPost/> },
+  { path: "/reportPage", element: <ReportPage /> },
+  { path: "/chat", element: <Chat /> },
 ];
 
 export default routes;

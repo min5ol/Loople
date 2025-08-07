@@ -32,9 +32,12 @@ import com.loople.backend.v2.global.exception.ErrorCode;
 import com.loople.backend.v2.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -133,9 +136,8 @@ public class UserServiceImpl implements UserService
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
 
         String token = jwtProvider.createToken(user.getNo(), user.getRole());
-        String nickname = user.getNickname();
 
-        return new UserLoginResponse(token, nickname);
+        return new UserLoginResponse(token);
     }
 
     @Override
@@ -155,13 +157,9 @@ public class UserServiceImpl implements UserService
     @Override
     public UserLoginResponse socialLoginOrRedirect(OAuthUserInfo userInfo)
     {
-        User user = userRepository.findByEmail(userInfo.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        String token = jwtProvider.createToken(user.getNo(), user.getRole());
-        String nickname = user.getNickname();
-
-        return new UserLoginResponse(token, nickname);
+        return userRepository.findByProviderAndSocialId(userInfo.getProvider(), userInfo.getSocialId())
+                .map(user -> new UserLoginResponse(jwtProvider.createToken(user.getNo(), user.getRole())))
+                .orElse(null);
     }
 
     @Override
@@ -415,5 +413,12 @@ public class UserServiceImpl implements UserService
                 .build();
 
         userRepository.save(updated);
+    }
+
+    @Override
+    public UserInfoResponse getUserInfo(Long userId) {
+        User user = userRepository.findByNo(userId).orElseThrow(() -> new NoSuchElementException("해당 사용자가 존재하지 않습니다."));
+
+        return new UserInfoResponse(user.getNo(), user.getNickname(), user.getEmail());
     }
 }
