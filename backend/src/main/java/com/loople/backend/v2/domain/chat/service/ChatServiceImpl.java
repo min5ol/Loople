@@ -5,6 +5,7 @@ import com.loople.backend.v2.domain.chat.entity.*;
 import com.loople.backend.v2.domain.chat.repository.*;
 import com.loople.backend.v2.domain.users.entity.User;
 import com.loople.backend.v2.domain.users.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -52,9 +53,9 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void saveText(ChatTextRequest chatTextRequest) {
         ChatText chatText = ChatText.builder()
-                .roomId(chatTextRequest.getRoomId())
-                .nickname(chatTextRequest.getNickname())
-                .content(chatTextRequest.getContent())
+                .roomId(chatTextRequest.roomId())
+                .nickname(chatTextRequest.nickname())
+                .content(chatTextRequest.content())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -140,25 +141,6 @@ public class ChatServiceImpl implements ChatService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public ChatTextResponse sendMessage(ChatTextRequest chatTextRequest) {
-        ChatText chatText = ChatText.builder()
-                .roomId(chatTextRequest.getRoomId())
-                .nickname(chatTextRequest.getNickname())
-                .content(chatTextRequest.getContent())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        chatTextRepository.save(chatText);
-
-        return ChatTextResponse.builder()
-                .no(chatText.getNo())
-                .roomId(chatText.getRoomId())
-                .content(chatText.getContent())
-                .nickname(chatText.getNickname())
-                .createdAt(chatText.getCreatedAt())
-                .build();
-    }
 
     @Override
     public List<ChatTextResponse> viewRoomText(Long roomId) {
@@ -169,6 +151,25 @@ public class ChatServiceImpl implements ChatService {
                 .collect(Collectors.toList());
     }
 
+    //WebSocket
+    @Override
+    @Transactional
+    public ChatTextResponse saveMessage(ChatTextRequest chatTextRequest) {
+        ChatTextRequest chatMessage = chatTextRequest.withTimestamp();
+        ChatText chatText = ChatText.builder()
+                .roomId(chatMessage.roomId())
+                .nickname(chatMessage.nickname())
+                .content(chatMessage.content())
+                .type(chatMessage.type())
+                .createdAt(chatMessage.createdAt())
+                .build();
+
+        chatTextRepository.save(chatText);
+        ChatRoom chatRoom = chatRoomRepository.findByNo(chatText.getRoomId()).orElseThrow(() -> new NoSuchElementException("해당 채팅방이 존재하지 않습니다."));
+        chatRoom.setUpdatedAt(LocalDateTime.now());
+
+        return new ChatTextResponse(chatText.getNo(), chatText.getRoomId(), chatText.getNickname(), chatText.getContent(), chatText.getType(), chatText.getCreatedAt());
+    }
 
 
 

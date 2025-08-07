@@ -1,5 +1,6 @@
 package com.loople.backend.v2.domain.chat.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "chat_rooms")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom {
     @Id
@@ -20,16 +22,19 @@ public class ChatRoom {
     @Column(name="participant_b")
     private String participantB;
 
-    @Column(name="created_at", insertable = false, updatable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", insertable = false, updatable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
     @Column(name="is_deleted")
     private int isDeleted;
 
-    @Column(name="deleted_at", insertable = false, updatable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @Column(name="deleted_at")
     private LocalDateTime deletedAt;
 
     @Builder

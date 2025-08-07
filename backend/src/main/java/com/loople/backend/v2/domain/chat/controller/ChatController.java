@@ -10,6 +10,11 @@ import com.loople.backend.v2.global.jwt.JwtProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -24,11 +29,12 @@ public class ChatController {
 
     private final OpenApiClient openApiClient;
     private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // POST 방식으로 메시지 받아 OpenAI 응답 반환
     @PostMapping("/chatbot/text")
     public Mono<String> sendMessageToAI(@RequestBody ChatTextRequest chatTextRequest){
-        String prompt = chatTextRequest.getContent()
+        String prompt = chatTextRequest.content()
                 + " 쓰레기 처리 방법에 대해 알려줘 !\n"
                 + "두괄식으로 어떻게 할지 먼저 써주고 그 뒤에 설명 붙여줘\n"
                 + "줄글의 형식으로 보여주며 줄바꿈 적용해서 가독성 있게 답장 부탁해";
@@ -39,7 +45,7 @@ public class ChatController {
                     chatService.saveText(chatTextRequest);
 
                     //응답 메시지 저장
-                    chatService.saveResponse(chatTextRequest.getRoomId(), AIResponse);
+                    chatService.saveResponse(chatTextRequest.roomId(), AIResponse);
                     return Mono.just(AIResponse);
                 });
     }
@@ -70,14 +76,35 @@ public class ChatController {
         return chatService.getAllRooms(nickname);
     }
 
-    @PostMapping("/user/send")
-    public ChatTextResponse sendMessage(@RequestBody ChatTextRequest chatTextRequest){
-        return chatService.sendMessage(chatTextRequest);
-    }
-
     @GetMapping("/user/{roomId}/text")
     public List<ChatTextResponse> viewRoomText(@PathVariable Long roomId){
         return chatService.viewRoomText(roomId);
+    }
+
+
+    @MessageMapping("/chat.sendMessage")
+    @SendTo("/topic/public")
+    public void sendMessage(@Payload ChatTextRequest chatTextRequest) {
+        System.out.println("chatTextRequest = " + chatTextRequest);
+
+        // JDK 21의 가상 스레드를 사용하여 비동기적으로 메시지 처리
+        Thread.ofVirtual()
+                .name("chat-process-" + System.currentTimeMillis())
+                .start(() -> {
+                    ChatTextResponse response = chatService.saveMessage(chatTextRequest);
+                    messagingTemplate.convertAndSend("/topic/public", response);
+                });
+
+    }
+
+    @MessageMapping("/chat.addUser")
+    @SendTo("/topic/public")
+    public ChatTextRequest addUser(@Payload ChatTextRequest chatTextRequest,
+                               SimpMessageHeaderAccessor headerAccessor) {
+        // 웹소켓 세션에 사용자 이름 추가
+        headerAccessor.getSessionAttributes()
+                .put("username", chatTextRequest.nickname());
+        return chatTextRequest.withTimestamp();
     }
 
 }

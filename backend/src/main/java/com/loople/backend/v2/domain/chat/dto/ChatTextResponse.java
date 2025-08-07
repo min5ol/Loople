@@ -1,5 +1,6 @@
 package com.loople.backend.v2.domain.chat.dto;
 
+import com.loople.backend.v2.domain.chat.entity.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,6 @@ public class ChatTextResponse {
     private Long roomId;
     private String nickname;
     private String content;
-    private String type;
+    private MessageType type;
     private LocalDateTime createdAt;
 }

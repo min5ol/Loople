@@ -14,6 +14,8 @@ public interface ChatService {
 
     ChatRoomResponse buildRoom(ChatRoomRequest chatRoomRequest);
     List<ChatRoomResponse> getAllRooms(String nickname);
-    ChatTextResponse sendMessage(ChatTextRequest chatTextRequest);
     List<ChatTextResponse> viewRoomText(Long roomId);
+
+    //WebSocket
+    ChatTextResponse saveMessage(ChatTextRequest chatTextRequest);
 }
