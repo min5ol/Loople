@@ -16,7 +16,7 @@ export default function Community({currentUserInfo}) {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [noticePosts, setNoticePosts] = useState([]);
-  const [selectedBoard, setSelectedBoard] = useState("ALL");
+  const [selectedBoard, setSelectedBoard] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage=10;
   
@@ -31,7 +31,7 @@ export default function Community({currentUserInfo}) {
     const fetchData = async () => {
       try {
         await handlePost("NOTICE");
-        await handlePost("ALL");
+        // await handlePost("ALL");
       } catch (err) {
         console.error("게시글 불러오기 실패:", err);
       }

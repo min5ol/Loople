@@ -56,8 +56,17 @@ public class CommunityServiceImpl implements CommunityService{
         } else {
             User user = getUser(userId);
 
-            CommunityBoards communityBoards = new CommunityBoards(userId, user.getNickname(), user.getBeopjeongdong().getDongCode(),
-                    communityBoardsRequest.getTitle(), communityBoardsRequest.getContent(), communityBoardsRequest.getCategory(), communityBoardsRequest.getAttachedFile(), LocalDateTime.now());
+            CommunityBoards communityBoards = CommunityBoards.builder()
+                    .userId(userId)
+                    .nickname(user.getNickname())
+                    .dongCode(user.getBeopjeongdong().getDongCode())
+                    .title(communityBoardsRequest.getTitle())
+                    .content(communityBoardsRequest.getContent())
+                    .category(communityBoardsRequest.getCategory())
+                    .attachedFile(communityBoardsRequest.getAttachedFile())
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
 
             CommunityBoards save = communityBoardsRepository.save(communityBoards);
 
@@ -96,6 +105,8 @@ public class CommunityServiceImpl implements CommunityService{
                 .boardId(communityCommentRequest.getBoardId())
                 .parentId(communityCommentRequest.getParentId())
                 .comment(communityCommentRequest.getComment())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
         CommunityComment saved = communityCommentRepository.save(communityComment);
@@ -133,6 +144,7 @@ public class CommunityServiceImpl implements CommunityService{
                 .targetId(communityReportsRequest.getTargetId())
                 .category(communityReportsRequest.getCategory())
                 .reason(communityReportsRequest.getReason())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         communityReportsRepository.save(build);

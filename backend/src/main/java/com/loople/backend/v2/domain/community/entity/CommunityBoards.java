@@ -32,10 +32,10 @@ public class CommunityBoards {
     @Column(name="attached_file", columnDefinition = "TEXT")
     private String attachedFile;
 
-    @Column(name="created_at", updatable = false, insertable = false)
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", updatable = false, insertable = false)
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
     @Column(name="is_deleted")
@@ -45,7 +45,7 @@ public class CommunityBoards {
     private LocalDateTime deletedAt;
 
     @Builder
-    public CommunityBoards(Long userId, String nickname, String dongCode, String title, String content, String category, String attachedFile, LocalDateTime createdAt) {
+    public CommunityBoards(Long userId, String nickname, String dongCode, String title, String content, String category, String attachedFile, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.userId = userId;
         this.nickname = nickname;
         this.dongCode = dongCode;
@@ -54,6 +54,7 @@ public class CommunityBoards {
         this.category = category;
         this.attachedFile = attachedFile;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
 }

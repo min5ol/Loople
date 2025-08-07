@@ -23,9 +23,9 @@ public class CommunityComment {
     private Long parentId;
     @Column(columnDefinition = "TEXT")
     private String comment;
-    @Column(name="created_at", insertable = false, updatable = false)
+    @Column(name="created_at")
     private LocalDateTime createdAt;
-    @Column(name="updated_at", insertable = false, updatable = false)
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
     @Column(name="is_deleted")
     private int isDeleted;
@@ -33,11 +33,13 @@ public class CommunityComment {
     private LocalDateTime deletedAt;
 
     @Builder
-    public CommunityComment(Long userId, String nickname, Long boardId, Long parentId, String comment) {
+    public CommunityComment(Long userId, String nickname, Long boardId, Long parentId, String comment, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.userId = userId;
         this.nickname = nickname;
         this.boardId = boardId;
         this.parentId = parentId;
         this.comment = comment;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 }

@@ -7,4 +7,7 @@ export default defineConfig({
     react(),
     Unocss(),
   ],
+  define: {
+    global: 'window',
+  },
 })

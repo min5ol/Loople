@@ -12,14 +12,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-chat") // 웹소켓 엔드포인트 (프론트에서 연결)
-                .setAllowedOriginPatterns("*")
-                .withSockJS(); // SockJS fallback 옵션
+        // WebSocket 연결을 위한 엔드포인트 등록
+        // SockJS는 WebSocket을 지원하지 않는 브라우저를 위한 폴백 옵션
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins("http://localhost:5173") // Vite 기본 포트
+                .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/app"); // 클라이언트 -> 서버
-        registry.enableSimpleBroker("/topic"); // 서버 -> 클라이언트 (메시지 브로커)
+        // 클라이언트로 메시지를 보낼 때 사용할 prefix
+        registry.enableSimpleBroker("/topic");
+
+        // 서버로 메시지를 보낼 때 사용할 prefix
+        registry.setApplicationDestinationPrefixes("/app");
     }
 }

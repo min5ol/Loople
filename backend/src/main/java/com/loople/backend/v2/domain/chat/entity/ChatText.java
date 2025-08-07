@@ -1,5 +1,6 @@
 package com.loople.backend.v2.domain.chat.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,13 +27,16 @@ public class ChatText {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private String type;
+    //CHAT, JOIN, LEAVE
+    @Enumerated(EnumType.STRING)
+    private MessageType type;
 
-    @Column(name="created_at", insertable = false, updatable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
     @Builder
-    public ChatText(Long roomId, String nickname, String content, String type, LocalDateTime createdAt) {
+    public ChatText(Long roomId, String nickname, String content, MessageType type, LocalDateTime createdAt) {
         this.roomId = roomId;
         this.nickname = nickname;
         this.content = content;

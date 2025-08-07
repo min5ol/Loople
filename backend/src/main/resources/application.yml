@@ -57,3 +57,7 @@ oauth:
     client-id: ${NAVER_CLIENT_ID}
     client-secret: ${NAVER_CLIENT_SECRET}
     redirect-uri: http://localhost:5173/oauth/callback/naver
+
+# 선택사항: 서버 시간대도 설정 (스프링 부트 2.x 이하에서는 일부 경우 필요)
+server:
+  timezone: Asia/Seoul

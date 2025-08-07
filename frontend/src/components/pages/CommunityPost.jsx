@@ -44,9 +44,12 @@ export default function CommunityPost() {
   const [deleteTargetId, setDeleteTargetId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [currentComment, setCurrentComment] = useState(null);
 
   // 댓글 수정 input에 포커스 주기 위한 ref
   const inputRef = useRef(null);
+
+  const commentRef = useRef(null);
 
   // 댓글 입력창 input에 대한 ref (상태 대신 ref로 값 읽기)
   const commentInputRef = useRef(null);
@@ -75,6 +78,12 @@ export default function CommunityPost() {
     }
   }, [editCommentId]);
 
+  useEffect(() => {
+    if (commentRef.current) {
+      commentRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [currentComment])
+
   // 첨부파일 확장자 추출 함수
   const getFileExtension = (filename) => {
     return filename?.split(".").pop().toLowerCase();
@@ -96,6 +105,9 @@ export default function CommunityPost() {
   const handleComment = async () => {
     const comment = commentInputRef.current.value;
 
+    setCurrentComment(comment);
+
+
     // 빈 문자열은 무시
     if (!comment.trim()) return;
 
@@ -116,6 +128,7 @@ export default function CommunityPost() {
 
       // 입력창 초기화
       commentInputRef.current.value = "";
+      setCurrentComment("");
     } catch (error) {
       console.error("댓글 등록 실패", error);
     }
@@ -238,7 +251,7 @@ export default function CommunityPost() {
               작성자: <span className="font-semibold">{post.nickname}</span>
             </span>
             {post.category === "USED" && post.userId != currentUserInfo.no && (
-              <button className="bg-[#3C9A5F] text-[#FEF7E2] px-3 py-1 rounded hover:bg-[#264D3D] transition-colors border-none cursor-pointer" onClick={() => navigate("/chat", { state: {currentUserInfo, post} })}>
+              <button className="bg-[#3C9A5F] text-[#FEF7E2] px-3 py-1 rounded hover:bg-[#264D3D] transition-colors border-none cursor-pointer" onClick={() => navigate("/chat", { state: { currentUserInfo, post } })}>
                 💬 채팅하기
               </button>
             )}
@@ -282,61 +295,97 @@ export default function CommunityPost() {
           {/* 댓글 리스트 */}
           <div className="space-y-4 max-h-96 mb-6 flex-grow overflow-y-auto relative">
             {comments.length > 0 &&
-              comments.map((comment) => (
-                <div key={comment.no} className="relative bg-white p-5 rounded shadow border border-[#C7E6C9]">
-                  <div className="flex justify-between items-center text-sm text-[#3C9A5F] mb-1">
-                    <span className="font-semibold">{comment.nickname}</span>
-                    <div className="flex items-center gap-2">
-                      <div>
-                        <span className="block text-xs text-gray-400">
-                          {new Date(comment.createdAt).toLocaleString()}
-                        </span>
-                        {comment.updatedAt != comment.createdAt && (
+              comments.map((comment, index) => {
+                const isLast = index === comments.length - 1;
+                return (
+                  <div
+                    key={comment.no}
+                    className="relative bg-white p-5 rounded shadow border border-[#C7E6C9]"
+                    ref={isLast ? commentRef : null}
+                  >
+                    <div className="flex justify-between items-center text-sm text-[#3C9A5F] mb-1">
+                      <span className="font-semibold">{comment.nickname}</span>
+                      <div className="flex items-center gap-2">
+                        <div>
                           <span className="block text-xs text-gray-400">
-                            수정: {new Date(comment.updatedAt).toLocaleString()}
+                            {new Date(comment.createdAt).toLocaleString()}
                           </span>
-                        )}
-                      </div>
-
-                      {/* 댓글 옵션 버튼 */}
-                      <div className="relative group inline-block">
-                        <div className="w-5 h-5 cursor-pointer flex items-center justify-center">
-                          <span className="select-none">⋮</span>
+                          {comment.updatedAt !== comment.createdAt && (
+                            <span className="block text-xs text-gray-400">
+                              수정: {new Date(comment.updatedAt).toLocaleString()}
+                            </span>
+                          )}
                         </div>
 
-                        {/* 옵션 메뉴 (수정, 삭제, 신고) */}
-                        <div className="absolute top-full right-[-10px] mt-0 group-hover:block hidden w-28 bg-white rounded shadow-lg z-50">
-                          <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-1 mb-0" onClick={() => runIfOwner(comment, "수정", "comment")}>댓글 수정</p>
-                          <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-3 mb-3" onClick={() => runIfOwner(comment, "삭제", "comment")}>댓글 삭제</p>
-                          <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-0 mb-1" onClick={() => navigate("/reportPage", {
-                            state: {
-                              target: "comment",
-                              targetId: comment.no,
-                            }
-                          })}>댓글 신고</p>
+                        {/* 댓글 옵션 버튼 */}
+                        <div className="relative group inline-block">
+                          <div className="w-5 h-5 cursor-pointer flex items-center justify-center">
+                            <span className="select-none">⋮</span>
+                          </div>
+
+                          {/* 옵션 메뉴 (수정, 삭제, 신고) */}
+                          <div className="absolute top-full right-[-10px] mt-0 group-hover:block hidden w-28 bg-white rounded shadow-lg z-50">
+                            <p
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-1 mb-0"
+                              onClick={() => runIfOwner(comment, "수정", "comment")}
+                            >
+                              댓글 수정
+                            </p>
+                            <p
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-3 mb-3"
+                              onClick={() => runIfOwner(comment, "삭제", "comment")}
+                            >
+                              댓글 삭제
+                            </p>
+                            <p
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-0 mb-1"
+                              onClick={() =>
+                                navigate("/reportPage", {
+                                  state: {
+                                    target: "comment",
+                                    targetId: comment.no,
+                                  },
+                                })
+                              }
+                            >
+                              댓글 신고
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
+
+                    {/* 수정 중인 댓글은 input으로, 아닌 경우는 일반 텍스트로 표시 */}
+                    {editCommentId === comment.no ? (
+                      <div>
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={editText}
+                          className="w-full box-border pt-3 pb-3 border"
+                          onChange={(e) => setEditText(e.target.value)}
+                        />
+                        <div className="flex justify-end gap-2 mt-2 right">
+                          <button
+                            className="px-3 py-1 bg-[#3C9A5F] text-white rounded border-none"
+                            onClick={handleEditSave}
+                          >
+                            수정
+                          </button>
+                          <button
+                            className="px-3 py-1 bg-[#f2f2f2] rounded border-none"
+                            onClick={handleEditCancel}
+                          >
+                            취소
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p>{comment.comment}</p>
+                    )}
                   </div>
-
-                  {/* 수정 중인 댓글은 input으로, 아닌 경우는 일반 텍스트로 표시 */}
-                  {editCommentId === comment.no ? (
-                    <div>
-                      <input ref={inputRef} type="text" value={editText} className="w-full box-border pt-3 pb-3 border" onChange={(e) => setEditText(e.target.value)} />
-                      <div className="flex justify-end gap-2 mt-2 right">
-                        <button className="px-3 py-1 bg-[#3C9A5F] text-white rounded border-none" onClick={handleEditSave}>
-                          수정
-                        </button>
-                        <button className="px-3 py-1 bg-[#f2f2f2] rounded border-none" onClick={handleEditCancel}>
-                          취소
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <p>{comment.comment}</p>
-                  )}
-                </div>
-              ))}
+                );
+              })}
           </div>
 
           {/* 댓글 입력창 및 등록 버튼 */}
@@ -345,6 +394,9 @@ export default function CommunityPost() {
               type="text"
               placeholder="댓글을 입력하세요"
               className="flex-1 border border-[#81C784] border-solid rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#3C9A5F] box-border"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleComment();
+              }}
               ref={commentInputRef}
             />
             <button

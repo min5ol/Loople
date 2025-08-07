@@ -194,7 +194,7 @@ export default function NewPost() {
                   type="submit"
                   value={isLoading ? "처리 중..." : isEditMode ? "수정하기" : "등록하기"}
                   disabled={isLoading}
-                  className={`cursor-pointer w-full max-w-xs py-3 rounded-lg font-semibold text-[#FEF7E2] text-base ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-[#3C9A5F] hover:bg-[#264D3D]"
+                  className={`cursor-pointer w-full max-w-xs py-3 rounded-lg font-semibold text-[#FEF7E2] text-base border-none ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-[#3C9A5F] hover:bg-[#264D3D]"
                     } transition-colors`}
                 />
               </td>
