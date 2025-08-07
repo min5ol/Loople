@@ -137,7 +137,7 @@ public class UserServiceImpl implements UserService
 
         String token = jwtProvider.createToken(user.getNo(), user.getRole());
 
-        return new UserLoginResponse(token);
+        return new UserLoginResponse(token, user.getNickname());
     }
 
     @Override
@@ -157,9 +157,12 @@ public class UserServiceImpl implements UserService
     @Override
     public UserLoginResponse socialLoginOrRedirect(OAuthUserInfo userInfo)
     {
-        return userRepository.findByProviderAndSocialId(userInfo.getProvider(), userInfo.getSocialId())
-                .map(user -> new UserLoginResponse(jwtProvider.createToken(user.getNo(), user.getRole())))
-                .orElse(null);
+        User user = userRepository.findByProviderAndSocialId(userInfo.getProvider(), userInfo.getSocialId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String token = jwtProvider.createToken(user.getNo(), user.getRole());
+
+        return new UserLoginResponse(token, user.getNickname());
     }
 
     @Override
