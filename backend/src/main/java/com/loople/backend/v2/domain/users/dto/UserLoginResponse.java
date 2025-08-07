@@ -8,5 +8,6 @@
 package com.loople.backend.v2.domain.users.dto;
 
 public record UserLoginResponse(
-        String token // 로그인 후 클라이언트에 전달할 JWT 또는 액세스 토큰
+        String token, // 로그인 후 클라이언트에 전달할 JWT 또는 액세스 토큰
+        String nickname
 ) {}
