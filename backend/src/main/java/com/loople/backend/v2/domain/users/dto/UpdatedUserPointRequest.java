@@ -1,16 +1,16 @@
-/*
-    작성일자: 2025-07-18
-    작성자: 백진선
-    설명: 사용자 포인트 갱신을 위한 요청 데이터 전달용 DTO 클래스
-*/
+/**
+ * 작성일자: 2025-07-18
+ * 작성자: 백진선, 장민솔
+ * 설명: 사용자 포인트 갱신 요청 DTO
+ */
+
 package com.loople.backend.v2.domain.users.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
-@Data
-@AllArgsConstructor
-public class UpdatedUserPointRequest {
-    private Long userId;    //사용자 ID
-    private int points; //갱신할 값
-}
+public record UpdatedUserPointRequest(
+        @NotNull
+        @Min(1)
+        Integer points
+){}

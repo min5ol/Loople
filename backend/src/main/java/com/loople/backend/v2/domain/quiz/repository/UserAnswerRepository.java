@@ -34,4 +34,6 @@ public interface UserAnswerRepository extends JpaRepository<UserAnswer, Long> {
 
     List<UserAnswer> findByUserId(Long userId);
     List<Long> findProblemIdByUserId(Long userId);
+
+    List<UserAnswer> findByUserIdOrderBySolvedAtDesc(Long userId);
 }

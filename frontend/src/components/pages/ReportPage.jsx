@@ -1,3 +1,5 @@
+// src/components/pages/ReportPage.jsx
+
 import React, { useState } from "react";
 import Header from "../templates/Header";
 import { useLocation, useNavigate } from "react-router-dom";

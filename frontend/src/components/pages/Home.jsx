@@ -1,46 +1,73 @@
-// 작성일: 2025.08.05
-// 작성자: 장민솔
-// 설명: 로그인/회원가입 진입 포함 홈화면 (소셜+로컬 로그인 + 디자인 피드백 반영)
+// src/components/pages/Home.jsx
 
-import React, { useState } from "react";
-import logo from "../../assets/brandLogo.png";
-import googleIcon from "../../assets/google.png";
-import kakaoIcon from "../../assets/kakao.png";
-import naverIcon from "../../assets/naver.png";
-import appleIcon from "../../assets/apple.png";
-import { useNavigate } from "react-router-dom";
-import instance from "../../apis/instance";
+import React from 'react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../../store/authStore'
+import instance from '../../apis/instance'
+
+import logo from '../../assets/brandLogo.png'
+import googleIcon from '../../assets/google.png'
+import kakaoIcon from '../../assets/kakao.png'
+import naverIcon from '../../assets/naver.png'
+import appleIcon from '../../assets/apple.png'
 
 export default function Home() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const setAuthInfo = useAuthStore((state) => state.setAuthInfo)
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: '', password: '' })
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      const res = await instance.post("/users/login", form);
-      const { token } = res.data;
-      const { nickname } = res.data;
-      localStorage.setItem("accessToken", token);
-      localStorage.setItem("nickname", nickname);
-      navigate("/quiz");
+      const res = await instance.post('/users/login', form)
+
+      // --- 디버깅을 위한 콘솔 로그 ---
+      console.log('API 응답 전체:', res)
+      console.log('API 응답 데이터:', res.data)
+      // --------------------------
+
+      // [핵심 수정] API 응답 데이터 구조에 맞게 수정합니다.
+      // 만약 데이터가 res.data 안에 바로 있다면, 아래 코드가 맞습니다.
+      const { userId, token, nickname } = res.data
+
+      // 만약 데이터가 res.data.data 와 같은 다른 객체 안에 있다면,
+      // const { userId, token, nickname } = res.data.data; 와 같이 수정해야 합니다.
+
+      if (!token) {
+        throw new Error('응답에서 토큰을 찾을 수 없습니다.')
+      }
+
+      setAuthInfo({
+        userId,
+        nickname,
+        email: form.email,
+        token,
+      })
+
+      navigate('/quiz')
     } catch (err) {
-      alert("로그인 실패: " + err.response?.data?.message);
+      console.error('로그인 실패:', err) // 에러 객체 전체를 출력하여 상세 원인 파악
+      alert(
+        '로그인 실패: ' +
+          (err.response?.data?.message ||
+            '알 수 없는 오류가 발생했습니다.'),
+      )
     }
-  };
+  }
 
   const socialProviders = [
-    { id: "google", name: "Google", icon: googleIcon, bg: "bg-white", text: "text-[#202020]" },
-    { id: "kakao", name: "Kakao", icon: kakaoIcon, bg: "bg-[#FEE500]", text: "text-[#3C1E1E]" },
-    { id: "naver", name: "Naver", icon: naverIcon, bg: "bg-[#03C75A]", text: "text-white" },
-    { id: "apple", name: "Apple", icon: appleIcon, bg: "bg-[#000000]", text: "text-white" },
-  ];
+    { id: 'google', name: 'Google', icon: googleIcon, bg: 'bg-white', text: 'text-[#202020]' },
+    { id: 'kakao', name: 'Kakao', icon: kakaoIcon, bg: 'bg-[#FEE500]', text: 'text-[#3C1E1E]' },
+    { id: 'naver', name: 'Naver', icon: naverIcon, bg: 'bg-[#03C75A]', text: 'text-white' },
+    { id: 'apple', name: 'Apple', icon: appleIcon, bg: 'bg-[#000000]', text: 'text-white' },
+  ]
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-[#264D3D] font-ptd-400">
@@ -97,7 +124,9 @@ export default function Home() {
             <button
               key={id}
               onClick={() =>
-                (window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/${id}`)
+                (window.location.href = `${
+                  import.meta.env.VITE_API_BASE_URL
+                }/oauth2/authorization/${id}`)
               }
               className={`w-full h-12 flex items-center border-none justify-center gap-3 rounded-lg ${bg} ${text} hover:opacity-90 transition font-ptd-500`}
             >
@@ -109,15 +138,15 @@ export default function Home() {
 
         {/* 회원가입 안내 */}
         <p className="mt-8 text-sm text-center text-[#202020]">
-          계정이 없으신가요?{" "}
+          계정이 없으신가요?{' '}
           <span
             className="text-[#3C9A5F] font-semibold cursor-pointer hover:underline"
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate('/signup')}
           >
             회원가입
           </span>
         </p>
       </div>
     </div>
-  );
+  )
 }

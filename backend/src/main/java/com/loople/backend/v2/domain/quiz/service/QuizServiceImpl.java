@@ -18,9 +18,12 @@ import com.loople.backend.v2.domain.quiz.repository.UserAnswerRepository;
 import com.loople.backend.v2.domain.users.dto.UpdatedUserPointRequest;
 import com.loople.backend.v2.domain.users.entity.User;
 import com.loople.backend.v2.domain.users.repository.UserRepository;
+import com.loople.backend.v2.global.exception.CustomException;
+import com.loople.backend.v2.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.DayOfWeek;
@@ -151,7 +154,7 @@ public class QuizServiceImpl implements QuizService {
                                             .build();
                                     multipleOptionRepository.save(buildOption);
                                 });
-                            };
+                            }
                         });
     }
 
@@ -164,59 +167,68 @@ public class QuizServiceImpl implements QuizService {
         }
     }
 
-    //사용자 답안 저장 및 정답 여부, 점수 계산 
+    //사용자 답안 저장 및 정답 여부, 점수 계산
+    @Transactional
     @Override
     public UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto, Long userId) {
-        //전처리
-        Long problemId = userAnswerRequestDto.getProblemId();
-        String submittedAnswer = userAnswerRequestDto.getSubmittedAnswer();
+        // 공통 값
+        LocalDate today = LocalDate.now();
 
-        //정답 여부 체크
+        // 유저 1번 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 정답 여부
         boolean isCorrect = checkTheAnswer(userAnswerRequestDto);
 
-        //주간, 월간 접속 여부 체크
+        // 주간/월간 출석
         boolean isWeekly = false;
         boolean isMonthly = false;
 
-        //주간 출석 체크 - 일요일인 경우 한 번에 체크
-        if (LocalDate.now().getDayOfWeek() == DayOfWeek.SUNDAY) {
-            System.out.println("일요일입니다");
-            if (hasCheckedAttendanceForAWeek(userId)) {
-                isWeekly = true;
-            }
+        if(today.getDayOfWeek() == DayOfWeek.SUNDAY && hasCheckedAttendanceForAWeek(userId))
+        {
+            isWeekly = true;
         }
 
-        //월간 출석 체크
-        if (hasCheckedAttendanceForAMonth(userId)) {
+        if(hasCheckedAttendanceForAMonth(userId))
+        {
             isMonthly = true;
         }
 
-        //점수 계산(정답 여부, 주간 및 월간 출석 보너스 포함)
+        // 점수 계산
         int totalPoints = (isCorrect ? 7 : 3) + (isWeekly ? 20 : 0) + (isMonthly ? 100 : 0);
 
-        //사용자 점수 업데이트
-        updatedUserPoints(new UpdatedUserPointRequest(userId, totalPoints), userId);
+        // 사용자 점수 업데이트
+        updatedUserPoints(totalPoints, user);
 
-        User ById = findById(userId);
-
-        //사용자 답안 엔티티 생성 및 저장
+        // 답안 저장
         UserAnswer userAnswer = UserAnswer.builder()
                 .userId(userId)
-                .userEmail(ById.getEmail())
-                .problemId(problemId)
-                .submittedAnswer(submittedAnswer)
+                .userEmail(user.getEmail())
+                .problemId(userAnswerRequestDto.getProblemId())
+                .submittedAnswer(userAnswerRequestDto.getSubmittedAnswer())
                 .isCorrect(isCorrect ? 1 : 0)
                 .isWeekly(isWeekly ? 1 : 0)
                 .isMonthly(isMonthly ? 1 : 0)
                 .points(totalPoints)
-                .solvedAt(LocalDate.now())
+                .solvedAt(today)
                 .build();
 
         userAnswerRepository.save(userAnswer);
 
-        //답안 채점 결과 DTO 반환
-        return new UserAnswerResponseDto(userAnswer.getIsCorrect(), userAnswer.getIsWeekly(), userAnswer.getIsMonthly(), totalPoints);
+        return new UserAnswerResponseDto(
+                userAnswer.getIsCorrect(),
+                userAnswer.getIsWeekly(),
+                userAnswer.getIsMonthly(),
+                totalPoints
+        );
+    }
 
+    private void updatedUserPoints(int delta, User user)
+    {
+        int newPoints = user.getPoints() + delta;
+        if(newPoints < 0) newPoints = 0;
+        user.addPoints(newPoints);
     }
 
     //오늘 문제 풀이 여부 반환
@@ -315,7 +327,7 @@ public class QuizServiceImpl implements QuizService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
-        user.addPoints(request.getPoints());
+        user.addPoints(request.points());
     }
 
     //이번 달 정보 출력
@@ -339,6 +351,68 @@ public class QuizServiceImpl implements QuizService {
         public unFindNoException(String message) {
             super(message); //예외 메시지 부모 클래스(RuntimeException)로 전달
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AttendanceInfoResponse getAttendanceInfo(Long userId)
+    {
+        List<UserAnswer> allAnswers = userAnswerRepository.findByUserIdOrderBySolvedAtDesc(userId);
+
+        if(allAnswers.isEmpty())
+        {
+            return new AttendanceInfoResponse(0, 0);
+        }
+
+        List<LocalDate> uniqueDates = allAnswers.stream()
+                .map(UserAnswer::getSolvedAt)
+                .distinct()
+                .collect(Collectors.toList());
+
+        int consecutiveDays = calculateConsecutiveDays(uniqueDates);
+
+        int monthlyDays = calculateMonthlyDays(uniqueDates);
+
+        return new AttendanceInfoResponse(consecutiveDays, monthlyDays);
+    }
+
+    private int calculateConsecutiveDays(List<LocalDate> uniqueDates)
+    {
+        if(uniqueDates.isEmpty()) return 0;
+
+        LocalDate today = LocalDate.now();
+        LocalDate mostRecentDate = uniqueDates.get(0);
+        int streak = 0;
+
+        // 가장 최근 기록이 오늘 또는 어제여쟈 연속 출석이 유효
+        if(mostRecentDate.equals(today) || mostRecentDate.equals(today.minusDays(1)))
+        {
+            streak = 1;
+            LocalDate expectedDate = mostRecentDate.minusDays(1);
+
+            for(int i = 1; i < uniqueDates.size(); i++)
+            {
+                if(uniqueDates.get(i).equals(expectedDate))
+                {
+                    streak++;
+                    expectedDate = expectedDate.minusDays(1);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        return streak;
+    }
+
+    private int calculateMonthlyDays(List<LocalDate> uniqueDates)
+    {
+        YearMonth currentMonth = YearMonth.now();
+        return (int) uniqueDates.stream()
+                .filter(date -> YearMonth.from(date).equals(currentMonth))
+                .count();
     }
 }
 

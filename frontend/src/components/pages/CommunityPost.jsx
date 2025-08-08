@@ -1,3 +1,5 @@
+// src/components/pages/CommunityPost.jsx
+
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../templates/Header";

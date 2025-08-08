@@ -1,3 +1,5 @@
+// src/components/pages/RegionRules.jsx
+
 import { useState, useEffect } from "react";
 import instance from "../../apis/instance";
 import Header from "../templates/Header";

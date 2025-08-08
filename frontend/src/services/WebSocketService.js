@@ -1,3 +1,5 @@
+// scr/services/WebSocketService.js
+
 import { Client } from '@stomp/stompjs';   // STOMP 프로토콜 클라이언트 라이브러리
 import SockJS from 'sockjs-client';        // SockJS를 이용해 WebSocket 연결 생성
 
