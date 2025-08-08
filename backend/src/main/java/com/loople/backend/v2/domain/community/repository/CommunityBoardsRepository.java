@@ -12,5 +12,6 @@ public interface CommunityBoardsRepository extends JpaRepository<CommunityBoards
     Optional<CommunityBoards> findByNoAndIsDeletedNot(Long no, int isDeleted);
     List<CommunityBoards> findByCategoryStartingWithAndIsDeletedNotOrderByNoDesc(String category, int isDeleted);
     List<CommunityBoards> findByCategoryAndIsDeletedNotOrderByNoDesc(String category, int isDeleted);
+    Optional<CommunityBoards> findByNo(Long no);
 
 }

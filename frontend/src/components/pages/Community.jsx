@@ -55,16 +55,16 @@ export default function Community({currentUserInfo}) {
   }
 
   const fetchDetailPost = async (no) => {
-    const res = await getDetailPost(no);
+    const post = await getDetailPost(no);
     navigate("/communityPost", {
-      state: { res, currentUserInfo }
+      state: { post, currentUserInfo }
     });
   };
 
   return (
     <div className="mt-20 px-6 py-10 max-w-4xl mx-auto bg-[#D9E6D4] border border-[#4A7C59] rounded-xl shadow-lg">
       <p className="text-center text-green-700 text-xl font-semibold mb-6">
-        🌿 Loople 동네 게시판에 오신 걸 환영합니다!<br />
+        🌿 Loople 게시판에 오신 걸 환영합니다!<br />
         여러분의 소소한 이야기와 나눔을 함께해요.
       </p>
 

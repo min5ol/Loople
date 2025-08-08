@@ -1,25 +1,18 @@
 package com.loople.backend.v2.domain.chat.controller;
 
 import com.loople.backend.v2.domain.chat.dto.*;
-import com.loople.backend.v2.domain.chat.entity.ChatRoom;
 import com.loople.backend.v2.domain.chat.service.ChatService;
 import com.loople.backend.v2.global.api.OpenApiClient;
-import com.loople.backend.v2.global.exception.UnauthorizedException;
-import com.loople.backend.v2.global.getUserId.GetLoggedInUserId;
-import com.loople.backend.v2.global.jwt.JwtProvider;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -34,6 +27,7 @@ public class ChatController {
     // POST 방식으로 메시지 받아 OpenAI 응답 반환
     @PostMapping("/chatbot/text")
     public Mono<String> sendMessageToAI(@RequestBody ChatTextRequest chatTextRequest){
+        System.out.println("chatTextRequest = " + chatTextRequest);
         String prompt = chatTextRequest.content()
                 + " 쓰레기 처리 방법에 대해 알려줘 !\n"
                 + "두괄식으로 어떻게 할지 먼저 써주고 그 뒤에 설명 붙여줘\n"
@@ -50,9 +44,9 @@ public class ChatController {
                 });
     }
 
-    @GetMapping("/chatbot/buildRoom")
-    public ChatRoomResponse getRoomNum(@RequestParam Long userId){
-        return chatService.buildRoomWithAI(userId);
+    @GetMapping("/chatbot/buildRoom/{nickname}")
+    public ChatRoomResponse getRoomNum(@PathVariable String nickname){
+        return chatService.buildRoomWithAI(nickname);
     }
 
     @GetMapping("/chatbot/category")
@@ -66,9 +60,9 @@ public class ChatController {
         return chatService.getDetail(parentId, userId);
     }
 
-    @PostMapping("user/buildRoom")
-    public ChatRoomResponse getRoomListByUser(@RequestBody ChatRoomRequest chatRoomRequest){
-        return chatService.buildRoom(chatRoomRequest);
+    @PostMapping("user/buildRoom/{postId}")
+    public ChatRoomResponse getRoomListByUser(@RequestBody ChatRoomRequest chatRoomRequest, @PathVariable Long postId){
+        return chatService.buildRoom(chatRoomRequest, postId);
     }
 
     @GetMapping("user/allRoom/{nickname}")
@@ -77,8 +71,13 @@ public class ChatController {
     }
 
     @GetMapping("/user/{roomId}/text")
-    public List<ChatTextResponse> viewRoomText(@PathVariable Long roomId){
-        return chatService.viewRoomText(roomId);
+    public List<ChatTextResponse> viewRoomText(@PathVariable Long roomId, @RequestParam String nickname){
+        return chatService.viewRoomText(roomId, nickname);
+    }
+
+    @GetMapping("/user/delete/{roomId}")
+    public void deleteChatRoom(@PathVariable Long roomId, @RequestParam String nickname) {
+        chatService.deleteChatRoom(roomId, nickname);
     }
 
 
@@ -100,11 +99,26 @@ public class ChatController {
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
     public ChatTextRequest addUser(@Payload ChatTextRequest chatTextRequest,
-                               SimpMessageHeaderAccessor headerAccessor) {
-        // 웹소켓 세션에 사용자 이름 추가
-        headerAccessor.getSessionAttributes()
-                .put("username", chatTextRequest.nickname());
-        return chatTextRequest.withTimestamp();
+                                   SimpMessageHeaderAccessor headerAccessor) {
+
+        String nickname = chatTextRequest.nickname();
+
+        if (nickname != null) {
+            headerAccessor.getSessionAttributes().put("username", nickname);
+        } else {
+            System.err.println("nickname이 null 입니다.");
+        }
+
+        // 반환용 ChatTextRequest 구성
+        return new ChatTextRequest(
+                chatTextRequest.roomId(),
+                chatTextRequest.userId(),
+                nickname,
+                chatTextRequest.content() != null ? chatTextRequest.content() : "",
+                chatTextRequest.type(),
+                chatTextRequest.createdAt() != null ? chatTextRequest.createdAt() : LocalDateTime.now()
+        );
     }
+
 
 }

@@ -107,7 +107,7 @@ class WebSocketService {
 
         // 입장 메시지 객체 생성
         const message = {
-            sender: username,
+            nickname: username,
             content: `${username} joined the chat`,
             type: MessageType.JOIN,
         };

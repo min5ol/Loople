@@ -112,12 +112,12 @@ export default function NewPost() {
     try {
       let type;
       isEditMode ? type = "update" : type = "create";
-      const res = await submitPost(data, type);
+      const post = await submitPost(data, type);
       navigate("/communityPost", {
-        state: { res, currentUserInfo },
+        state: { post, currentUserInfo },
       });
 
-      console.log("성공", res);
+      console.log("성공", post);
     } catch (error) {
       console.log("오류", error);
       console.log("게시글 등록 중 오류가 발생했습니다.");

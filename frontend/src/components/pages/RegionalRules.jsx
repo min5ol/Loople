@@ -173,9 +173,25 @@ export default function RegionalRules() {
 
           {isResult === true && wasteInfo && wasteInfo.length > 0 && (
             <>
-              <h2 className="font-semibold text-[#264D3D] mb-4 text-center">
-                {wasteInfo[0].sido} {wasteInfo[0].sigungu}의 쓰레기 수거 정보
-              </h2>
+              <div className="p-0 rounded-lg max-w-lg mx-auto">
+                <h2 className="font-semibold text-[#264D3D] mb-2 text-center">
+                  {wasteInfo[0].sido} {wasteInfo[0].sigungu}의 쓰레기 수거 정보
+                </h2>
+                <p className="text-center">
+                  <a
+                    href={wasteInfo[0].homepage}
+                    className={`text-[#202020] ${wasteInfo[0].homepage
+                        ? 'hover:text-green-900 hover:underline transition-colors duration-300'
+                        : 'pointer-events-none opacity-50 cursor-default'
+                      }`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    [홈페이지에서 정보 확인하기]
+                  </a>
+                </p>
+              </div>
+
 
               {wasteInfo
                 .filter(item => !item.wasteType)
