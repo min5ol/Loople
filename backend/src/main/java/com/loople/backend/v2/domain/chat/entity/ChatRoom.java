@@ -16,6 +16,9 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long no;
 
+    @Column(name="post_id")
+    private Long postId;
+
     @Column(name="participant_a")
     private String participantA;
 
@@ -30,15 +33,16 @@ public class ChatRoom {
     @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name="is_deleted")
-    private int isDeleted;
+    @Column(name="a_left")
+    private boolean ALeft;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
-    @Column(name="deleted_at")
-    private LocalDateTime deletedAt;
+    @Column(name="b_left")
+    private boolean BLeft;
+
 
     @Builder
-    public ChatRoom(String participantA, String participantB, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public ChatRoom(Long postId, String participantA, String participantB, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.postId = postId;
         this.participantA = participantA;
         this.participantB = participantB;
         this.createdAt = createdAt;

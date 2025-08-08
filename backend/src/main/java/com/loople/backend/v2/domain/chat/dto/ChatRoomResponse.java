@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ChatRoomResponse {
     private Long no;
+    private Long postId;
+    private String postTitle;
     private String participantA;
     private String participantB;
     private String lastMessage;

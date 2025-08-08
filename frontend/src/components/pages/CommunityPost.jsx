@@ -30,7 +30,7 @@ export default function CommunityPost() {
   // React Router로부터 전달받은 게시글 데이터 및 네비게이트 함수
   const location = useLocation();
   const navigate = useNavigate();
-  const post = location.state.res;
+  const post = location.state?.post;
   const currentUserInfo = location.state.currentUserInfo;
 
   // 댓글 리스트 상태

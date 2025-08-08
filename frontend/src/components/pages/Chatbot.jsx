@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
 
-export const buildRoom = async (userId) => {
-  const res = await instance.get("/chat/completion/chatbot/buildRoom", {params: {userId}});
+export const buildRoom = async (nickname) => {
+  const res = await instance.get(`/chat/completion/chatbot/buildRoom/${nickname}`);
   return res.data;
 };
 
@@ -22,11 +22,11 @@ export const getDetails = async (parentId, userId) => {
 };
 
 export const sendMessages = async (userMessage) => {
-  const res = await instance.post("/chat/completion/withAI/text", userMessage);
+  const res = await instance.post("/chat/completion/chatbot/text", userMessage);
   return res.data;
 };
 
-export default function Chatbot({currentUserInfo}) {
+export default function Chatbot({ currentUserInfo }) {
   const [room, setRoom] = useState(null);
   const [showChatRoom, setShowChatRoom] = useState(false);
   const [chatHistory, setChatHistory] = useState([
@@ -41,13 +41,19 @@ export default function Chatbot({currentUserInfo}) {
   const lastUserMessageRef = useRef(null);
   const inputRef = useRef(null);
 
+  const MessageType = {
+    CHAT: 'CHAT',
+    JOIN: 'JOIN',
+    LEAVE: 'LEAVE',
+  };
+
   const handleChatRoom = async () => {
     setChatHistory([{ type: "AI", text: "안녕하세요😊 분리 배출 정보를 알려드리는 챗봇입니다. 버튼을 눌러주세요 !" }]);
     setCategory([]);
     setUserMessage('');
     setIsInputDisabled(true);
 
-    const room = await buildRoom(currentUserInfo.no);
+    const room = await buildRoom(currentUserInfo.nickname);
     setRoom(room);
     setShowChatRoom(true);
 
@@ -214,7 +220,7 @@ export default function Chatbot({currentUserInfo}) {
     setChatHistory(prev => [...prev, { type: "USER", text: userMessage }]);
     setWaitingResponse(true);
 
-    const payLoad = { roomId: room.no, content: userMessage, userId: currentUserInfo.no };
+    const payLoad = { roomId: room.no, content: userMessage, nickname: currentUserInfo.nickname, type: MessageType.CHAT };
     setUserMessage('');
 
     try {
