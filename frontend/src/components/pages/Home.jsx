@@ -25,9 +25,9 @@ export default function Home() {
     e.preventDefault();
     try {
       const res = await instance.post("/users/login", form);
-      const { accessToken } = res.data;
+      const { token } = res.data;
       const { nickname } = res.data;
-      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("accessToken", token);
       localStorage.setItem("nickname", nickname);
       navigate("/quiz");
     } catch (err) {
