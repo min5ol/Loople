@@ -137,8 +137,34 @@ public class User {
         작성자: 백진선
         설명: 사용자 포인트를 누적 값으로 더하는 메서드
     */
-    public void addPoints(int pointsToAdd)
+    public void addPoints(int delta)
     {
-        this.points += pointsToAdd;
+        this.points += delta;
+        if (this.points < 0) this.points = 0;
+    }
+
+    public void assignBadge(MyBadge badge)
+    {
+        this.badge = badge;
+    }
+
+    public void assignRoom(MyRoom room)
+    {
+        this.room = room;
+    }
+
+    public void assignLoopling(MyLoopling loopling)
+    {
+        this.myLoopling = loopling;
+    }
+
+    public void assignVillage(MyVillage village)
+    {
+        this.village = village;
+    }
+
+    public void markSignupCompleted()
+    {
+        this.signupStatus = SignupStatus.COMPLETED;
     }
 }

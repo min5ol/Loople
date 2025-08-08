@@ -1,15 +1,23 @@
-// 작성일: 2025.07.18
-// 작성자: 장민솔
-// 설명: 회원가입 1단계 – 이메일 중복 확인, 입력 검증, 디자인 완전 리팩토링 (box-sizing 적용 반영)
+/**
+ * 작성일: 2025.07.14
+ * 수정일: 2025.08.08
+ * 작성자: 장민솔
+ * 설명: 회원가입 1단계 로직, zustand 상태관리 도입
+ */
 
-// src/components/pages/SignupStep1.jsx
+// src/components/pages/SignUpStep1.jsx
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { checkEmail } from "../../apis/user";
+import { useSignupStore } from "../../store/signupStore";
 
-export default function SignUpStep1() {
+export default function SignUpStep1()
+{
   const navigate = useNavigate();
+
+  // zustand 스토어에서 데이터 저장을 위한 액션 함수
+  const setStep1Data = useSignupStore((state) => state.setStep1Data);
 
   const [form, setForm] = useState({
     email: "",
@@ -25,15 +33,17 @@ export default function SignUpStep1() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({...prev, [name]: value }));
 
-    if (name === "email") {
+    if(name === 'email')
+    {
       setEmailStatus({ checked: false, message: "", isValid: false });
     }
   };
 
   const handleEmailCheck = async () => {
-    if (!form.email) {
+    if(!form.email)
+    {
       setEmailStatus({
         checked: false,
         message: "이메일을 입력해주세요.",
@@ -42,11 +52,11 @@ export default function SignUpStep1() {
       return;
     }
 
-    try {
+    try{
       const res = await checkEmail(form.email);
       setEmailStatus({
         checked: true,
-        message: res.available
+        message: res.available 
           ? "✅ 사용 가능한 이메일입니다."
           : "❌ 이미 사용 중인 이메일입니다.",
         isValid: res.available,
@@ -62,7 +72,6 @@ export default function SignUpStep1() {
 
   const handleNext = () => {
     const { email, password, passwordConfirm } = form;
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!email || !password || !passwordConfirm) {
@@ -82,7 +91,12 @@ export default function SignUpStep1() {
       return;
     }
 
-    sessionStorage.setItem("signupStep1", JSON.stringify(form));
+    // sessionStorage 대신 Zustand 스토어에 데이터를 저장
+    setStep1Data({
+      email: form.email,
+      password: form.password,
+    });
+
     navigate("/signup/step2");
   };
 

@@ -17,6 +17,7 @@ import NewPost from "../components/pages/NewPost";
 import CommunityPost from "../components/pages/CommunityPost";
 import ReportPage from "../components/pages/ReportPage";
 import Chat from "../components/pages/Chat";
+import MyPage from "../components/pages/myPage";
 
 const routes = [
   { path: "/", element: <Home /> },               // 로그인 (루트)
@@ -32,6 +33,7 @@ const routes = [
   { path: "/communityPost", element: <CommunityPost/> },
   { path: "/reportPage", element: <ReportPage /> },
   { path: "/chat", element: <Chat /> },
+  { path: "/mypage", element: <MyPage /> },
 ];
 
 export default routes;

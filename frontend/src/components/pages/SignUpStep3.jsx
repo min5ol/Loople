@@ -1,9 +1,16 @@
-// 작성일: 2025.07.23
-// 작성자: 장민솔
-// 설명: 회원가입 3단계 – 소셜/일반 분기 완전 분리 + 주소 및 이미지 처리 → 성공 모달 → 축하 페이지 이동
+/**
+ * 작성일: 2025.07.23
+ * 수정일: 2025.08.08
+ * 작성자: 장민솔
+ * 설명: 회원가입 3단계 - zustand 스토어 분리 적용 및 버그 수정
+ */
+
+// src/components/pages/SignUpStep3.jsx
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSignupStore } from "../../store/signupStore"; // 임시 스토어
+import { useAuthStore } from "../../store/authStore"; // 영구 스토어 import
 
 import instance from "../../apis/instance";
 import { searchKakaoAddress } from "../../services/kakaoService";
@@ -17,6 +24,11 @@ import SignupSuccessModal from "../atoms/SignupSuccessModal";
 
 export default function SignUpStep3() {
   const navigate = useNavigate();
+  
+  // 각 스토어에서 필요한 상태와 함수를 가져옵니다.
+  const { step1Data, step2Data, socialData } = useSignupStore();
+  const setAuthInfo = useAuthStore((state) => state.setAuthInfo);
+
   const [form, setForm] = useState({
     address: "",
     detailAddress: "",
@@ -35,19 +47,12 @@ export default function SignUpStep3() {
   const [signupUserId, setSignupUserId] = useState(null);
 
   useEffect(() => {
-    const provider = sessionStorage.getItem("provider");
-    const step2 = sessionStorage.getItem("signupStep2");
-
-    if (!step2) {
+    // 이전 단계 데이터가 없으면 뒤로 보냅니다.
+    if (!step2Data.nickname) {
       alert("이전 단계를 먼저 진행해주세요.");
       navigate("/signup");
     }
-
-    if (!provider && !sessionStorage.getItem("signupStep1")) {
-      alert("이전 단계를 먼저 진행해주세요.");
-      navigate("/signup");
-    }
-  }, [navigate]);
+  }, [step2Data, navigate]);
 
   const handleUpload = (url) => {
     setForm((prev) => ({ ...prev, profileImageUrl: url }));
@@ -68,7 +73,7 @@ export default function SignUpStep3() {
             if (!result) return alert("주소 검색 결과가 없습니다.");
 
             const { sido, sigungu, eupmyun, ri } = parseAddress(result.address);
-            const { data } = await instance.get("/beopjeongdong/dong-code", {
+            const { data: dongData } = await instance.get("/beopjeongdong/dong-code", {
               params: { sido, sigungu, eupmyun, ri },
             });
 
@@ -81,7 +86,7 @@ export default function SignUpStep3() {
               sigungu,
               eupmyun,
               ri,
-              dong_code: data.dongCode,
+              dong_code: dongData.dongCode,
             }));
           } catch (err) {
             console.error("주소 처리 오류", err);
@@ -101,9 +106,6 @@ export default function SignUpStep3() {
   };
 
   const handleSubmit = async () => {
-    const provider = sessionStorage.getItem("provider");
-    const step2 = JSON.parse(sessionStorage.getItem("signupStep2") || "{}");
-
     const {
       address,
       detailAddress,
@@ -123,50 +125,38 @@ export default function SignUpStep3() {
 
     try {
       let payload, res;
+      let finalPayload = {
+        detailAddress,
+        profileImageUrl: profileImageUrl ?? DEFAULT_PROFILE_IMAGE_URL,
+        sido,
+        sigungu,
+        eupmyun,
+      };
 
-      if (provider) {
-        const email = sessionStorage.getItem("email");
-        const socialId = sessionStorage.getItem("socialId");
+      if (ri && ri.trim() !== "") {
+        finalPayload.ri = ri;
+      }
 
-        if (!email || !socialId || !step2.nickname || !step2.phone) {
+      if (socialData.provider) {
+        if (!socialData.email || !socialData.socialId || !step2Data.nickname || !step2Data.phone) {
           alert("소셜 사용자 정보가 누락되었습니다.");
           return;
         }
-
-        payload = {
-          email,
-          socialId,
-          provider,
-          name: step2.name,
-          nickname: step2.nickname,
-          phone: step2.phone,
-          detailAddress,
-          profileImageUrl: profileImageUrl ?? DEFAULT_PROFILE_IMAGE_URL,
-          sido,
-          sigungu,
-          eupmyun,
-          ri: ri || "",
-        };
-
+        payload = { ...finalPayload, ...socialData, ...step2Data };
         res = await signupSocial(payload);
       } else {
-        const step1 = JSON.parse(sessionStorage.getItem("signupStep1") || "{}");
-
-        payload = {
-          ...step1,
-          ...step2,
-          detailAddress,
-          profileImageUrl: profileImageUrl ?? DEFAULT_PROFILE_IMAGE_URL,
-          sido,
-          sigungu,
-          eupmyun,
-          ri: ri || "",
-        };
-
+        payload = { ...finalPayload, ...step1Data, ...step2Data };
         res = await signup(payload);
       }
 
-      localStorage.setItem("accessToken", res.token);
+      // [핵심] API 응답 성공 후, 영구 스토어에 사용자 정보를 저장합니다.
+      setAuthInfo({
+        userId: res.userId,
+        nickname: res.nickname,
+        email: payload.email,
+        token: res.token,
+      });
+
       setSignupUserName(res.nickname);
       setSignupUserId(res.userId);
       setModalOpen(true);
@@ -178,7 +168,8 @@ export default function SignUpStep3() {
 
   const handleModalConfirm = () => {
     setModalOpen(false);
-    sessionStorage.clear();
+    // [핵심] 여기서 reset()을 호출하지 않습니다. 버그의 원인입니다.
+    // 데이터 초기화는 다음 페이지인 SignUpComplete.jsx에서 처리합니다.
     navigate(`/signup/complete?userId=${signupUserId}&name=${encodeURIComponent(signupUserName)}`);
   };
 
@@ -191,8 +182,7 @@ export default function SignUpStep3() {
       />
       <div className="min-h-screen flex items-center justify-center px-4 bg-[#F6F6F6] font-[pretendard]">
         <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-xl space-y-6 box-border">
-          <h2 className="text-2xl font-semibold text-[#264D3D] text-center">프로필 이미지 업로드</h2>
-
+          <h2 className="text-2xl font-semibold text-[#264D3D] text-center">프로필 및 주소 입력</h2>
           <div className="flex flex-col items-center gap-4">
             <img
               src={form.profileImageUrl || DEFAULT_PROFILE_IMAGE_URL}
@@ -201,7 +191,6 @@ export default function SignUpStep3() {
             />
             <ProfileImageUploader onUpload={handleUpload} />
           </div>
-
           <div className="pt-4 space-y-4">
             <button
               onClick={handleAddressSearch}
@@ -209,7 +198,6 @@ export default function SignUpStep3() {
             >
               주소 검색
             </button>
-
             <input
               name="address"
               value={form.address}
@@ -217,7 +205,6 @@ export default function SignUpStep3() {
               className="w-full h-12 px-4 rounded-lg bg-[#F0F0F0] shadow-inner font-ptd-400 box-border"
               placeholder="선택된 주소"
             />
-
             <input
               name="detailAddress"
               placeholder="상세주소"
@@ -226,7 +213,6 @@ export default function SignUpStep3() {
               className="w-full h-12 px-4 rounded-lg bg-[#F9F9F9] shadow-inner font-ptd-400 box-border"
             />
           </div>
-
           <button
             onClick={handleSubmit}
             className="w-full h-12 mt-6 bg-primary text-white rounded-lg hover:bg-[#2f7b4d] transition font-ptd-600 border-none shadow-inner"

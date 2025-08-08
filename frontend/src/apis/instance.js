@@ -4,6 +4,7 @@
 
 // src/apis/instance.js
 import axios from 'axios';
+import { useAuthStore } from '../store/authStore';
 
 // 로컬 스토리지에서 accessToken 꺼내옴
 // 로그인 후에 저장된 토큰이 있어야 Authorization 헤더에 붙여서 요청 가능함
@@ -22,15 +23,22 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
+    const { accessToken } = useAuthStore.getState();
+
+    if (accessToken)
+    {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    else
+    {
       delete config.headers.Authorization;
     }
+
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 export default instance;

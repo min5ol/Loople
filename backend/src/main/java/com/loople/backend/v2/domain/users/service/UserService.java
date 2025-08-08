@@ -8,8 +8,10 @@
 package com.loople.backend.v2.domain.users.service;
 
 import com.loople.backend.v2.domain.auth.dto.OAuthUserInfo;
+import com.loople.backend.v2.domain.quiz.dto.AttendanceInfoResponse;
 import com.loople.backend.v2.domain.users.dto.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService
@@ -30,7 +32,7 @@ public interface UserService
     // 소셜 로그인 시 기존 유저 or 신규 유저 구분 후 redirect 여부 판단
     UserLoginResponse socialLoginOrRedirect(OAuthUserInfo userInfo);
 
-    void updatePoints(UpdatedUserPointRequest request);
+    void updatePoints(Long userId, UpdatedUserPointRequest request);
 
     void completeSignup(Long userId);
 
@@ -45,4 +47,14 @@ public interface UserService
     void assignVillage(Long userId);
 
     UserInfoResponse getUserInfo(Long userId);
+
+    MyPageResponse getMyPage(Long userId);
+
+    AttendanceInfoResponse getAttendanceInfo(Long userId);
+
+    String updateProfileImage(User user, UpdateProfileImageRequest request);
+
+    String updateNickname(User user, UpdateNicknameRequest request);
+
+    String updatePhone(User user, UpdatePhoneReqeust reqeust);
 }

@@ -1,9 +1,10 @@
 /**
  * 작성일자: 2025-07-16
  * 작성자: 장민솔
- * 설명: 사용자 서비스 구현체
- *       - 회원가입: 중복 검사, 주소 매핑, 유저/알림/마을 초기화 처리
- *       - 로그인: 이메일 + 비밀번호 검증 및 토큰 발급
+ * 설명: 사용자 서비스 구현체 (리팩토링)
+ *       - 세터/엔티티 재생성 제거 → 도메인 메서드 + JPA 더티체킹
+ *       - 포인트 누적 버그 수정
+ *       - 트랜잭션 정리
  */
 
 package com.loople.backend.v2.domain.users.service;
@@ -21,6 +22,8 @@ import com.loople.backend.v2.domain.myRoom.entity.MyRoom;
 import com.loople.backend.v2.domain.myRoom.service.MyRoomService;
 import com.loople.backend.v2.domain.myVillage.entity.MyVillage;
 import com.loople.backend.v2.domain.myVillage.service.MyVillageService;
+import com.loople.backend.v2.domain.quiz.dto.AttendanceInfoResponse;
+import com.loople.backend.v2.domain.quiz.service.QuizService;
 import com.loople.backend.v2.domain.users.dto.*;
 import com.loople.backend.v2.domain.users.entity.Provider;
 import com.loople.backend.v2.domain.users.entity.Role;
@@ -32,18 +35,19 @@ import com.loople.backend.v2.global.exception.ErrorCode;
 import com.loople.backend.v2.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
+import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService
-{
+@Transactional // 기본 트랜잭션: 쓰기 가능. 조회 전용 메서드는 개별로 readOnly 적용
+public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
     private final BeopjeongdongRepository beopjeongdongRepository;
     private final PasswordEncoder passwordEncoder;
@@ -55,10 +59,12 @@ public class UserServiceImpl implements UserService
     private final MyLooplingService myLooplingService;
     private final MyVillageService myVillageService;
 
+    private final QuizService quizService;
+
     private void validateDuplicate(String email, String nickname)
     {
-        if(userRepository.existsByEmail(email)) throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
-        if(userRepository.existsByNickname(nickname)) throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+        if (userRepository.existsByEmail(email)) throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        if (userRepository.existsByNickname(nickname)) throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
     }
 
     private Beopjeongdong findBeopjeongdong(String sido, String sigungu, String eupmyun, String ri)
@@ -92,7 +98,6 @@ public class UserServiceImpl implements UserService
         userRepository.save(user);
 
         String token = jwtProvider.createToken(user.getNo(), user.getRole());
-
         return new UserSignupResponse(user.getNo(), user.getNickname(), token, user.getSignupStatus());
     }
 
@@ -122,25 +127,25 @@ public class UserServiceImpl implements UserService
         userRepository.save(user);
 
         String token = jwtProvider.createToken(user.getNo(), user.getRole());
-
         return new SocialSignupResponse(user.getNo(), user.getNickname(), token, user.getSignupStatus());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserLoginResponse login(UserLoginRequest request)
     {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if(!passwordEncoder.matches(request.password(), user.getPasswordHash()))
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash()))
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
 
         String token = jwtProvider.createToken(user.getNo(), user.getRole());
-
-        return new UserLoginResponse(token, user.getNickname());
+        return new UserLoginResponse(user.getNo(), token, user.getNickname());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EmailCheckResponse checkEmail(String email)
     {
         boolean available = !userRepository.existsByEmail(email);
@@ -148,6 +153,7 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public NicknameCheckResponse checkNickname(String nickname)
     {
         boolean available = !userRepository.existsByNickname(nickname);
@@ -155,24 +161,24 @@ public class UserServiceImpl implements UserService
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserLoginResponse socialLoginOrRedirect(OAuthUserInfo userInfo)
     {
         User user = userRepository.findByProviderAndSocialId(userInfo.getProvider(), userInfo.getSocialId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String token = jwtProvider.createToken(user.getNo(), user.getRole());
-
-        return new UserLoginResponse(token, user.getNickname());
+        return new UserLoginResponse(user.getNo(), token, user.getNickname());
     }
 
     @Override
-    public void updatePoints(UpdatedUserPointRequest request)
+    public void updatePoints(Long userId, UpdatedUserPointRequest request)
     {
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        user.addPoints(request.getPoints());
-        userRepository.save(user);
+        // 누적 delta만 적용 (음수 방지는 도메인 메서드에서 처리)
+        user.addPoints(request.points());
     }
 
     @Override
@@ -182,41 +188,15 @@ public class UserServiceImpl implements UserService
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getMyAvatar() == null ||
-            user.getBadge() == null ||
-            user.getRoom() == null ||
-            user.getMyLoopling() == null ||
-            user.getVillage() == null)
-        {
+                user.getBadge() == null ||
+                user.getRoom() == null ||
+                user.getMyLoopling() == null ||
+                user.getVillage() == null) {
             throw new CustomException(ErrorCode.SIGNUP_NOT_COMPLETE);
         }
 
-        User completedUser = User.builder()
-                .no(user.getNo())
-                .email(user.getEmail())
-                .passwordHash(user.getPasswordHash())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .phone(user.getPhone())
-                .beopjeongdong(user.getBeopjeongdong())
-                .address(user.getAddress())
-                .detailAddress(user.getDetailAddress())
-                .profileImageUrl(user.getProfileImageUrl())
-                .provider(user.getProvider())
-                .socialId(user.getSocialId())
-                .myAvatar(user.getMyAvatar())
-                .badge(user.getBadge())
-                .room(user.getRoom())
-                .myLoopling(user.getMyLoopling())
-                .village(user.getVillage())
-                .role(user.getRole())
-                .signupStatus(SignupStatus.COMPLETED)
-                .points(user.getPoints())
-                .isDeleted(user.getIsDeleted())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .build();
-
-        userRepository.save(completedUser);
+        // 엔티티 재생성/저장 없이 상태만 변경 → 더티체킹
+        user.markSignupCompleted();
     }
 
     @Override
@@ -224,37 +204,10 @@ public class UserServiceImpl implements UserService
     {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        if (user.getMyAvatar() != null)
-        {
-            throw new CustomException(ErrorCode.ALREADY_ASSIGNED_AVATAR);
-        }
+        if (user.getMyAvatar() != null) throw new CustomException(ErrorCode.ALREADY_ASSIGNED_AVATAR);
 
         MyAvatar avatar = myAvatarService.createDefaultAvatar(user);
-
-        User updated = User.builder()
-                .no(user.getNo())
-                .email(user.getEmail())
-                .passwordHash(user.getPasswordHash())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .phone(user.getPhone())
-                .beopjeongdong(user.getBeopjeongdong())
-                .address(user.getAddress())
-                .detailAddress(user.getDetailAddress())
-                .profileImageUrl(user.getProfileImageUrl())
-                .provider(user.getProvider())
-                .socialId(user.getSocialId())
-                .role(user.getRole())
-                .signupStatus(user.getSignupStatus())
-                .points(user.getPoints())
-                .isDeleted(user.getIsDeleted())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .myAvatar(avatar)
-                .build();
-
-        userRepository.save(updated);
+        user.assignAvatar(avatar);
     }
 
     @Override
@@ -262,36 +215,10 @@ public class UserServiceImpl implements UserService
     {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        if (user.getBadge() != null)
-        {
-            throw new CustomException(ErrorCode.ALREADY_ASSIGNED_BADGE);
-        }
+        if (user.getBadge() != null) throw new CustomException(ErrorCode.ALREADY_ASSIGNED_BADGE);
 
         MyBadge badge = myBadgeService.assignDefaultBadge(user);
-
-        User updated = User.builder()
-                .no(user.getNo())
-                .email(user.getEmail())
-                .passwordHash(user.getPasswordHash())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .phone(user.getPhone())
-                .beopjeongdong(user.getBeopjeongdong())
-                .address(user.getAddress())
-                .detailAddress(user.getDetailAddress())
-                .profileImageUrl(user.getProfileImageUrl())
-                .provider(user.getProvider())
-                .socialId(user.getSocialId())
-                .points(user.getPoints())
-                .isDeleted(user.getIsDeleted())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .myAvatar(user.getMyAvatar())
-                .badge(badge)
-                .build();
-
-        userRepository.save(updated);
+        user.assignBadge(badge);
     }
 
     @Override
@@ -299,38 +226,10 @@ public class UserServiceImpl implements UserService
     {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        if(user.getRoom() != null)
-        {
-            throw new CustomException(ErrorCode.ALREADY_ASSIGNED_ROOM);
-        }
+        if (user.getRoom() != null) throw new CustomException(ErrorCode.ALREADY_ASSIGNED_ROOM);
 
         MyRoom room = myRoomService.createDefaultRoom(user);
-
-        User updated = User.builder()
-                .no(user.getNo())
-                .email(user.getEmail())
-                .passwordHash(user.getPasswordHash())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .phone(user.getPhone())
-                .beopjeongdong(user.getBeopjeongdong())
-                .address(user.getAddress())
-                .detailAddress(user.getDetailAddress())
-                .profileImageUrl(user.getProfileImageUrl())
-                .provider(user.getProvider())
-                .role(user.getRole())
-                .signupStatus(user.getSignupStatus())
-                .points(user.getPoints())
-                .isDeleted(user.getIsDeleted())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .myAvatar(user.getMyAvatar())
-                .badge(user.getBadge())
-                .room(room)
-                .build();
-
-        userRepository.save(updated);
+        user.assignRoom(room);
     }
 
     @Override
@@ -338,40 +237,10 @@ public class UserServiceImpl implements UserService
     {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        if (user.getMyLoopling() != null)
-        {
-            throw new CustomException(ErrorCode.ALREADY_ASSIGNED_LOOPLING);
-        }
+        if (user.getMyLoopling() != null) throw new CustomException(ErrorCode.ALREADY_ASSIGNED_LOOPLING);
 
         MyLoopling loopling = myLooplingService.assignLoopling(user, catalogId);
-
-        User updated = User.builder()
-                .no(user.getNo())
-                .email(user.getEmail())
-                .passwordHash(user.getPasswordHash())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .phone(user.getPhone())
-                .beopjeongdong(user.getBeopjeongdong())
-                .address(user.getAddress())
-                .detailAddress(user.getDetailAddress())
-                .profileImageUrl(user.getProfileImageUrl())
-                .provider(user.getProvider())
-                .socialId(user.getSocialId())
-                .role(user.getRole())
-                .signupStatus(user.getSignupStatus())
-                .points(user.getPoints())
-                .isDeleted(user.getIsDeleted())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .myAvatar(user.getMyAvatar())
-                .badge(user.getBadge())
-                .room(user.getRoom())
-                .myLoopling(loopling)
-                .build();
-
-        userRepository.save(updated);
+        user.assignLoopling(loopling);
     }
 
     @Override
@@ -379,49 +248,60 @@ public class UserServiceImpl implements UserService
     {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        if (user.getVillage() != null)
-        {
-            throw new CustomException(ErrorCode.ALREADY_ASSIGNED_VILLAGE);
-        }
+        if (user.getVillage() != null) throw new CustomException(ErrorCode.ALREADY_ASSIGNED_VILLAGE);
 
         String dongCodePrefix = user.getBeopjeongdong().getDongCode().substring(0, 8);
-
         MyVillage village = myVillageService.assignVillage(user, dongCodePrefix);
-
-        User updated = User.builder()
-                .no(user.getNo())
-                .email(user.getEmail())
-                .passwordHash(user.getPasswordHash())
-                .name(user.getName())
-                .nickname(user.getNickname())
-                .phone(user.getPhone())
-                .beopjeongdong(user.getBeopjeongdong())
-                .address(user.getAddress())
-                .detailAddress(user.getDetailAddress())
-                .profileImageUrl(user.getProfileImageUrl())
-                .provider(user.getProvider())
-                .socialId(user.getSocialId())
-                .role(user.getRole())
-                .signupStatus(user.getSignupStatus())
-                .points(user.getPoints())
-                .isDeleted(user.getIsDeleted())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .myAvatar(user.getMyAvatar())
-                .badge(user.getBadge())
-                .room(user.getRoom())
-                .myLoopling(user.getMyLoopling())
-                .village(village)
-                .build();
-
-        userRepository.save(updated);
+        user.assignVillage(village);
     }
 
     @Override
-    public UserInfoResponse getUserInfo(Long userId) {
-        User user = userRepository.findByNo(userId).orElseThrow(() -> new NoSuchElementException("해당 사용자가 존재하지 않습니다."));
-
+    @Transactional(readOnly = true)
+    public UserInfoResponse getUserInfo(Long userId)
+    {
+        User user = userRepository.findByNo(userId)
+                .orElseThrow(() -> new NoSuchElementException("해당 사용자가 존재하지 않습니다."));
         return new UserInfoResponse(user.getNo(), user.getNickname(), user.getEmail());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MyPageResponse getMyPage(Long userId)
+    {
+        User user = userRepository.findByNo(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<Integer> attendanceDays = quizService.fetchAttendanceStatus(userId);
+
+        return new MyPageResponse(
+                user.getProfileImageUrl(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getNickname(),
+                user.getPoints(),
+                attendanceDays
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AttendanceInfoResponse getAttendanceInfo(Long userId)
+    {
+        return quizService.getAttendanceInfo(userId);
+    }
+
+    @Override
+    public String updateProfileImage(org.springframework.security.core.userdetails.User user, UpdateProfileImageRequest request) {
+        return "";
+    }
+
+    @Override
+    public String updateNickname(org.springframework.security.core.userdetails.User user, UpdateNicknameRequest request) {
+        return "";
+    }
+
+    @Override
+    public String updatePhone(org.springframework.security.core.userdetails.User user, UpdatePhoneReqeust reqeust) {
+        return "";
     }
 }

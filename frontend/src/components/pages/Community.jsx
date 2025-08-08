@@ -1,3 +1,5 @@
+// src/components/pages/Community.jsx
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";

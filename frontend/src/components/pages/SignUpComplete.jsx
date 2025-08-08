@@ -2,8 +2,11 @@
 // 작성자: 장민솔
 // 설명: 회원가입 완료 후 단계별 지급 슬라이드 진행 컴포넌트
 
-import React, { useState } from "react";
+// src/components/pages/SignUpComplete.jsx
+
+import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSignupStore } from "../../store/signupStore";
 import instance from "../../apis/instance";
 import FinalSuccessModal from "../atoms/FinalSuccessModal";
 import LooplingSelector from "../organisms/LooplingSelector";
@@ -15,40 +18,52 @@ import Village from "../../assets/preview_village.png";
 export default function SignUpComplete() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const userId = params.get("userId");
   const name = params.get("name");
+
+  const resetSignupStore = useSignupStore((state) => state.reset);
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [looplingId, setLooplingId] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  useEffect(() => {
+    resetSignupStore();
+  }, [resetSignupStore]);
+
   const handleNext = async () => {
-    if (!userId) return;
     setLoading(true);
 
     try {
       switch (step) {
         case 1:
-          await instance.post(`/users/${userId}/avatar/default`);
+          // [수정] URL에서 userId 제거
+          await instance.post(`/users/avatar/default`);
           break;
         case 2:
-          await instance.post(`/users/${userId}/badge/default`);
+          // [수정] URL에서 userId 제거
+          await instance.post(`/users/badge/default`);
           break;
         case 3:
-          await instance.post(`/users/${userId}/room/default`);
+          // [수정] URL에서 userId 제거
+          await instance.post(`/users/room/default`);
           break;
         case 4:
           if (!looplingId) {
             alert("루플링을 선택해주세요!");
+            setLoading(false);
             return;
           }
-          await instance.post(`/users/${userId}/loopling?catalogId=${looplingId}`);
+          // [수정] URL에서 userId 제거
+          await instance.post(`/users/loopling?catalogId=${looplingId}`);
           break;
         case 5:
-          await instance.post(`/users/${userId}/village`);
-          await instance.patch(`/users/${userId}/complete`);
+          // [수정] URL에서 userId 제거
+          await instance.post(`/users/village`);
+          // [수정] URL에서 userId 제거
+          await instance.patch(`/users/complete`);
           setShowModal(true);
+          setLoading(false);
           return;
         default:
           break;

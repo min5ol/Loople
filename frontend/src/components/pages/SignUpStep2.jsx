@@ -1,15 +1,21 @@
-// 작성일: 2025.07.18
-// 작성자: 장민솔 (리팩토링 by GPT)
-// 설명: 회원가입 2단계 – 소셜/일반 회원가입 분기 포함 + 이름/닉네임/휴대폰 처리 (중복 저장 제거)
+/**
+ * 작성일: 2025.07.18
+ * 수정일: 2025.08.08
+ * 작성자: 장민솔
+ * 설명: 회원가입 2단계 - 소셜/일반 회원가입 분기 포함 + zustand 도입
+ */
 
-// src/components/pages/SignupStep2.jsx
+// src/components/pages/SignUpStep2.jsx
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { checkNickname } from "../../apis/user";
+import { useSignupStore } from "../../store/signupStore"; // Zustand 스토어 import
 
 export default function SignUpStep2() {
   const navigate = useNavigate();
+  // Zustand 스토어에서 이전 단계 데이터와 현재 단계 데이터를 저장할 액션을 가져옴
+  const { step1Data, socialData, setStep2Data } = useSignupStore();
 
   const [form, setForm] = useState({
     name: "",
@@ -24,14 +30,13 @@ export default function SignUpStep2() {
   });
 
   useEffect(() => {
-    const provider = sessionStorage.getItem("provider");
-    const step1 = sessionStorage.getItem("signupStep1");
-
-    if (!provider && !step1) {
+    // sessionStorage 대신 스토어에 이전 단계 데이터가 있는지 확인
+    // 소셜 로그인 데이터(socialData.provider)나 일반 가입 1단계 데이터(step1Data.email)가 없으면 이전 페이지로
+    if (!socialData.provider && !step1Data.email) {
       alert("1단계를 먼저 진행해주세요.");
-      navigate("/signup/step1");
+      navigate("/signup");
     }
-  }, [navigate]);
+  }, [step1Data, socialData, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -89,9 +94,9 @@ export default function SignUpStep2() {
       return;
     }
 
-    sessionStorage.setItem("signupStep2", JSON.stringify(form));
+    // sessionStorage 대신 Zustand 스토어에 데이터를 저장
+    setStep2Data(form);
 
-    // 소셜이든 일반이든 signupStep2만 저장하면 step3에서 일괄 처리 가능
     navigate("/signup/step3");
   };
 

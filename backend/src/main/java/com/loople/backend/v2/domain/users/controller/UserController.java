@@ -8,20 +8,17 @@
 
 package com.loople.backend.v2.domain.users.controller;
 
+import com.loople.backend.v2.domain.quiz.dto.AttendanceInfoResponse;
 import com.loople.backend.v2.domain.users.dto.*;
 import com.loople.backend.v2.domain.users.entity.User;
-import com.loople.backend.v2.domain.users.repository.UserRepository;
 import com.loople.backend.v2.domain.users.service.UserService;
 import com.loople.backend.v2.global.getUserId.GetLoggedInUserId;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController
 {
     private final UserService userService;
-    private final UserRepository userRepository;
     private final GetLoggedInUserId getLoggedInUserId;
 
     @GetMapping("/check-email")
@@ -80,23 +76,24 @@ public class UserController
     }
 
     @PutMapping("/points")
-    public ResponseEntity<Void> updatePoints(@RequestBody @Valid UpdatedUserPointRequest request)
+    public ResponseEntity<Void> updatePoints(@AuthenticationPrincipal Long userId,
+                                             @RequestBody @Valid UpdatedUserPointRequest request)
     {
-        log.info("[포인트 적립 요청] points={}", request.getPoints());
+        log.info("[포인트 적립 요청] points={}", request.points());
 
-        userService.updatePoints(request);
+        userService.updatePoints(userId, request);
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{userId}/complete")
-    public ResponseEntity<Void> completeSignup(@PathVariable Long userId)
+    @PatchMapping("/complete")
+    public ResponseEntity<Void> completeSignup(@AuthenticationPrincipal Long userId)
     {
         userService.completeSignup(userId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{userId}/avatar/default")
-    public ResponseEntity<Void> assignDefaultAvatar(@PathVariable Long userId)
+    @PostMapping("/avatar/default")
+    public ResponseEntity<Void> assignDefaultAvatar(@AuthenticationPrincipal Long userId)
     {
         long t0 = System.currentTimeMillis();
         log.info("[1] API 도착");
@@ -107,29 +104,29 @@ public class UserController
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{userId}/badge/default")
-    public ResponseEntity<Void> assignDefaultBadge(@PathVariable Long userId)
+    @PostMapping("/badge/default")
+    public ResponseEntity<Void> assignDefaultBadge(@AuthenticationPrincipal Long userId)
     {
         userService.assignDefaultBadge(userId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{userId}/room/default")
-    public ResponseEntity<Void> assignDefaultRoom(@PathVariable Long userId)
+    @PostMapping("/room/default")
+    public ResponseEntity<Void> assignDefaultRoom(@AuthenticationPrincipal Long userId)
     {
         userService.assignDefaultRoom(userId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{userId}/loopling")
-    public ResponseEntity<Void> assignLoopling(@PathVariable Long userId, @RequestParam Long catalogId)
+    @PostMapping("/loopling")
+    public ResponseEntity<Void> assignLoopling(@AuthenticationPrincipal Long userId, @RequestParam Long catalogId)
     {
         userService.assignLoopling(userId, catalogId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{userId}/village")
-    public ResponseEntity<Void> assignVillage(@PathVariable Long userId)
+    @PostMapping("/village")
+    public ResponseEntity<Void> assignVillage(@AuthenticationPrincipal Long userId)
     {
         userService.assignVillage(userId);
         return ResponseEntity.ok().build();
@@ -140,5 +137,18 @@ public class UserController
     public UserInfoResponse getUserInfo(HttpServletRequest request){
         Long userId = getLoggedInUserId.getUserId(request);
         return userService.getUserInfo(userId);
+    }
+
+    @GetMapping("/mypage")
+    public ResponseEntity<MyPageResponse> getMyPage(@AuthenticationPrincipal Long userId)
+    {
+        return ResponseEntity.ok(userService.getMyPage(userId));
+    }
+
+    @GetMapping("/attendance")
+    public ResponseEntity<AttendanceInfoResponse> getAttendance(@AuthenticationPrincipal Long userId)
+    {
+        AttendanceInfoResponse attendanceInfo = userService.getAttendanceInfo(userId);
+        return ResponseEntity.ok(attendanceInfo);
     }
 }
