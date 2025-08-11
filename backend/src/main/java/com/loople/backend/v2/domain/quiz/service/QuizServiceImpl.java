@@ -77,85 +77,35 @@ public class QuizServiceImpl implements QuizService {
         //  }
         //]
         //```
-//
-//        try{
-//            ObjectMapper mapper = new ObjectMapper();
-//            ProblemRequestDto problemRequestDto = mapper.readValue(response, ProblemRequestDto.class);
-//
-//            Problem problem = Problem.builder()
-//                    .question(problemRequestDto.getQuestion())
-//                    .type(problemRequestDto.getType())
-//                    .answer(problemRequestDto.getAnswer())
-//                    .build();
-//
-//            problemRepository.save(problem);
-//            System.out.println("problemRequestDto.getOptions() = " + problemRequestDto.getOptions());
-//        } catch(JsonProcessingException e){
-//            throw new RuntimeException(e);
-//        }
-//
-
-
-//        if(problemRequestDto.getOptions() != null){
-//            for(MultipleOptionRequestDto multipleOption : problemRequestDto.getOptions()){
-//                MultipleOption build = MultipleOption.builder()
-//                        .problem(problem)
-//                        .content(multipleOption.getContent())
-//                        .optionOrder(multipleOption.getOptionOrder())
-//                        .build();
-//
-//                multipleOptionRepository.save(build);
-//            }
-//        }
-
-
-//        // OpenAPI 응답 문자열을 파싱해 문제 요청 DTO 생성
-//        List<MultipleOptionRequestDto> options = problemRequestDto.getOptions();
-//
-//        //문제 엔티티 생성 및 요청 DTO 데이터 저장
-//        Problem problesm = new Problem(problemRequestDto.getQuestion(), problemRequestDto.getType(), problemRequestDto.getAnswer());
-//        problemRepository.save(problem);
-//
-//        //옵션 저장 처리
-//        saveOption(options, problem);
-//
-//        //저장된 옵션 DTO 리스트로 반환
-//        List<MultipleOptionResponseDto> responseOptions = options.stream()
-//                .map(opt -> new MultipleOptionResponseDto(opt.getContent(), opt.getOptionOrder()))
-//                .toList();
-//
-//        //문제 응답 DTO 반환
-//        return new ProblemResponseDto(problem.getNo(), problem.getQuestion(), problem.getType(), responseOptions, false);
 
         String cleanedResponse = response
                 .replaceAll("^```json\\s*", "")  // 시작 부분의 ```json 제거
                 .replaceAll("```$", "");          // 끝 부분의 ``` 제거
         System.out.println("cleanedResponse = " + cleanedResponse);
 
-
         ObjectMapper mapper = new ObjectMapper();
 
         List<ProblemRequestDto> extracted = extracted(cleanedResponse, mapper);
 
         extracted.forEach(problem -> {
-                            Problem build = Problem.builder()
-                                    .question(problem.getQuestion())
-                                    .type(problem.getType())
-                                    .answer(problem.getAnswer())
-                                    .build();
-                            problemRepository.save(build);
-                            
-                            if(problem.getOptions() != null){
-                                problem.getOptions().forEach(option -> {
-                                    MultipleOption buildOption = MultipleOption.builder()
-                                            .problem(build)
-                                            .content(option.getContent())
-                                            .optionOrder(option.getOptionOrder())
-                                            .build();
-                                    multipleOptionRepository.save(buildOption);
-                                });
-                            }
-                        });
+            Problem build = Problem.builder()
+                    .question(problem.getQuestion())
+                    .type(problem.getType())
+                    .answer(problem.getAnswer())
+                    .build();
+            problemRepository.save(build);
+
+            if (problem.getOptions() != null) {
+                problem.getOptions().forEach(option -> {
+                    MultipleOption buildOption = MultipleOption.builder()
+                            .problem(build)
+                            .content(option.getContent())
+                            .optionOrder(option.getOptionOrder())
+                            .build();
+                    multipleOptionRepository.save(buildOption);
+                });
+            }
+        });
     }
 
     private List<ProblemRequestDto> extracted(String response, ObjectMapper mapper) {
@@ -171,37 +121,27 @@ public class QuizServiceImpl implements QuizService {
     @Transactional
     @Override
     public UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto, Long userId) {
-        // 공통 값
         LocalDate today = LocalDate.now();
 
-        // 유저 1번 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = findById(userId);
 
-        // 정답 여부
         boolean isCorrect = checkTheAnswer(userAnswerRequestDto);
 
-        // 주간/월간 출석
         boolean isWeekly = false;
         boolean isMonthly = false;
 
-        if(today.getDayOfWeek() == DayOfWeek.SUNDAY && hasCheckedAttendanceForAWeek(userId))
-        {
+        if (today.getDayOfWeek() == DayOfWeek.SUNDAY && hasCheckedAttendanceForAWeek(userId)) {
             isWeekly = true;
         }
 
-        if(hasCheckedAttendanceForAMonth(userId))
-        {
+        if (hasCheckedAttendanceForAMonth(userId)) {
             isMonthly = true;
         }
 
-        // 점수 계산
         int totalPoints = (isCorrect ? 7 : 3) + (isWeekly ? 20 : 0) + (isMonthly ? 100 : 0);
 
-        // 사용자 점수 업데이트
         updatedUserPoints(totalPoints, user);
 
-        // 답안 저장
         UserAnswer userAnswer = UserAnswer.builder()
                 .userId(userId)
                 .userEmail(user.getEmail())
@@ -224,10 +164,9 @@ public class QuizServiceImpl implements QuizService {
         );
     }
 
-    private void updatedUserPoints(int delta, User user)
-    {
+    private void updatedUserPoints(int delta, User user) {
         int newPoints = user.getPoints() + delta;
-        if(newPoints < 0) newPoints = 0;
+        if (newPoints < 0) newPoints = 0;
         user.addPoints(newPoints);
     }
 
@@ -243,16 +182,12 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public List<Integer> fetchAttendanceStatus(Long userId) {
         DateRange thisMonthInfo = getThisMonthInfo();
-        System.out.println("thisMonthInfo.getStart() = " + thisMonthInfo.getStart());
-        System.out.println("thisMonthInfo = " + thisMonthInfo.getEnd());
 
         List<UserAnswer> byUserId = userAnswerRepository.findByUserIdAndSolvedAtBetween(userId, thisMonthInfo.getStart(), thisMonthInfo.getEnd());
-        System.out.println("byUserId = " + byUserId);
 
         List<Integer> attendanceDays = new ArrayList<>();
         for (UserAnswer userAnswer : byUserId) {
             int day = userAnswer.getSolvedAt().getDayOfMonth();
-            System.out.println("day = " + day);
             attendanceDays.add(day);
         }
 
@@ -261,7 +196,6 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     public ProblemResponseDto getProblem(Long userId) {
-        long count = problemRepository.count();
         Random random = new Random();
 
         if (hasSolvedTodayProblem(userId)) {
@@ -300,12 +234,9 @@ public class QuizServiceImpl implements QuizService {
     //이번 주에 사용자가 매일 출석했는지 확인
     private boolean hasCheckedAttendanceForAWeek(Long userId) {
         LocalDate today = LocalDate.now();  //2025-07-18
-        System.out.println("today = " + today);
         LocalDate weekAgo = today.minusDays(6); //오늘 포함 7일 -> 2025-07-12
-        System.out.println("weekAgo = " + weekAgo);
 
         Long counted = userAnswerRepository.countAttendanceByUserIdAndSolvedAtBetween(userId, weekAgo, today);
-        System.out.println("counted = " + counted);
 
         return counted == 6;    //일요일 당일 문제 풀이 제외하고
     }
@@ -314,20 +245,10 @@ public class QuizServiceImpl implements QuizService {
     private boolean hasCheckedAttendanceForAMonth(Long userId) {
         DateRange thisMonthInfo = getThisMonthInfo();
         int totalDayOfThisMonth = thisMonthInfo.getEnd().getDayOfMonth();
-        System.out.println("totalDayOfThisMonth = " + totalDayOfThisMonth);
 
         Long counted = userAnswerRepository.countAttendanceByUserIdAndSolvedAtBetween(userId, thisMonthInfo.getStart(), thisMonthInfo.getEnd());
 
-        return totalDayOfThisMonth == (counted+1);
-    }
-
-    //사용자 점수 업데이트
-    private void updatedUserPoints(UpdatedUserPointRequest request, Long userId) {
-        System.out.println("userId = " + userId);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
-
-        user.addPoints(request.points());
+        return totalDayOfThisMonth == (counted + 1);
     }
 
     //이번 달 정보 출력
@@ -355,12 +276,10 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Transactional(readOnly = true)
-    public AttendanceInfoResponse getAttendanceInfo(Long userId)
-    {
+    public AttendanceInfoResponse getAttendanceInfo(Long userId) {
         List<UserAnswer> allAnswers = userAnswerRepository.findByUserIdOrderBySolvedAtDesc(userId);
 
-        if(allAnswers.isEmpty())
-        {
+        if (allAnswers.isEmpty()) {
             return new AttendanceInfoResponse(0, 0);
         }
 
@@ -376,29 +295,23 @@ public class QuizServiceImpl implements QuizService {
         return new AttendanceInfoResponse(consecutiveDays, monthlyDays);
     }
 
-    private int calculateConsecutiveDays(List<LocalDate> uniqueDates)
-    {
-        if(uniqueDates.isEmpty()) return 0;
+    private int calculateConsecutiveDays(List<LocalDate> uniqueDates) {
+        if (uniqueDates.isEmpty()) return 0;
 
         LocalDate today = LocalDate.now();
         LocalDate mostRecentDate = uniqueDates.get(0);
         int streak = 0;
 
         // 가장 최근 기록이 오늘 또는 어제여쟈 연속 출석이 유효
-        if(mostRecentDate.equals(today) || mostRecentDate.equals(today.minusDays(1)))
-        {
+        if (mostRecentDate.equals(today) || mostRecentDate.equals(today.minusDays(1))) {
             streak = 1;
             LocalDate expectedDate = mostRecentDate.minusDays(1);
 
-            for(int i = 1; i < uniqueDates.size(); i++)
-            {
-                if(uniqueDates.get(i).equals(expectedDate))
-                {
+            for (int i = 1; i < uniqueDates.size(); i++) {
+                if (uniqueDates.get(i).equals(expectedDate)) {
                     streak++;
                     expectedDate = expectedDate.minusDays(1);
-                }
-                else
-                {
+                } else {
                     break;
                 }
             }
@@ -407,8 +320,7 @@ public class QuizServiceImpl implements QuizService {
         return streak;
     }
 
-    private int calculateMonthlyDays(List<LocalDate> uniqueDates)
-    {
+    private int calculateMonthlyDays(List<LocalDate> uniqueDates) {
         YearMonth currentMonth = YearMonth.now();
         return (int) uniqueDates.stream()
                 .filter(date -> YearMonth.from(date).equals(currentMonth))

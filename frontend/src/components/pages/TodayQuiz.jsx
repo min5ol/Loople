@@ -10,24 +10,24 @@
 // src/components/pages/TodayQuiz.jsx
 
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import instance from '../../apis/instance.js';  //axios 인스턴스 (API 호출용)
 
 //백엔드에서 오늘의 문제를 받아오는 API 호출 함수
-export const getProblem = async () => {
+export const getProblem = async (userId) => {
   //비동기 API 호출
-  //const res = await instance.get('/quiz/buildAndShow/test');
-  const res = await instance.post('/quiz/getProblem');
-  return res.data;  //문제 데이터 반환
+  const res = await instance.post(`/quiz/getProblem/${userId}`);
+  return res.data;
 };
 
 // 사용자가 제출한 답안을 서버에 보내고 결과를 받는 함수
-export const submitAnswer = async (submittedAnswer) => {
+export const submitAnswer = async (submittedAnswer, userId) => {
   //비동기 API 호출
-  const res = await instance.post('/quiz/submitAnswer', submittedAnswer);
-  return res.data;  //응답 채점 결과 반환
+  const res = await instance.post(`/quiz/${userId}/submitAnswer`, submittedAnswer);
+  return res.data;
 };
 
-export default function TodayQuiz() {
+export default function TodayQuiz({ userId }) {
   //컴포넌트 상태 선언 - React 함수형 컴포넌트 내에서 useState 훅으로 상태 선언
   const [problem, setProblem] = useState(null); //현재 받아온 문제 정보
   const [submitResult, setSubmitResult] = useState(null); //답안 제출 결과 정보
@@ -35,14 +35,18 @@ export default function TodayQuiz() {
   const [loading, setLoading] = useState(true);  // 페이지 로딩 상태
   const [isSubmitting, setIsSubmitting] = useState(false); // 정답 제출 상태
   const hasFetched = useRef(false); //호출 여부 체크
+  const navigate = useNavigate();
 
+  const goToHome = () => {
+    navigate("/looplehome");
+  };
 
   //문제 받아오기 처리 함수
   const handleSolve = async () => {
     setLoading(true); // 문제 받아오기 시작할 때 로딩 ON
 
     try {
-      const data = await getProblem();  //API 호출
+      const data = await getProblem(userId);  //API 호출
       setProblem(data); //문제 상태 저장
       setSubmitResult(null);  //이전 채점 결과 초기화
       setErrorMessage(data.hasSolvedToday ? "오늘 할당된 모든 문제를 푸셨습니다." : null);  //오늘 이미 문제 푼 경우
@@ -63,7 +67,7 @@ export default function TodayQuiz() {
       };
 
       //비동기 API 호출로 제출
-      const data = await submitAnswer(payLoad);
+      const data = await submitAnswer(payLoad, userId);
 
       setSubmitResult(data);  //결과 저장
       setErrorMessage(null);  //에러 메시지 초기화
@@ -87,8 +91,13 @@ export default function TodayQuiz() {
     <div>
       {/* 에러 메시지 출력 영역 - errorMessage 내부에 데이터가 있으면 아래 로직 수행 */}
       {!loading && errorMessage && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded text-center">
-          {errorMessage}
+        <div className="mb-4 p-6 bg-red-100 border border-red-400 text-red-700 rounded-md text-center shadow-sm">
+          <p className="mb-4 text-base font-medium">
+            {errorMessage}
+          </p>
+          <button onClick={goToHome} className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md transition duration-200 border-none cursor-pointer">
+            홈으로 이동
+          </button>
         </div>
       )}
 
@@ -107,10 +116,10 @@ export default function TodayQuiz() {
             {/* OX 문제일 때 */}
             {problem.type === "OX" ? (
               <>
-                <button onClick={() => handleSubmit("O")} className="px-5 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition cursor-pointer">
+                <button onClick={() => handleSubmit("O")} className="px-5 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition cursor-pointer border-none">
                   O
                 </button>
-                <button onClick={() => handleSubmit("X")} className="px-5 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer" >
+                <button onClick={() => handleSubmit("X")} className="px-5 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer border-none" >
                   X
                 </button>
               </>
@@ -119,7 +128,7 @@ export default function TodayQuiz() {
               problem.type === "MULTIPLE" ? problem.options && problem.options.length > 0 ? (
                 <div className="flex flex-col gap-3 justify-center items-center">
                   {problem.options.map((opt, idx) => (
-                    <button key={idx} onClick={() => handleSubmit(String.fromCharCode(65 + idx))} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition cursor-pointer w-full max-w-md text-left">
+                    <button key={idx} onClick={() => handleSubmit(String.fromCharCode(65 + idx))} className="border-none px-4 py-2 bg-[#3C9A5F] text-white rounded hover:bg-[#338553] transition cursor-pointer w-full max-w-md text-left">
                       {String.fromCharCode(65 + idx)}. {opt.content}
                     </button>
                   ))}
@@ -134,41 +143,58 @@ export default function TodayQuiz() {
       {/* 제출 결과 보여주기 */}
       {submitResult && (
         <div>
-          <div className="text-center p-4 rounded border border-green-400 bg-green-100 text-green-800">
-            <p>
-              {(() => {
-                const { isCorrect, isWeekly, isMonthly, points } = submitResult;
-                
-                const bonusText = [
-                  isWeekly ? '주간 출석 보상' : '',
-                  isMonthly ? '월간 출석 보상' : ''
-                ].filter(Boolean).join(' 및 ');
+          <div className={`text-center p-6 rounded shadow-sm 
+              ${submitResult.isCorrect
+                ? 'border border-green-400 bg-green-100 text-green-800'
+                : 'border border-red-400 bg-red-100 text-red-800'
+              }`}
+          >
 
-                if (isCorrect) {
-                  return bonusText
-                    ? `정답! ${bonusText}과 함께 +${points}점 획득!`
-                    : `정답! +${points}점 획득!`;
-                } else {
-                  return bonusText
-                    ? `틀렸습니다. ${bonusText}과 함께 기본 출석 점수로 +${points}점이 지급되었습니다.`
-                    : `틀렸습니다. 기본 출석 점수로 +${points}점이 지급되었습니다.`;
-                }
-              })()}
+          <p className="mb-4 text-base font-medium">
+            {(() => {
+              const { isCorrect, isWeekly, isMonthly, points } = submitResult;
 
-            </p>
-          </div>
+              const bonusText = [
+                isWeekly ? '주간 출석 보상' : '',
+                isMonthly ? '월간 출석 보상' : ''
+              ].filter(Boolean).join(' 및 ');
+
+              if (isCorrect) {
+                return bonusText
+                  ? `정답! ${bonusText}과 함께 +${points}점 획득!`
+                  : `정답! +${points}점 획득!`;
+              } else {
+                return bonusText
+                  ? `틀렸습니다. ${bonusText}과 함께 기본 출석 점수로 +${points}점이 지급되었습니다.`
+                  : `틀렸습니다. 기본 출석 점수로 +${points}점이 지급되었습니다.`;
+              }
+            })()}
+          </p>
+
+          <button onClick={goToHome}
+            className={`cursor-pointer border-none px-5 py-2 text-white font-semibold rounded-md transition duration-200 
+              ${submitResult.isCorrect ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}
+          >
+            home으로 이동
+          </button>
+
         </div>
-      )}
-
-      {/*제출 현황 표시*/}
-      {isSubmitting && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white px-6 py-4 rounded-lg shadow-md text-center">
-            <p className="text-lg font-semibold text-gray-800">제출 중입니다</p>
-            <p className="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
-          </div>
         </div>
-      )}
+
+  )
+}
+
+{/*제출 현황 표시*/ }
+{
+  isSubmitting && (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white px-6 py-4 rounded-lg shadow-md text-center">
+        <p className="text-lg font-semibold text-gray-800">제출 중입니다</p>
+        <p className="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
+      </div>
     </div>
+  )
+}
+    </div >
   );
 }

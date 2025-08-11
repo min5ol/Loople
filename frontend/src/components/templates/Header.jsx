@@ -16,7 +16,6 @@ export default function Header() {
     { label: "Loople 홈", path: "/loopleHome", emoji: "🌿" },
     { label: "마이페이지", path: "/mypage", emoji: "👤" },
     { label: "마이룸", path: "/myroom", emoji: "🛏️" },
-    { label: "퀴즈 풀기", path: "/quiz", emoji: "🧠" },
     { label: "지역별 규칙", path: "/rule", emoji: "📜" },
     { label: "채팅하기", path: "/chat", emoji: "💬" },
   ];

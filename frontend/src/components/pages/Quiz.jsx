@@ -6,7 +6,7 @@
 // src/components/pages/Quiz.jsx
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import TodayQuiz from "./TodayQuiz";
 import AttendanceCalendar from "./AttendanceCalendar";
 import instance from "../../apis/instance";
@@ -19,12 +19,10 @@ export const temperoryMakeProblem = async () => {
 
 export default function Quiz() {
   const [mode, setMode] = useState("attendance");
-
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const goToHome = () => {
-    navigate("/looplehome");
-  };
+  const userId = location.state?.userId;
 
   const goToQuiz = () => {
     setMode("quiz");
@@ -53,13 +51,13 @@ export default function Quiz() {
 
         {mode == "quiz" && (
           <div>
-            <TodayQuiz />
+            <TodayQuiz userId = {userId}/>
           </div>
         )}
 
         {mode == "attendance" && (
           <div>
-            <AttendanceCalendar />
+            <AttendanceCalendar userId = {userId}/>
           </div>
         )}
 
@@ -69,9 +67,6 @@ export default function Quiz() {
           </button>
           <button onClick={goToQuiz} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
             퀴즈풀기
-          </button>
-          <button onClick={goToHome} className="bg-white border border-[#749E89] text-[#264D3D] text-sm font-semibold px-6 py-2 rounded-full transition-all hover:bg-[#F6F6F6] hover:scale-105 cursor-pointer">
-            home
           </button>
           <button
             onClick={async () => {
