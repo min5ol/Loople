@@ -16,7 +16,6 @@ public class RuleController {
 
     @PostMapping("/region")
     public List<String> getRegion(@RequestBody RegionRequest regionRequest){
-        System.out.println("region");
         return ruleService.getRegion(regionRequest);
     }
 

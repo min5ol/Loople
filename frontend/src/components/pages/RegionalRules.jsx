@@ -98,7 +98,9 @@ export default function RegionalRules() {
     return (
       <div className="relative w-50">
         <div onClick={() => setIsOpen(!isOpen)}
-          className="bg-[#F6F6F6] border-2 border-[#4CAF50] text-[#202020] rounded px-4 py-2 shadow-lg cursor-pointer select-none h-7">
+          className="text-center gap-1.5 p-2 text-sm transition-all border-none bg-white text-[#202020] font-semibold cursor-pointer" style={{
+            boxShadow: "inset 1px 1px 3px rgba(0,0,0,0.1), inset -1px -1px 3px rgba(255,255,255,0.7)",
+          }}>
           {selected || label}
         </div>
         {isOpen && (
@@ -144,7 +146,7 @@ export default function RegionalRules() {
 
 
   return (
-    <>
+    <div>
       <Header />
       <div className="pt-12 mb-10 mt-10">
         <div className="flex justify-center flex-wrap gap-4">
@@ -159,7 +161,7 @@ export default function RegionalRules() {
           ))}
 
           {/* 조회 버튼 */}
-          <button onClick={fetchRuleByAddress} className="bg-[#3C9A5F] hover:bg-[#264D3D] text-white px-6 py-2 rounded shadow-md transition-all border-none cursor-pointer">
+          <button onClick={fetchRuleByAddress} className="bg-[#264D3D] hover:bg-[#749E89] text-white px-6 py-2 rounded shadow-md transition-all border-none cursor-pointer">
             조회
           </button>
         </div>
@@ -167,11 +169,18 @@ export default function RegionalRules() {
         {/* 결과 출력 */}
         <div className="mt-12 space-y-8 px-6 max-w-4xl mx-auto">
           {isResult === false && (
-            <div className="bg-[#FEF7E2] border border-[#81C784] rounded-lg shadow p-6 text-center text-[#264D3D] font-semibold">
-              <p>{selectedAddr.sido} {selectedAddr.sigungu}의 쓰레기 수거 정보가 존재하지 않습니다.</p>
-              <p>관리자에게 문의해 주세요.</p>
+            <div className="bg-[#749E89] border border-[#A5D6A7] rounded-xl shadow-lg p-8 text-center text-white space-y-3">
+              <div className="flex flex-col items-center space-y-2">
+                <p className="text-lg font-bold">
+                  {selectedAddr.sido} {selectedAddr.sigungu}의 쓰레기 수거 정보가 존재하지 않습니다.
+                </p>
+                <p className="text-sm text-[#E8F5E9]">
+                  정확한 정보는 관리자에게 문의해 주세요.
+                </p>
+              </div>
             </div>
           )}
+
 
           {isResult === true && wasteInfo && wasteInfo.length > 0 && (
             <>
@@ -183,8 +192,8 @@ export default function RegionalRules() {
                   <a
                     href={wasteInfo[0].homepage}
                     className={`text-[#202020] ${wasteInfo[0].homepage
-                        ? 'hover:text-green-900 hover:underline transition-colors duration-300'
-                        : 'pointer-events-none opacity-50 cursor-default'
+                      ? 'hover:text-green-900 hover:underline transition-colors duration-300'
+                      : 'pointer-events-none opacity-50 cursor-default'
                       }`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -194,20 +203,28 @@ export default function RegionalRules() {
                 </p>
               </div>
 
-
               {wasteInfo
                 .filter(item => !item.wasteType)
                 .map((item, idx) => (
-                  <div key={"noType" + idx} className="bg-[#FEF7E2] border border-[#81C784] rounded-lg shadow p-6 text-center text-[#264D3D] font-semibold">
-                    <p>
-                      {selectedAddr.sido} {selectedAddr.sigungu}의 쓰레기 수거 정보가 존재하지 않습니다.
-                    </p>
-                    <p>정확한 정보는 홈페이지에서 확인 바랍니다.</p>
-                    <a href={item.homepage} className="inline-block text-[#202020] hover:text-green-900 hover:underline font-medium" target="_blank" rel="noopener noreferrer">
-                      [{selectedAddr.sido} {selectedAddr.sigungu} 홈페이지 바로가기]
-                    </a>
+                  <div key={"noType" + idx} className="bg-[#749E89] border border-[#A5D6A7] rounded-xl shadow-lg p-8 text-center text-white font-semibold space-y-4">
+                    <div className="flex flex-col items-center space-y-2">
+
+                      <p className="text-lg">
+                        <span className="font-bold text-[#C8E6C9]">{selectedAddr.sido} {selectedAddr.sigungu}</span>의 쓰레기 수거 정보가 존재하지 않습니다.
+                      </p>
+                      <p className="text-sm text-[#E8F5E9]">
+                        더 정확한 정보는 해당 지역 홈페이지를 참고해주세요.
+                      </p>
+
+                      <a href={item.homepage}
+                        className="mt-4 inline-block bg-white text-[#2E7D32] hover:bg-[#C8E6C9] hover:text-[#1B5E20] transition-colors px-4 py-2 rounded-full font-semibold shadow"
+                        target="_blank" rel="noopener noreferrer">
+                        [{selectedAddr.sido} {selectedAddr.sigungu} 홈페이지 바로가기]
+                      </a>
+                    </div>
                   </div>
                 ))}
+
 
 
               {["GENERAL", "FOOD", "RECYCLING"].map((type) => {
@@ -219,37 +236,36 @@ export default function RegionalRules() {
                 else if (type === "FOOD") wasteLabel = "음식물쓰레기";
                 else if (type === "RECYCLING") wasteLabel = "재활용쓰레기";
 
-                {/* 🕒 배출시간 📅 배출요일 🚛 수거일시 📍 배출장소 📋 배출방법 🖼️ 참고이미지 💡 참고사항 */ }
                 return (
-                  <div key={type} className="bg-[#FEF7E2] border border-[#81C784] rounded-lg shadow p-6">
-                    <h3 className="text-lg font-semibold text-[#264D3D] mb-4">
-                      <span className="text-[#3C9A5F]">{wasteLabel}</span>
+                  <div key={type} className="bg-[#749E89] border border-[#A5D6A7] rounded-xl shadow-lg p-6 space-y-3">
+                    <h3 className="text-2xl font-bold text-center text-[#202020] mb-4">
+                      {wasteLabel}
                     </h3>
 
-                    {showInfo("🕒 배출 시간: ", info.disposalTime)}
-                    {showInfo("📅 배출 요일: ", info.disposalDays)}
-                    {showInfo("🚛 수거 일시: ", info.collectionSchedule)}
-                    {showInfo("📍 배출 장소: ", info.disposalLocation)}
-                    {showInfo("📋 배출 방법", info.disposalMethod)}
-                    {showInfo("💡 참고 사항: ", info.notes)}
+                    <div className="space-y-2 text-lg leading-relaxed">
+                      {showInfo("🕒 배출 시간: ", info.disposalTime)}
+                      {showInfo("📅 배출 요일: ", info.disposalDays)}
+                      {showInfo("🚛 수거 일시: ", info.collectionSchedule)}
+                      {showInfo("📍 배출 장소: ", info.disposalLocation)}
+                      {showInfo("📋 배출 방법: ", info.disposalMethod)}
+                      {showInfo("💡 참고 사항: ", info.notes)}
+                    </div>
 
                     {info.imgUrl && (
-                      <p>
-                        <strong>참고 이미지</strong>
-                        <img src={info.imgUrl} alt="참고 이미지" className="max-w-full h-auto" />
-                      </p>
+                      <div className="mt-4">
+                        <p className="font-semibold mb-2">🖼️ 참고 이미지</p>
+                        <img src={info.imgUrl} alt="참고 이미지" className="w-full max-h-64 object-contain rounded-lg border border-white"/>
+                      </div>
                     )}
-
                   </div>
-                )
-              })
+                );
+              })}
 
-              }
             </>
           )}
         </div>
 
       </div>
-    </>
+    </div>
   );
 }

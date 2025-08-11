@@ -23,7 +23,6 @@ public class RuleServiceImpl implements RuleService{
 
     @Override
     public List<String> getRegion(RegionRequest regionRequest) {
-        System.out.println("regionRequest = " + regionRequest);
         if (isNullOrEmpty(regionRequest.getSido())) {
             return beopjeongdongRepository.findDistinctSido();
         } else if (isNullOrEmpty(regionRequest.getSigungu())) {
@@ -37,7 +36,6 @@ public class RuleServiceImpl implements RuleService{
 
     @Override
     public List<LocalGovenmentWasteInfoResponse> getRule(RegionRequest regionRequest) {
-        System.out.println("regionRequest = " + regionRequest);
         return localGovernmentWasteInfoRepository
                 .findBySidoAndSigungu(regionRequest.getSido(), regionRequest.getSigungu())
                 .stream()

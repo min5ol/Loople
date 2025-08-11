@@ -81,7 +81,6 @@ public class QuizServiceImpl implements QuizService {
         String cleanedResponse = response
                 .replaceAll("^```json\\s*", "")  // 시작 부분의 ```json 제거
                 .replaceAll("```$", "");          // 끝 부분의 ``` 제거
-        System.out.println("cleanedResponse = " + cleanedResponse);
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -171,8 +170,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     //오늘 문제 풀이 여부 반환
-    @Override
-    public boolean hasSolvedTodayProblem(Long userId) {
+    private boolean hasSolvedTodayProblem(Long userId) {
         //현재 로그인된 사용자가 오늘 문제를 푼 기록이 있는지 조회
         Optional<UserAnswer> byUserIdAndSolvedDate = userAnswerRepository.findByUserIdAndSolvedAt(userId, LocalDate.now());
 
@@ -327,5 +325,4 @@ public class QuizServiceImpl implements QuizService {
                 .count();
     }
 }
-
 
