@@ -6,6 +6,7 @@ import Header from "../templates/Header";
 import Chatbot from "./Chatbot";
 import instance from "../../apis/instance";
 
+// #81C784, #749E89, #3C9A5F, #264D3D, #F6F6F6, #FEF7E2, #202020, #f7f7f7ef
 export const getUserInfo = async () => {
   const res = await instance.get("/users/userInfo");
   return res.data;
@@ -28,7 +29,7 @@ export default function LoopleHome() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-[#FEF7E2] pt-20 pb-10">
+    <div className="relative pt-20 pb-10">
       {/* 🧭 상단 네비게이션 탭 */}
       <Header currentUserInfo={currentUserInfo} />
 

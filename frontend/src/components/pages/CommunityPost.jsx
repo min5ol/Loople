@@ -220,7 +220,7 @@ export default function CommunityPost() {
   }
 
   return (
-    <>
+    <div>
       <Header />
       <div className="max-w-3xl mx-auto mt-20 p-6 bg-white rounded-lg">
         {/* 게시글 제목 및 작성자 정보 */}
@@ -455,6 +455,6 @@ export default function CommunityPost() {
         )}
 
       </div>
-    </>
+    </div>
   );
 }

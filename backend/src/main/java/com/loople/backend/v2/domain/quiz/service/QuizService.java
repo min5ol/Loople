@@ -29,13 +29,6 @@ public interface QuizService {
      */
     UserAnswerResponseDto saveUserAnswer(UserAnswerRequestDto userAnswerRequestDto, Long userId);
 
-    /**
-     * 해당 사용자가 오늘 이미 문제를 풀었는지 여부를 확인
-     * @param userId: 사용자 ID
-     * @return 오늘 문제를 풀었으면 true, 아니면 false
-     */
-    boolean hasSolvedTodayProblem(Long userId);
-
     List<Integer> fetchAttendanceStatus(Long userId);
 
     ProblemResponseDto getProblem(Long userId);

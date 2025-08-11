@@ -22,7 +22,7 @@ export default function Quiz() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const userId = location.state?.userId;
+  const userId = location.state?.res.data.userId;
 
   const goToQuiz = () => {
     setMode("quiz");
