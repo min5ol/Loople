@@ -52,13 +52,10 @@ public class QuizController {
 
     private final OpenApiClient openApiClient;
     private final QuizService quizService;
-    private final GetLoggedInUserId getLoggedInUserId;
 
-
-//    @Scheduled(cron = "0 0 0 1 * *") // 매월 1일 00:00:00  //초 분 시 일 월 요일
+    @Scheduled(cron = "0 0 0 1 * *") // 매월 1일 00:00:00  //초 분 시 일 월 요일
     @PostMapping("/temp")
     public void generateMonthlyProblem(){
-        System.out.println("임시문제생성");
         String prompt = buildPrompt();
 
         Mono<String> stringMono = openApiClient.requestChatCompletion(prompt);
@@ -67,48 +64,23 @@ public class QuizController {
         });
     }
 
-
-    //문제 생성 및 db 저장 후 저장된 문제 클라이언트에게 show
+    //저장된 문제 클라이언트에게 show
     //Mono: 비동기 단일 값 컨테이너 -> 나중에 1개의 데이터를 비동기적으로 받음
-    @PostMapping("/getProblem")
-    public ProblemResponseDto getProblem(HttpServletRequest request) {
-        Long userId = getLoggedInUserId.getUserId(request);
-
+    @PostMapping("/getProblem/{userId}")
+    public ProblemResponseDto getProblem(@PathVariable Long userId) {
         return quizService.getProblem(userId);
-    }
-
-    //테스트용
-    @GetMapping("/buildAndShow/test")
-    public Mono<ProblemResponseDto> testBuildQuiz(HttpServletRequest request){
-        Long userId = getLoggedInUserId.getUserId(request);
-
-        if(quizService.hasSolvedTodayProblem(userId)){
-            return Mono.just(new ProblemResponseDto(null, null, null, null, true));
-        }
-
-        String dummyResponse = "type: OX\n" +
-                "question: 돼지는 꿀꿀\n" +
-                "answer: O";
-
-        quizService.saveProblem(dummyResponse);
-        return null;
     }
     
     //사용자 응답 제출 비교
-    @PostMapping("/submitAnswer")
-    public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto userAnswerRequestDto, HttpServletRequest request){
-        Long userId = getLoggedInUserId.getUserId(request);
+    @PostMapping("/{userId}/submitAnswer")
+    public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto userAnswerRequestDto, @PathVariable Long userId){
         return quizService.saveUserAnswer(userAnswerRequestDto, userId);
     }
 
-    //출석일수 구하기
-    @GetMapping("/getAttendanceDays")
-    public List<Integer> checkAttendanceDaysByUser(HttpServletRequest request){
-        Long userId = getLoggedInUserId.getUserId(request);
-        System.out.println("userId = " + userId);
-        List<Integer> integers = quizService.fetchAttendanceStatus(userId);
-        System.out.println("integers = " + integers);
-        return integers;
+    //출석 일수 구하기
+    @GetMapping("/{userId}/getAttendanceDays")
+    public List<Integer> checkAttendanceDaysByUser(@PathVariable Long userId){
+        return quizService.fetchAttendanceStatus(userId);
     }
 
     //API 문제 요청 프롬프트
@@ -151,7 +123,4 @@ public class QuizController {
                 + "학생들이 흥미를 느끼고, 자연스럽게 순환 경제와 분리배출을 배울 수 있게 너의 능력을 발휘해줘! \uD83D\uDE0A";
 
     }
-
-
-
 }

@@ -9,12 +9,12 @@ import instance from '../../apis/instance.js';
 
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
-export const getAttendanceDays = async () => {
-  const res = await instance.get('/quiz/getAttendanceDays');
+export const getAttendanceDays = async (userId) => {
+  const res = await instance.get(`/quiz/${userId}/getAttendanceDays`);
   return res.data;
 };
 
-export default function AttendanceCalendar() {
+export default function AttendanceCalendar({userId}) {
   const [today, setToday] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState([]);
   const [attendanceDays, setAttendanceDays] = useState([]);
@@ -69,7 +69,7 @@ export default function AttendanceCalendar() {
 
   const handleAttendance = async () => {
     try {
-      const data = await getAttendanceDays();
+      const data = await getAttendanceDays(userId);
       setAttendanceDays(data);
       generateCalendarDays(today, data);
     } catch (error) {

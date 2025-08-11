@@ -51,7 +51,7 @@ export default function Home() {
         token,
       })
 
-      navigate('/quiz')
+      navigate('/quiz', {state: {userId}});
     } catch (err) {
       console.error('로그인 실패:', err) // 에러 객체 전체를 출력하여 상세 원인 파악
       alert(
