@@ -13,10 +13,11 @@ const submitReport = async (formData) => {
 export default function ReportPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const target = location.state;
+  const { currentUserInfo, target, targetId } = location.state;
   const [formData, setFormData] = useState({
-    target: target.target,
-    targetId: target.targetId,
+    userId: currentUserInfo.no,
+    target: target,
+    targetId: targetId,
     category: "",
     reason: ""
   });

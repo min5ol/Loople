@@ -20,7 +20,7 @@ export default function LoopleHome() {
       try {
         const user = await getUserInfo();
         setCurrentUserInfo(user);
-        console.log(user);
+        console.log("user", user);
       } catch (error) {
         console.error("Failed to fetch Init", error);
       }

@@ -5,12 +5,12 @@ import com.loople.backend.v2.domain.community.dto.*;
 import java.util.List;
 
 public interface CommunityService {
-    CommunityBoardsResponse addPost(CommunityBoardsRequest communityBoardsRequest, Long userId, String type);
-    List<CommunityBoardsResponse> getPostsByCategory(CommunityBoardsRequest communityBoardsRequest, Long userId);
+    CommunityBoardsResponse addPost(CommunityBoardsRequest communityBoardsRequest, String type);
+    List<CommunityBoardsResponse> getPostsByCategory(CommunityBoardsRequest communityBoardsRequest);
     CommunityBoardsResponse getPost(Long no);
-    CommunityCommentResponse addComment(Long userId, CommunityCommentRequest communityCommentRequest);
+    CommunityCommentResponse addComment(CommunityCommentRequest communityCommentRequest);
     List<CommunityCommentResponse> getComments(Long boardId);
-    CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest, Long userId);
-    void submitReport(CommunityReportsRequest communityReportsRequest, Long userId);
+    CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest);
+    void submitReport(CommunityReportsRequest communityReportsRequest);
     void deleteContent(String target, Long targetId, Long userId);
 }

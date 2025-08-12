@@ -141,7 +141,6 @@ export default function Chatbot({ currentUserInfo }) {
         case "배출 방법": prefix = "✅ 배출 방법"; break;
         case "주의 사항": prefix = "⚠️ 주의 사항"; break;
         case "FAQ": prefix = "💬 FAQ"; break;
-        case "지역별 URL": prefix = ""; break;
         case "지역별 정보": prefix = ""; break;
         default: prefix = "";
       }

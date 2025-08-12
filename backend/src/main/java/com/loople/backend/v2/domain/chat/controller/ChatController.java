@@ -50,7 +50,7 @@ public class ChatController {
     }
 
     @GetMapping("/chatbot/category")
-    public List<ChatbotCategoryResponse> getMainCategory(@RequestParam String categoryType, @RequestParam(required=false) Long parentId){
+    public List<ChatbotCategoryResponse> getCategory(@RequestParam String categoryType, @RequestParam(required=false) Long parentId){
         System.out.println("categoryType = " + categoryType);
         return chatService.getCategory(categoryType, parentId);
     }
@@ -59,6 +59,8 @@ public class ChatController {
     public List<ChatbotCategoryDetailResponse> getDetails(@RequestParam Long parentId, @RequestParam Long userId){
         return chatService.getDetail(parentId, userId);
     }
+
+
 
     @PostMapping("user/buildRoom/{postId}")
     public ChatRoomResponse getRoomListByUser(@RequestBody ChatRoomRequest chatRoomRequest, @PathVariable Long postId){
