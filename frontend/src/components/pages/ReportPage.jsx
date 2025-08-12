@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Header from "../templates/Header";
 import { useLocation, useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
+import { useAuthStore } from "../../store/authStore";
 
 const submitReport = async (formData) => {
   const res = await instance.post("/community/reports", formData);
@@ -11,11 +12,11 @@ const submitReport = async (formData) => {
 };
 
 export default function ReportPage() {
+  const { userInfo, clearAuthInfo } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUserInfo, target, targetId } = location.state;
+  const { target, targetId } = location.state;
   const [formData, setFormData] = useState({
-    userId: currentUserInfo.no,
     target: target,
     targetId: targetId,
     category: "",

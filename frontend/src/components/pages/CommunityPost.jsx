@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../templates/Header";
 import instance from "../../apis/instance";
+import { useAuthStore } from "../../store/authStore";
 
 // 댓글 목록 조회 API 호출 함수
 export const getComments = async (boardId) => {
@@ -23,17 +24,17 @@ export const editComment = async (sender) => {
   return res.data;
 };
 
-export const deleteContent = async (target, targetId, userId) => {
-  const res = await instance.get("/community/delete", { params: { target, targetId, userId } });
+export const deleteContent = async (target, targetId) => {
+  const res = await instance.get("/community/delete", { params: { target, targetId } });
   return res.data
 };
 
 export default function CommunityPost() {
+  const { userInfo, clearAuthInfo } = useAuthStore();
   // React Router로부터 전달받은 게시글 데이터 및 네비게이트 함수
   const location = useLocation();
   const navigate = useNavigate();
   const post = location.state?.post;
-  const currentUserInfo = location.state?.currentUserInfo;
 
   // 댓글 리스트 상태
   const [comments, setComments] = useState([]);
@@ -80,8 +81,11 @@ export default function CommunityPost() {
 
   //첫 실행
   useEffect(() => {
-    setComments(post.comments);
-  }, [])
+    if (post?.comments) {
+      setComments(post.comments);
+    }
+  }, []);
+
 
   // 댓글 수정 input이 열릴 때 포커스를 자동으로 줌
   useEffect(() => {
@@ -124,7 +128,6 @@ export default function CommunityPost() {
 
     // 서버에 보낼 데이터 생성
     const sender = {
-      userId: currentUserInfo.no,
       boardId: post.no,
       comment: comment,
       parentId: "",
@@ -161,7 +164,6 @@ export default function CommunityPost() {
     const sender = {
       no: editCommentId,
       comment: editText,
-      userId: currentUserInfo.no
     };
 
     try {
@@ -183,12 +185,14 @@ export default function CommunityPost() {
   };
 
   const runIfOwner = (target, type, targetType) => {
-    if (target.userId === currentUserInfo.no) {
+    console.log("t", target);
+    console.log("u", userInfo)
+    if (target.userId === userInfo.userId) {
       if (type === "수정") {
         if (targetType === "comment") {
           handleEditClick(target);
         } else if (targetType === "post") {
-          navigate("/newPost", { state: { post, currentUserInfo } });
+          navigate("/newPost", { state: { post } });
         }
       } else if (type === "삭제") {
         setDeleteTarget(targetType);
@@ -202,7 +206,7 @@ export default function CommunityPost() {
 
   const handleDelete = async () => {
     try {
-      await deleteContent(deleteTarget, deleteTargetId, currentUserInfo.no);
+      await deleteContent(deleteTarget, deleteTargetId);
       console.log("성공");
       if (deleteTarget === "comment") {
         const updatedComments = await getComments(post.no);
@@ -249,7 +253,6 @@ export default function CommunityPost() {
                 <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-3 mb-3" onClick={() => runIfOwner(post, "삭제", "post")}>게시글 삭제</p>
                 <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-0 mb-1" onClick={() => navigate("/reportPage", {
                   state: {
-                    currentUserInfo: currentUserInfo,
                     target: "post",
                     targetId: post.no,
                   }
@@ -263,8 +266,8 @@ export default function CommunityPost() {
             <span>
               작성자: <span className="font-semibold">{post.nickname}</span>
             </span>
-            {post.category === "USED" && post.userId != currentUserInfo.no && (
-              <button className="bg-[#3C9A5F] text-[#FEF7E2] px-3 py-1 rounded hover:bg-[#264D3D] transition-colors border-none cursor-pointer" onClick={() => navigate("/chat", { state: { currentUserInfo, post } })}>
+            {post.category === "USED" && post.userId != userInfo.userId && (
+              <button className="bg-[#3C9A5F] text-[#FEF7E2] px-3 py-1 rounded hover:bg-[#264D3D] transition-colors border-none cursor-pointer" onClick={() => navigate("/chat", { state: { post } })}>
                 💬 채팅하기
               </button>
             )}
@@ -356,7 +359,6 @@ export default function CommunityPost() {
                               onClick={() =>
                                 navigate("/reportPage", {
                                   state: {
-                                    currentUserInfo: currentUserInfo,
                                     target: "comment",
                                     targetId: comment.no,
                                   },

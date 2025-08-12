@@ -12,6 +12,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from '../../apis/instance.js';  //axios 인스턴스 (API 호출용)
+import { useAuthStore } from "../../store/authStore";
 
 //백엔드에서 오늘의 문제를 받아오는 API 호출 함수
 export const getProblem = async () => {
@@ -27,7 +28,8 @@ export const submitAnswer = async (submittedAnswer) => {
   return res.data;
 };
 
-export default function TodayQuiz({ userId }) {
+export default function TodayQuiz() {
+  const { userInfo, clearAuthInfo } = useAuthStore();
   //컴포넌트 상태 선언 - React 함수형 컴포넌트 내에서 useState 훅으로 상태 선언
   const [problem, setProblem] = useState(null); //현재 받아온 문제 정보
   const [submitResult, setSubmitResult] = useState(null); //답안 제출 결과 정보

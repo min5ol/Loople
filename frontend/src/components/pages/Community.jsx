@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
+import { useAuthStore } from "../../store/authStore";
 
 export const getPostByCategory = async (payLoad) => {
   const res = await instance.post("/community/posts", payLoad);
@@ -14,7 +15,8 @@ export const getDetailPost = async (no) => {
   return res.data;
 }
 
-export default function Community({ currentUserInfo }) {
+export default function Community() {
+  const { userInfo, clearAuthInfo } = useAuthStore();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [noticePosts, setNoticePosts] = useState([]);
@@ -30,8 +32,6 @@ export default function Community({ currentUserInfo }) {
   const totalPages = Math.ceil(posts.length / generalPostsPerPage);
 
   useEffect(() => {
-    if (!currentUserInfo?.no) return;
-
     const fetchData = async () => {
       try {
         await handlePost("NOTICE");
@@ -41,12 +41,12 @@ export default function Community({ currentUserInfo }) {
     };
 
     fetchData();
-  }, [currentUserInfo.no]);
+  }, []);
 
 
   const handlePost = async (category) => {
     const payLoad = {
-      userId: currentUserInfo.no,
+      userId: userInfo.no,
       category: category
     }
     const res = await getPostByCategory(payLoad);
@@ -64,9 +64,7 @@ export default function Community({ currentUserInfo }) {
 
   const fetchDetailPost = async (no) => {
     const post = await getDetailPost(no);
-    navigate("/communityPost", {
-      state: { post, currentUserInfo }
-    });
+    navigate("/communityPost", {state: {post}});
   };
 
   return (
@@ -100,7 +98,7 @@ export default function Community({ currentUserInfo }) {
             중고나눔게시판
           </button>
         </div>
-        <button onClick={() => navigate("/newPost", { state: { currentUserInfo } })} className="px-5 py-2 rounded-md shadow bg-[#C7E6C9] text-[#264D3D] hover:bg-[#264D3D] hover:text-white transition border-none cursor-pointer">
+        <button onClick={() => navigate("/newPost")} className="px-5 py-2 rounded-md shadow bg-[#C7E6C9] text-[#264D3D] hover:bg-[#264D3D] hover:text-white transition border-none cursor-pointer">
           글쓰기
         </button>
       </div>

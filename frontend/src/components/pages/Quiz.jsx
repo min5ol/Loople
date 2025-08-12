@@ -6,10 +6,10 @@
 // src/components/pages/Quiz.jsx
 
 import React, { useState } from "react";
-import { useLocation } from 'react-router-dom';
 import TodayQuiz from "./TodayQuiz";
 import AttendanceCalendar from "./AttendanceCalendar";
 import instance from "../../apis/instance";
+import { useAuthStore } from "../../store/authStore";
 
 export const temperoryMakeProblem = async () => {
   //비동기 API 호출
@@ -18,10 +18,10 @@ export const temperoryMakeProblem = async () => {
 };
 
 export default function Quiz() {
-  const [mode, setMode] = useState("attendance");
-  const location = useLocation();
+  const { userInfo, clearAuthInfo } = useAuthStore();
+  console.log(userInfo);
 
-  const userId = location.state?.res.data.userId;
+  const [mode, setMode] = useState("attendance");
 
   const goToQuiz = () => {
     setMode("quiz");
@@ -50,13 +50,13 @@ export default function Quiz() {
 
         {mode == "quiz" && (
           <div>
-            <TodayQuiz userId = {userId}/>
+            <TodayQuiz />
           </div>
         )}
 
         {mode == "attendance" && (
           <div>
-            <AttendanceCalendar userId = {userId}/>
+            <AttendanceCalendar />
           </div>
         )}
 

@@ -3,6 +3,8 @@ package com.loople.backend.v2.domain.chat.controller;
 import com.loople.backend.v2.domain.chat.dto.*;
 import com.loople.backend.v2.domain.chat.service.ChatService;
 import com.loople.backend.v2.global.api.OpenApiClient;
+import com.loople.backend.v2.global.getUserId.GetLoggedInUserId;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -23,11 +25,11 @@ public class ChatController {
     private final OpenApiClient openApiClient;
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final GetLoggedInUserId getLoggedInUserId;
 
     // POST 방식으로 메시지 받아 OpenAI 응답 반환
     @PostMapping("/chatbot/text")
     public Mono<String> sendMessageToAI(@RequestBody ChatTextRequest chatTextRequest){
-        System.out.println("chatTextRequest = " + chatTextRequest);
         String prompt = chatTextRequest.content()
                 + " 쓰레기 처리 방법에 대해 알려줘 !\n"
                 + "두괄식으로 어떻게 할지 먼저 써주고 그 뒤에 설명 붙여줘\n"
@@ -44,9 +46,10 @@ public class ChatController {
                 });
     }
 
-    @GetMapping("/chatbot/buildRoom/{nickname}")
-    public ChatRoomResponse getRoomNum(@PathVariable String nickname){
-        return chatService.buildRoomWithAI(nickname);
+    @GetMapping("/chatbot/buildRoom")
+    public ChatRoomResponse getRoomNum(HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return chatService.buildRoomWithAI(userId);
     }
 
     @GetMapping("/chatbot/category")
@@ -56,30 +59,35 @@ public class ChatController {
     }
 
     @GetMapping("/chatbot/details")
-    public List<ChatbotCategoryDetailResponse> getDetails(@RequestParam Long parentId, @RequestParam Long userId){
+    public List<ChatbotCategoryDetailResponse> getDetails(@RequestParam Long parentId, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
         return chatService.getDetail(parentId, userId);
     }
 
 
 
-    @PostMapping("user/buildRoom/{postId}")
-    public ChatRoomResponse getRoomListByUser(@RequestBody ChatRoomRequest chatRoomRequest, @PathVariable Long postId){
-        return chatService.buildRoom(chatRoomRequest, postId);
+    @GetMapping("user/buildRoom/{postId}")
+    public ChatRoomResponse getRoomListByUser(@RequestParam String partner, @PathVariable Long postId, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return chatService.buildRoom(userId, partner, postId);
     }
 
-    @GetMapping("user/allRoom/{nickname}")
-    public List<ChatRoomResponse> getAllRooms(@PathVariable String nickname){
-        return chatService.getAllRooms(nickname);
+    @GetMapping("user/allRoom")
+    public List<ChatRoomResponse> getAllRooms(HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return chatService.getAllRooms(userId);
     }
 
     @GetMapping("/user/{roomId}/text")
-    public List<ChatTextResponse> viewRoomText(@PathVariable Long roomId, @RequestParam String nickname){
-        return chatService.viewRoomText(roomId, nickname);
+    public List<ChatTextResponse> viewRoomText(@PathVariable Long roomId, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return chatService.viewRoomText(roomId, userId);
     }
 
     @GetMapping("/user/delete/{roomId}")
-    public void deleteChatRoom(@PathVariable Long roomId, @RequestParam String nickname) {
-        chatService.deleteChatRoom(roomId, nickname);
+    public void deleteChatRoom(@PathVariable Long roomId, HttpServletRequest request) {
+        Long userId = getLoggedInUserId.getUserId(request);
+        chatService.deleteChatRoom(roomId, userId);
     }
 
 
