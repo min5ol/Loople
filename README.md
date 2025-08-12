@@ -20,6 +20,7 @@
 ### FE
 
 ### BE
+~~~plaintext
 backend/
 ├── .gradle/
 ├── .idea/
@@ -69,6 +70,7 @@ backend/
 ├── gradlew.bat
 ├── HELP.md
 └── settings.gradle
+~~~
 
 - `src/main/java/com/loople/backend/v2/domain` : 도메인별 세부 모듈들 (auth, chat, community 등)
 - `src/main/java/com/loople/backend/v2/global` : 공통 기능 (api, config, exception 등)
