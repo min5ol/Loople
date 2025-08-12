@@ -30,6 +30,7 @@ import com.loople.backend.v2.global.api.OpenApiClient;
 import com.loople.backend.v2.global.exception.UnauthorizedException;
 import com.loople.backend.v2.global.getUserId.GetLoggedInUserId;
 import com.loople.backend.v2.global.jwt.JwtProvider;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -52,6 +53,7 @@ public class QuizController {
 
     private final OpenApiClient openApiClient;
     private final QuizService quizService;
+    private final GetLoggedInUserId getLoggedInUserId;
 
     @Scheduled(cron = "0 0 0 1 * *") // 매월 1일 00:00:00  //초 분 시 일 월 요일
     @PostMapping("/temp")
@@ -66,20 +68,23 @@ public class QuizController {
 
     //저장된 문제 클라이언트에게 show
     //Mono: 비동기 단일 값 컨테이너 -> 나중에 1개의 데이터를 비동기적으로 받음
-    @PostMapping("/getProblem/{userId}")
-    public ProblemResponseDto getProblem(@PathVariable Long userId) {
+    @PostMapping("/getProblem")
+    public ProblemResponseDto getProblem(HttpServletRequest request) {
+        Long userId = getUserId(request);
         return quizService.getProblem(userId);
     }
     
     //사용자 응답 제출 비교
-    @PostMapping("/{userId}/submitAnswer")
-    public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto userAnswerRequestDto, @PathVariable Long userId){
+    @PostMapping("/submitAnswer")
+    public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto userAnswerRequestDto, HttpServletRequest request){
+        Long userId = getUserId(request);
         return quizService.saveUserAnswer(userAnswerRequestDto, userId);
     }
 
     //출석 일수 구하기
-    @GetMapping("/{userId}/getAttendanceDays")
-    public List<Integer> checkAttendanceDaysByUser(@PathVariable Long userId){
+    @GetMapping("/getAttendanceDays")
+    public List<Integer> checkAttendanceDaysByUser(HttpServletRequest request){
+        Long userId = getUserId(request);
         return quizService.fetchAttendanceStatus(userId);
     }
 
@@ -122,5 +127,9 @@ public class QuizController {
                 + "마지막으로, 생성한 " + n + "개의 문제를 JSON 파일 형식으로 출력해줘.\n"
                 + "학생들이 흥미를 느끼고, 자연스럽게 순환 경제와 분리배출을 배울 수 있게 너의 능력을 발휘해줘! \uD83D\uDE0A";
 
+    }
+
+    private Long getUserId(HttpServletRequest request){
+        return getLoggedInUserId.getUserId(request);
     }
 }
