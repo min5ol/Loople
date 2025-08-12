@@ -18,6 +18,61 @@
 
 ## 프로젝트 구조
 ### FE
+# 프론트엔드 프로젝트 구조
+
+~~~plaintext
+FRONTEND/
+├── node_modules/
+├── public/
+├── src/
+│   ├── apis/
+│   ├── assets/
+│   ├── components/
+│   │   ├── atoms/
+│   │   ├── common/
+│   │   ├── modals/
+│   │   ├── organisms/
+│   │   ├── pages/
+│   │   └── templates/
+│   ├── constants/
+│   ├── context/
+│   ├── hooks/ 
+│   ├── routes/
+│   ├── services/
+│   ├── store/
+│   ├── styles/
+│   ├── utils/
+│   ├── App.jsx
+│   └── main.jsx
+├── .env
+├── .gitignore
+├── eslint.config.js
+├── index.html
+├── package-lock.json
+├── package.json
+├── README.md
+├── uno.config.mjs
+├── vite.config.js
+└── yarn.lock
+~~~
+- `src/apis` : API 요청 관련 모듈
+- `src/assets` : 이미지, 폰트 등 정적 자원
+- `src/components` : UI 컴포넌트 모음 (atoms, modals, templates 등으로 분리)
+- `src/constants` : 상수 정의 파일
+- `src/context` : 전역 상태 관리를 위한 React Context
+- `src/hooks` : 커스텀 훅 정의
+- `src/routes` : 라우팅 관련 설정 파일
+- `src/services` : 도메인별 서비스 로직
+- `src/store` : 전역 상태관리 (예: Redux, Zustand 등)
+- `src/styles` : 전역 스타일, 테마 등 스타일 정의
+- `src/utils` : 공통 유틸리티 함수
+- `src/App.jsx` : 전체 앱을 구성하는 루트 컴포넌트
+- `src/main.jsx` : 앱 진입점, React 앱을 DOM에 마운트
+- `index.html` : 앱의 HTML 템플릿
+- `vite.config.js` : Vite 번들러 설정 파일
+- `.env` : 환경변수 설정 파일
+- `package.json` : 프로젝트 의존성과 스크립트 정의
+
 
 ### BE
 ~~~plaintext
