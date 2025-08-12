@@ -1,8 +1,8 @@
-// 작성일: 2025.07.28
-// 작성자: 장민솔
-// 설명: 회원가입 완료 후 단계별 지급 슬라이드 진행 컴포넌트
-
 // src/components/pages/SignUpComplete.jsx
+// 작성일: 2025.07.28
+// 수정일: 2025.08.12
+// 설명: 회원가입 완료 후 단계별 지급 슬라이드 진행 컴포넌트
+//       - 마지막 완료 후 /quiz 로 이동
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -37,15 +37,12 @@ export default function SignUpComplete() {
     try {
       switch (step) {
         case 1:
-          // [수정] URL에서 userId 제거
           await instance.post(`/users/avatar/default`);
           break;
         case 2:
-          // [수정] URL에서 userId 제거
           await instance.post(`/users/badge/default`);
           break;
         case 3:
-          // [수정] URL에서 userId 제거
           await instance.post(`/users/room/default`);
           break;
         case 4:
@@ -54,17 +51,22 @@ export default function SignUpComplete() {
             setLoading(false);
             return;
           }
-          // [수정] URL에서 userId 제거
           await instance.post(`/users/loopling?catalogId=${looplingId}`);
           break;
         case 5:
-          // [수정] URL에서 userId 제거
           await instance.post(`/users/village`);
-          // [수정] URL에서 userId 제거
           await instance.patch(`/users/complete`);
-          setShowModal(true);
+          setShowModal(true);   // 완료 모달 노출
           setLoading(false);
           return;
+
+          // 🔁 모달 없이 바로 이동하고 싶다면 위 3줄 대신 아래로 교체:
+          // await instance.post(`/users/village`);
+          // await instance.patch(`/users/complete`);
+          // navigate("/quiz", { replace: true });
+          // setLoading(false);
+          // return;
+
         default:
           break;
       }
@@ -78,9 +80,10 @@ export default function SignUpComplete() {
     }
   };
 
+  // ✅ 완료 후 퀴즈 페이지로 이동
   const handleDashboard = () => {
     setShowModal(false);
-    navigate("/looplehome");
+    navigate("/quiz", { replace: true });
   };
 
   const steps = [
@@ -152,7 +155,7 @@ export default function SignUpComplete() {
       {showModal && (
         <FinalSuccessModal
           name={name}
-          onConfirm={handleDashboard}
+          onConfirm={handleDashboard}   // ← 모달 확인 시 /quiz 이동
         />
       )}
     </div>

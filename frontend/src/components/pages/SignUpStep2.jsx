@@ -1,21 +1,23 @@
+// src/components/pages/SignUpStep2.jsx
+
 /**
  * 작성일: 2025.07.18
- * 수정일: 2025.08.08
- * 작성자: 장민솔
- * 설명: 회원가입 2단계 - 소셜/일반 회원가입 분기 포함 + zustand 도입
+ * 수정일: 2025.08.12
+ * 설명: 회원가입 2단계 - 소셜/일반 분기 + Zustand 사용
+ *  - 소셜 유입: Step1 스킵, OAuthCallback에서 저장한 socialData로 통과
+ *  - 새로고침 보호: sessionStorage에서 socialData 폴백 복구
  */
-
-// src/components/pages/SignUpStep2.jsx
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { checkNickname } from "../../apis/user";
-import { useSignupStore } from "../../store/signupStore"; // Zustand 스토어 import
+import { useSignupStore } from "../../store/signupStore";
 
 export default function SignUpStep2() {
   const navigate = useNavigate();
-  // Zustand 스토어에서 이전 단계 데이터와 현재 단계 데이터를 저장할 액션을 가져옴
-  const { step1Data, socialData, setStep2Data } = useSignupStore();
+
+  // Zustand 스토어
+  const { step1Data, socialData, setStep2Data, setSocialData } = useSignupStore();
 
   const [form, setForm] = useState({
     name: "",
@@ -29,14 +31,24 @@ export default function SignUpStep2() {
     isValid: false,
   });
 
+  // 가드: 소셜이거나(콜백에서 주입) 로컬 1단계를 통과했는지 확인
   useEffect(() => {
-    // sessionStorage 대신 스토어에 이전 단계 데이터가 있는지 확인
-    // 소셜 로그인 데이터(socialData.provider)나 일반 가입 1단계 데이터(step1Data.email)가 없으면 이전 페이지로
-    if (!socialData.provider && !step1Data.email) {
-      alert("1단계를 먼저 진행해주세요.");
-      navigate("/signup");
+    // 1) 소셜(Zustand) 또는 로컬(step1)이 있으면 통과
+    if (socialData?.provider || step1Data?.email) return;
+
+    // 2) 새로고침 등으로 스토어가 날아간 경우, sessionStorage에서 복구
+    const ssProvider = sessionStorage.getItem("provider");
+    const ssEmail = sessionStorage.getItem("email");
+    const ssSocialId = sessionStorage.getItem("socialId");
+    if (ssProvider && ssEmail) {
+      setSocialData({ provider: ssProvider, email: ssEmail, socialId: ssSocialId || "" });
+      return;
     }
-  }, [step1Data, socialData, navigate]);
+
+    // 3) 둘 다 없으면 Step1로
+    alert("1단계를 먼저 진행해주세요.");
+    navigate("/signup");
+  }, [step1Data, socialData, navigate, setSocialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,7 +60,7 @@ export default function SignUpStep2() {
   };
 
   const handleNicknameCheck = async () => {
-    if (!form.nickname) {
+    if (!form.nickname.trim()) {
       setNicknameStatus({
         checked: false,
         message: "닉네임을 입력해주세요.",
@@ -66,7 +78,8 @@ export default function SignUpStep2() {
           : "❌ 이미 사용 중인 닉네임입니다.",
         isValid: res.available,
       });
-    } catch {
+    } catch (e) {
+      console.error("[닉네임 중복확인] 실패", e);
       setNicknameStatus({
         checked: true,
         message: "오류가 발생했습니다. 다시 시도해주세요.",
@@ -84,17 +97,16 @@ export default function SignUpStep2() {
   const handleNext = () => {
     const { name, nickname, phone } = form;
 
-    if (!name || !nickname || !phone) {
+    if (!name.trim() || !nickname.trim() || !phone.trim()) {
       alert("모든 항목을 입력해주세요.");
       return;
     }
-
     if (!nicknameStatus.checked || !nicknameStatus.isValid) {
       alert("닉네임 중복 확인을 해주세요.");
       return;
     }
 
-    // sessionStorage 대신 Zustand 스토어에 데이터를 저장
+    // Zustand에 저장(다음 단계에서 사용)
     setStep2Data(form);
 
     navigate("/signup/step3");

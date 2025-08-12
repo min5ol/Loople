@@ -26,9 +26,9 @@ const initialState = {
 export const useSignupStore = create((set) => ({
   ...initialState,
 
-  setStep1Data: (data) => set({ step1Data: data }),
-  setStep2Data: (data) => set({ step2Data: data }),
-  setSocialData: (data) => set({ socialData: data }),
+  setStep1Data: (data) => set({ step1Data: { ...data } }),
+  setStep2Data: (data) => set({ step2Data: { ...data } }),
+  setSocialData: (data) => set({ socialData: { ...data } }),
 
   reset: () => set(initialState),
 }));
