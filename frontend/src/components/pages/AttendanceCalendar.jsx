@@ -9,8 +9,8 @@ import instance from '../../apis/instance.js';
 
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
-export const getAttendanceDays = async (userId) => {
-  const res = await instance.get(`/quiz/${userId}/getAttendanceDays`);
+export const getAttendanceDays = async () => {
+  const res = await instance.get(`/quiz/getAttendanceDays`);
   return res.data;
 };
 
@@ -69,7 +69,7 @@ export default function AttendanceCalendar({userId}) {
 
   const handleAttendance = async () => {
     try {
-      const data = await getAttendanceDays(userId);
+      const data = await getAttendanceDays();
       setAttendanceDays(data);
       generateCalendarDays(today, data);
     } catch (error) {

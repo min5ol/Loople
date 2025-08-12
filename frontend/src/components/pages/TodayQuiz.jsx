@@ -14,16 +14,16 @@ import { useNavigate } from "react-router-dom";
 import instance from '../../apis/instance.js';  //axios 인스턴스 (API 호출용)
 
 //백엔드에서 오늘의 문제를 받아오는 API 호출 함수
-export const getProblem = async (userId) => {
+export const getProblem = async () => {
   //비동기 API 호출
-  const res = await instance.post(`/quiz/getProblem/${userId}`);
+  const res = await instance.post(`/quiz/getProblem`);
   return res.data;
 };
 
 // 사용자가 제출한 답안을 서버에 보내고 결과를 받는 함수
-export const submitAnswer = async (submittedAnswer, userId) => {
+export const submitAnswer = async (submittedAnswer) => {
   //비동기 API 호출
-  const res = await instance.post(`/quiz/${userId}/submitAnswer`, submittedAnswer);
+  const res = await instance.post(`/quiz/submitAnswer`, submittedAnswer);
   return res.data;
 };
 
@@ -46,7 +46,7 @@ export default function TodayQuiz({ userId }) {
     setLoading(true); // 문제 받아오기 시작할 때 로딩 ON
 
     try {
-      const data = await getProblem(userId);  //API 호출
+      const data = await getProblem();  //API 호출
       setProblem(data); //문제 상태 저장
       setSubmitResult(null);  //이전 채점 결과 초기화
       setErrorMessage(data.hasSolvedToday ? "오늘 할당된 모든 문제를 푸셨습니다." : null);  //오늘 이미 문제 푼 경우
@@ -67,7 +67,7 @@ export default function TodayQuiz({ userId }) {
       };
 
       //비동기 API 호출로 제출
-      const data = await submitAnswer(payLoad, userId);
+      const data = await submitAnswer(payLoad);
 
       setSubmitResult(data);  //결과 저장
       setErrorMessage(null);  //에러 메시지 초기화

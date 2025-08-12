@@ -5,8 +5,8 @@
 
 // src/components/pages/Quiz.jsx
 
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from "react";
+import { useLocation } from 'react-router-dom';
 import TodayQuiz from "./TodayQuiz";
 import AttendanceCalendar from "./AttendanceCalendar";
 import instance from "../../apis/instance";
@@ -20,7 +20,6 @@ export const temperoryMakeProblem = async () => {
 export default function Quiz() {
   const [mode, setMode] = useState("attendance");
   const location = useLocation();
-  const navigate = useNavigate();
 
   const userId = location.state?.res.data.userId;
 
