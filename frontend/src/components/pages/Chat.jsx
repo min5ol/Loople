@@ -6,6 +6,7 @@ import Header from "../templates/Header";
 import instance from "../../apis/instance";
 import webSocketService, { MessageType } from '../../services/WebSocketService';
 import hamburgerMenu from "../../assets/hamburgerMenu.png";
+import { useAuthStore } from "../../store/authStore";
 
 const buildChatRoom = async (chatUserInfo, postId) => {
   const res = await instance.post(`/chat/completion/user/buildRoom/${postId}`, chatUserInfo);
@@ -30,15 +31,15 @@ const deleteChatRoom = async (roomId, nickname) => {
 export default function Chat() {
   const navigate = useNavigate()
   const location = useLocation();
-  const currentUserInfo = location.state?.currentUserInfo;
+  const currentUserInfo = location.state?.userInfo;
   const post = location.state?.post;
-
 
   const [chatList, setChatList] = useState([]);
   const [chatUserInfo, setChatUserInfo] = useState({
     participantA: "",
     participantB: ""
   });
+
   const [message, setMessage] = useState("");
   const [currentRoom, setCurrentRoom] = useState(null);
   const [textHistory, setTextHistory] = useState([]);
@@ -49,19 +50,21 @@ export default function Chat() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const { userInfo, clearAuthInfo } = useAuthStore();
+
   useEffect(() => {
     console.log("user", currentUserInfo);
     console.log("post", post);
   }, [])
 
   useEffect(() => {
-    if (currentUserInfo && post) {
+    if (userInfo && post) {
       setChatUserInfo({
-        participantA: currentUserInfo.nickname,
+        participantA: userInfo.nickname,
         participantB: post.nickname,
       });
     }
-  }, [currentUserInfo, post]);
+  }, [userInfo, post]);
 
   useEffect(() => {
     setChatList([]);
@@ -69,7 +72,7 @@ export default function Chat() {
     setIsOpenRoom(false);
 
     const fetchAllRoom = async () => {
-      const list = await getAllRoom(currentUserInfo.nickname);
+      const list = await getAllRoom(userInfo.nickname);
       setChatList(list);
       console.log("list", list);
     }
@@ -90,21 +93,21 @@ export default function Chat() {
         if (exists) return prev;
         return [...prev, saved];
       });
-      const res = await viewRoomText(saved.no, currentUserInfo.nickname);
+      const res = await viewRoomText(saved.no, userInfo.nickname);
       setTextHistory(res);
       console.log(saved);
 
       fetchBuild();
     }
-  }, [currentUserInfo, chatUserInfo]);
+  }, [userInfo, chatUserInfo]);
 
 
   //webSocket
   useEffect(() => {
-    if (!currentUserInfo) return;
+    if (!userInfo) return;
 
     // 접속 시 username으로 WebSocket 연결 시도
-    webSocketService.connect(currentUserInfo.nickname);
+    webSocketService.connect(userInfo.nickname);
 
     // ✅ 메시지 구독: 여기에서 중복 체크 추가!
     const unsubscribe = webSocketService.subscribeToMessages((msg) => {
@@ -178,7 +181,7 @@ export default function Chat() {
       unsubscribe();
       webSocketService.disconnect();
     };
-  }, [currentUserInfo, currentRoom]);
+  }, [userInfo, currentRoom]);
 
 
   useEffect(() => {
@@ -234,7 +237,7 @@ export default function Chat() {
 
 
     const myMessage = {
-      nickname: currentUserInfo.nickname,
+      nickname: userInfo.nickname,
       content: message,
       type: MessageType.CHAT,
       roomId: currentRoom.no, // 방 ID 포함 필요
@@ -269,7 +272,7 @@ export default function Chat() {
   const fetchRoom = async (chat) => {
     setCurrentRoom(chat);
     setIsOpenRoom(true);
-    const res = await viewRoomText(chat.no, currentUserInfo.nickname);
+    const res = await viewRoomText(chat.no, userInfo.nickname);
     console.log(res);
     setTextHistory(res);
   }
@@ -288,7 +291,7 @@ export default function Chat() {
   const handleDelete = async () => {
     setIsDeleting(true); // 🔄 삭제 중 표시 시작
     try {
-      await deleteChatRoom(currentRoom.no, currentUserInfo.nickname);
+      await deleteChatRoom(currentRoom.no, userInfo.nickname);
       setChatList(prevList => prevList.filter(room => room.no !== currentRoom.no));
       setCurrentRoom(null);
       setIsShowChatInfo(false);
@@ -306,7 +309,6 @@ export default function Chat() {
 
   return (
     <>
-
       <Header currentUserInfo={currentUserInfo} />
       <div className="flex mx-auto h-[600px] w-full max-w-4xl border rounded shadow mt-20 overflow-hidden">
 
@@ -321,7 +323,7 @@ export default function Chat() {
                 <li className="p-2 border-b border-gray-100 cursor-pointer hover:bg-[#F3F8F2] transition-colors" onClick={() => fetchRoom(chat)}>
                   <div className="flex justify-between items-center mb-1 p-0">
                     <p className="font-medium text-gray-800 m-0">
-                      {currentUserInfo.nickname === chat.participantA ? chat.participantB : chat.participantA}
+                      {userInfo.nickname === chat.participantA ? chat.participantB : chat.participantA}
                     </p>
                     <p className="text-xs text-gray-400 m-0">{formatChatTime(chat.updatedAt)}</p>
                   </div>
@@ -376,7 +378,7 @@ export default function Chat() {
                 </div>
 
                 <div className="font-bold text-xl">
-                  {currentUserInfo.nickname === currentRoom.participantA
+                  {userInfo.nickname === currentRoom.participantA
                     ? currentRoom.participantB
                     : currentRoom.participantA}
                 </div>
@@ -414,7 +416,7 @@ export default function Chat() {
                 {textHistory.length > 0 && (
                   <>
                     {textHistory.map((text, idx) => {
-                      const isCurrentUser = text.nickname === currentUserInfo.nickname;
+                      const isCurrentUser = text.nickname === userInfo.nickname;
                       return (
                         <div
                           key={idx}
@@ -468,7 +470,7 @@ export default function Chat() {
               <p className="text-lg font-semibold mb-3 text-gray-800">
                 채팅 상대:{" "}
                 <span className="text-green-600">
-                  {currentUserInfo.nickname === currentRoom.participantA
+                  {userInfo.nickname === currentRoom.participantA
                     ? currentRoom.participantB
                     : currentRoom.participantA}
                 </span>

@@ -15,6 +15,7 @@ export default function NewPost() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     no: "",
+    userId: "",
     title: "",
     category: "",
     content: "",
@@ -27,6 +28,8 @@ export default function NewPost() {
   const post = location.state?.post;
   const currentUserInfo = location.state?.currentUserInfo;
   const [isEditMode, setIsEditMode] = useState(false);
+  console.log(location.state);
+
 
   const [isFileChanged, setIsFileChanged] = useState(false);
 
@@ -99,6 +102,7 @@ export default function NewPost() {
     data.append("category", formData.category);
     data.append("content", formData.content);
     data.append("isFileChanged", isFileChanged);
+    data.append("userId", post.userId);
 
 
     if (isFileChanged && formData.attachedFile) {

@@ -35,7 +35,6 @@ public class ChatServiceImpl implements ChatService {
     //chatbot
     @Override
     public ChatRoomResponse buildRoomWithAI(String nickname) {
-        System.out.println("nickname = " + nickname);
         ChatRoom room = chatRoomRepository
                 .findByParticipantAAndParticipantBAndPostId(nickname, "AI", null)
                 .orElseGet(() -> chatRoomRepository.save(ChatRoom.builder()
@@ -69,22 +68,16 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatbotCategoryResponse> getCategory(String categoryType, Long parentId) {
-        List<ChatbotCategory> mainCategory = chatbotCategoryRepository.findByCategoryTypeAndParentId(categoryType, parentId);
+        List<ChatbotCategory> category = chatbotCategoryRepository.findByCategoryTypeAndParentId(categoryType, parentId);
 
-        return mainCategory.stream()
-                .map(category -> new ChatbotCategoryResponse(category.getNo(), category.getCategoryType(), category.getName()))
+        return category.stream()
+                .map(cat -> new ChatbotCategoryResponse(cat.getNo(), cat.getCategoryType(), cat.getName()))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ChatbotCategoryDetailResponse> getDetail(Long parentId, Long userId) {
-        if (parentId >= 43L && parentId <= 46L) {
-            return getLocalInfoUrl(userId);
-        }
-
-        if (parentId == 47L) {
-            return getLocalInfo(userId);
-        }
+        if (parentId >= 43L && parentId <= 47L) { return getLocalInfo(userId); }
 
         List<ChatbotCategoryDetail> byCategoryId = chatbotCategoryDetailRepository.findByCategoryId(parentId);
 
@@ -150,6 +143,7 @@ public class ChatServiceImpl implements ChatService {
 
 
         return merged.stream()
+                .filter(chatRoom -> !chatRoom.getParticipantB().equals("AI"))
                 .map(chatRoom -> getChatRoomResponse(chatRoom, getLastChatText(chatRoom)))
                 .collect(Collectors.toList());
     }
@@ -266,6 +260,11 @@ public class ChatServiceImpl implements ChatService {
                         .sido(info.getSido())
                         .sigungu(info.getSigungu())
                         .homepage(info.getHomepage())
+                        .allInfoUrl(info.getAllInfoUrl())
+                        .generalUrl(info.getGeneralUrl())
+                        .foodUrl(info.getFoodUrl())
+                        .recyclingUrl(info.getRecyclingUrl())
+                        .bulkyUrl(info.getBulkyUrl())
                         .wasteType(info.getWasteType())
                         .disposalTime(info.getDisposalTime())
                         .disposalDays(info.getDisposalDays())
@@ -276,28 +275,6 @@ public class ChatServiceImpl implements ChatService {
                 .collect(Collectors.toList());
 
         return List.of(new ChatbotCategoryDetailResponse("지역별 정보", null, localGovernsInfo));
-    }
-
-    private List<ChatbotCategoryDetailResponse> getLocalInfoUrl(Long userId) {
-        List<LocalGovernmentWasteInfo> infos = getLocalGovernmentWasteInfos(userId);
-
-        List<LocalGovenmentWasteInfoResponse> localGovernsUrl = infos.stream()
-                .map(info -> LocalGovenmentWasteInfoResponse.builder()
-                        .sido(info.getSido())
-                        .sigungu(info.getSigungu())
-                        .homepage(info.getHomepage())
-                        .allInfoUrl(info.getAllInfoUrl())
-                        .generalUrl(info.getGeneralUrl())
-                        .foodUrl(info.getFoodUrl())
-                        .recyclingUrl(info.getRecyclingUrl())
-                        .bulkyUrl(info.getBulkyUrl())
-                        .wasteType(info.getWasteType())
-                        .disposalMethod(info.getDisposalMethod())
-                        .build()
-                )
-                .collect(Collectors.toList());
-
-        return List.of(new ChatbotCategoryDetailResponse("지역별 URL", null, localGovernsUrl));
     }
 
     private List<LocalGovernmentWasteInfo> getLocalGovernmentWasteInfos(Long userId) {

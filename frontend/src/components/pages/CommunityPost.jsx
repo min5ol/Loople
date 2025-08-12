@@ -23,8 +23,8 @@ export const editComment = async (sender) => {
   return res.data;
 };
 
-export const deleteContent = async (target, targetId) => {
-  const res = await instance.get("/community/delete", { params: { target, targetId } });
+export const deleteContent = async (target, targetId, userId) => {
+  const res = await instance.get("/community/delete", { params: { target, targetId, userId } });
   return res.data
 };
 
@@ -33,7 +33,7 @@ export default function CommunityPost() {
   const location = useLocation();
   const navigate = useNavigate();
   const post = location.state?.post;
-  const currentUserInfo = location.state.currentUserInfo;
+  const currentUserInfo = location.state?.currentUserInfo;
 
   // 댓글 리스트 상태
   const [comments, setComments] = useState([]);
@@ -58,20 +58,30 @@ export default function CommunityPost() {
 
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // 컴포넌트가 처음 렌더링되거나 post.no가 바뀔 때 댓글 목록 및 로그인 된 유저 정보를 가져옴
+  //새로고침 시 -> location.state 사라짐
   useEffect(() => {
+    if (!post?.no) {
+      navigate("/looplehome");
+      return;
+    }
+
     const fetchComments = async () => {
       try {
-        const response = await getComments(post.no);
-        console.log("기존 댓글: ", response);
-        setComments(response);
+        const data = await getComments(post.no);
+        setComments(data);
       } catch (error) {
-        console.error("Failed to fetch comments", error);
+        console.error("댓글 불러오기 실패", error);
+        setErrorMessage("댓글을 불러오는 데 실패했습니다.");
       }
     };
 
     fetchComments();
-  }, [post.no]);
+  }, [post, navigate]); // post가 바뀌거나 컴포넌트 마운트 시 실행
+
+  //첫 실행
+  useEffect(() => {
+    setComments(post.comments);
+  }, [])
 
   // 댓글 수정 input이 열릴 때 포커스를 자동으로 줌
   useEffect(() => {
@@ -109,12 +119,12 @@ export default function CommunityPost() {
 
     setCurrentComment(comment);
 
-
     // 빈 문자열은 무시
     if (!comment.trim()) return;
 
     // 서버에 보낼 데이터 생성
     const sender = {
+      userId: currentUserInfo.no,
       boardId: post.no,
       comment: comment,
       parentId: "",
@@ -124,9 +134,7 @@ export default function CommunityPost() {
       // 댓글 등록 API 호출
       const res = await submitComment(sender);
 
-      // 등록 후 댓글 목록을 다시 가져와서 갱신
-      const updatedComments = await getComments(post.no);
-      setComments(updatedComments);
+      setComments(prev => [...prev, res]);
 
       // 입력창 초기화
       commentInputRef.current.value = "";
@@ -153,11 +161,13 @@ export default function CommunityPost() {
     const sender = {
       no: editCommentId,
       comment: editText,
+      userId: currentUserInfo.no
     };
 
     try {
       // 댓글 수정 API 호출
-      await editComment(sender);
+      const update = await editComment(sender);
+      console.log("updaet", update);
 
       // 수정 후 댓글 목록 다시 불러오기
       const updatedComments = await getComments(post.no);
@@ -178,7 +188,7 @@ export default function CommunityPost() {
         if (targetType === "comment") {
           handleEditClick(target);
         } else if (targetType === "post") {
-          navigate("/newPost", { state: { post } });
+          navigate("/newPost", { state: { post, currentUserInfo } });
         }
       } else if (type === "삭제") {
         setDeleteTarget(targetType);
@@ -192,7 +202,7 @@ export default function CommunityPost() {
 
   const handleDelete = async () => {
     try {
-      await deleteContent(deleteTarget, deleteTargetId);
+      await deleteContent(deleteTarget, deleteTargetId, currentUserInfo.no);
       console.log("성공");
       if (deleteTarget === "comment") {
         const updatedComments = await getComments(post.no);
@@ -239,6 +249,7 @@ export default function CommunityPost() {
                 <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-3 mb-3" onClick={() => runIfOwner(post, "삭제", "post")}>게시글 삭제</p>
                 <p className="px-3 py-2 hover:bg-gray-100 cursor-pointer mt-0 mb-1" onClick={() => navigate("/reportPage", {
                   state: {
+                    currentUserInfo: currentUserInfo,
                     target: "post",
                     targetId: post.no,
                   }
@@ -288,6 +299,7 @@ export default function CommunityPost() {
             </div>
           )}
         </div>
+
 
         {/* 댓글 섹션 */}
         <section className="flex flex-col bg-[#f9fdf7] rounded-lg p-4 border border-[#C7E6C9]">
@@ -344,6 +356,7 @@ export default function CommunityPost() {
                               onClick={() =>
                                 navigate("/reportPage", {
                                   state: {
+                                    currentUserInfo: currentUserInfo,
                                     target: "comment",
                                     targetId: comment.no,
                                   },

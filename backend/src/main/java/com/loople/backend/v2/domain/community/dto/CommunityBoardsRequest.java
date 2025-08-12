@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 public class CommunityBoardsRequest {
     private Long no;
     private Long userId;
-    private String nickname;
     private String dongCode;
     private String title;
     private String content;

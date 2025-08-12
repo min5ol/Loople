@@ -31,9 +31,10 @@ public class CommunityServiceImpl implements CommunityService{
 
     @Override
     @Transactional
-    public CommunityBoardsResponse addPost(CommunityBoardsRequest communityBoardsRequest, Long userId, String type) {
+    public CommunityBoardsResponse addPost(CommunityBoardsRequest communityBoardsRequest, String type) {
         if(type.equals("update")){
             CommunityBoards before = getBoardsByNo(communityBoardsRequest.getNo());
+            validateTargetOwner(before.getUserId(), communityBoardsRequest.getUserId());
 
             if(!before.getTitle().equals(communityBoardsRequest.getTitle())) {
                 before.setTitle(communityBoardsRequest.getTitle());
@@ -54,6 +55,7 @@ public class CommunityServiceImpl implements CommunityService{
 
             return getBuildBoards(updated);
         } else {
+            Long userId = communityBoardsRequest.getUserId();
             User user = getUser(userId);
 
             CommunityBoards communityBoards = CommunityBoards.builder()
@@ -75,8 +77,9 @@ public class CommunityServiceImpl implements CommunityService{
     }
 
     @Override
-    public List<CommunityBoardsResponse> getPostsByCategory(CommunityBoardsRequest communityBoardsRequest, Long userId) {
+    public List<CommunityBoardsResponse> getPostsByCategory(CommunityBoardsRequest communityBoardsRequest) {
         String category = communityBoardsRequest.getCategory();
+        Long userId = communityBoardsRequest.getUserId();
         User user = getUser(userId);
         String dongCodePrefix = user.getBeopjeongdong().getDongCode().substring(0, 5);
         List<CommunityBoards> byCategory = null;
@@ -97,8 +100,17 @@ public class CommunityServiceImpl implements CommunityService{
     }
 
     @Override
-    public CommunityCommentResponse addComment(Long userId, CommunityCommentRequest communityCommentRequest) {
+    public List<CommunityCommentResponse> getComments(Long boardId) {
+        return communityCommentRepository.findByBoardIdAndIsDeletedNot(boardId, 1).stream()
+                .map(board -> getBuildComment(board))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public CommunityCommentResponse addComment(CommunityCommentRequest communityCommentRequest) {
+        Long userId = communityCommentRequest.getUserId();
         User user = getUser(userId);
+
         CommunityComment communityComment = CommunityComment.builder()
                 .userId(userId)
                 .nickname(user.getNickname())
@@ -109,37 +121,30 @@ public class CommunityServiceImpl implements CommunityService{
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        CommunityComment saved = communityCommentRepository.save(communityComment);
-        CommunityComment updatedComment = getCommentByNo(saved.getNo());
+        communityCommentRepository.save(communityComment);
 
-        return getBuildComment(updatedComment);
+        return getBuildComment(communityComment);
     }
 
-    @Override
-    public List<CommunityCommentResponse> getComments(Long boardId) {
-        return communityCommentRepository.findByBoardIdAndIsDeletedNot(boardId, 1).stream()
-                .map(board -> getBuildComment(board))
-                .collect(Collectors.toList());
-    }
+
 
     @Override
     @Transactional
-    public CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest, Long userId) {
+    public CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest) {
         CommunityComment byNo = getCommentByNo(communityCommentRequest.getNo());
 
-        validateTargetOwner(byNo.getUserId(), userId);
+        validateTargetOwner(byNo.getUserId(), communityCommentRequest.getUserId());
 
         byNo.setComment(communityCommentRequest.getComment());
         CommunityComment updatedComment = getCommentByNo(byNo.getNo());
 
         return getBuildComment(updatedComment);
-
     }
 
     @Override
-    public void submitReport(CommunityReportsRequest communityReportsRequest, Long userId) {
+    public void submitReport(CommunityReportsRequest communityReportsRequest) {
         CommunityReports build = CommunityReports.builder()
-                .userId(userId)
+                .userId(communityReportsRequest.getUserId())
                 .target(communityReportsRequest.getTarget())
                 .targetId(communityReportsRequest.getTargetId())
                 .category(communityReportsRequest.getCategory())
@@ -216,6 +221,4 @@ public class CommunityServiceImpl implements CommunityService{
         return userRepository.findByNo(userId)
                 .orElseThrow(() -> new NoSuchElementException("해당 아이디가 존재하지 않습니다."));
     }
-
-
 }
