@@ -18,8 +18,6 @@
 
 ## 프로젝트 구조
 ### FE
-# 프론트엔드 프로젝트 구조
-
 ~~~plaintext
 FRONTEND/
 ├── node_modules/
