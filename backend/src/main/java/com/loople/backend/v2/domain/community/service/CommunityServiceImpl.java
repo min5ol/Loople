@@ -31,10 +31,10 @@ public class CommunityServiceImpl implements CommunityService{
 
     @Override
     @Transactional
-    public CommunityBoardsResponse addPost(CommunityBoardsRequest communityBoardsRequest, String type) {
+    public CommunityBoardsResponse addPost(Long userId, CommunityBoardsRequest communityBoardsRequest, String type) {
         if(type.equals("update")){
             CommunityBoards before = getBoardsByNo(communityBoardsRequest.getNo());
-            validateTargetOwner(before.getUserId(), communityBoardsRequest.getUserId());
+            validateTargetOwner(before.getUserId(), userId);
 
             if(!before.getTitle().equals(communityBoardsRequest.getTitle())) {
                 before.setTitle(communityBoardsRequest.getTitle());
@@ -55,7 +55,6 @@ public class CommunityServiceImpl implements CommunityService{
 
             return getBuildBoards(updated);
         } else {
-            Long userId = communityBoardsRequest.getUserId();
             User user = getUser(userId);
 
             CommunityBoards communityBoards = CommunityBoards.builder()
@@ -77,9 +76,8 @@ public class CommunityServiceImpl implements CommunityService{
     }
 
     @Override
-    public List<CommunityBoardsResponse> getPostsByCategory(CommunityBoardsRequest communityBoardsRequest) {
+    public List<CommunityBoardsResponse> getPostsByCategory(Long userId, CommunityBoardsRequest communityBoardsRequest) {
         String category = communityBoardsRequest.getCategory();
-        Long userId = communityBoardsRequest.getUserId();
         User user = getUser(userId);
         String dongCodePrefix = user.getBeopjeongdong().getDongCode().substring(0, 5);
         List<CommunityBoards> byCategory = null;
@@ -107,8 +105,7 @@ public class CommunityServiceImpl implements CommunityService{
     }
 
     @Override
-    public CommunityCommentResponse addComment(CommunityCommentRequest communityCommentRequest) {
-        Long userId = communityCommentRequest.getUserId();
+    public CommunityCommentResponse addComment(Long userId, CommunityCommentRequest communityCommentRequest) {
         User user = getUser(userId);
 
         CommunityComment communityComment = CommunityComment.builder()
@@ -130,10 +127,10 @@ public class CommunityServiceImpl implements CommunityService{
 
     @Override
     @Transactional
-    public CommunityCommentResponse editComment(CommunityCommentRequest communityCommentRequest) {
+    public CommunityCommentResponse editComment(Long userId, CommunityCommentRequest communityCommentRequest) {
         CommunityComment byNo = getCommentByNo(communityCommentRequest.getNo());
 
-        validateTargetOwner(byNo.getUserId(), communityCommentRequest.getUserId());
+        validateTargetOwner(byNo.getUserId(), userId);
 
         byNo.setComment(communityCommentRequest.getComment());
         CommunityComment updatedComment = getCommentByNo(byNo.getNo());
@@ -142,9 +139,9 @@ public class CommunityServiceImpl implements CommunityService{
     }
 
     @Override
-    public void submitReport(CommunityReportsRequest communityReportsRequest) {
+    public void submitReport(Long userId, CommunityReportsRequest communityReportsRequest) {
         CommunityReports build = CommunityReports.builder()
-                .userId(communityReportsRequest.getUserId())
+                .userId(userId)
                 .target(communityReportsRequest.getTarget())
                 .targetId(communityReportsRequest.getTargetId())
                 .category(communityReportsRequest.getCategory())

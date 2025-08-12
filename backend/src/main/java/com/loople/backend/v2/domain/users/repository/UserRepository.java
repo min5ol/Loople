@@ -29,4 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     //사용자 조회
     Optional<User> findByNo(Long userId);
+
+    //닉네임 기반 사용자 조회
+    Optional<User> findByNickname(String nickname);
 }

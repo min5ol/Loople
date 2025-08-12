@@ -17,16 +17,20 @@ import java.util.List;
 public class CommunityController {
 
     private final CommunityService communityService;
+    private final GetLoggedInUserId getLoggedInUserId;
 
     @PostMapping("/post/submit/{type}")
     public CommunityBoardsResponse handlePostSubmit(@RequestBody CommunityBoardsRequest communityBoardsRequest,
-                                                    @PathVariable String type){ //type=update, create
-        return communityService.addPost(communityBoardsRequest, type);
+                                                    @PathVariable String type,
+                                                    HttpServletRequest request){ //type=update, create
+        Long userId = getLoggedInUserId.getUserId(request);
+        return communityService.addPost(userId, communityBoardsRequest, type);
     }
 
     @PostMapping("/posts")
-    public List<CommunityBoardsResponse> getPostsByCategory(@RequestBody CommunityBoardsRequest communityBoardsRequest){
-        return communityService.getPostsByCategory(communityBoardsRequest);
+    public List<CommunityBoardsResponse> getPostsByCategory(@RequestBody CommunityBoardsRequest communityBoardsRequest, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return communityService.getPostsByCategory(userId, communityBoardsRequest);
     }
 
     @GetMapping("/post/{no}")
@@ -43,22 +47,26 @@ public class CommunityController {
     }
 
     @PostMapping("/comment/add")
-    public CommunityCommentResponse addComment(@RequestBody CommunityCommentRequest communityCommentRequest){
-        return communityService.addComment(communityCommentRequest);
+    public CommunityCommentResponse addComment(@RequestBody CommunityCommentRequest communityCommentRequest, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return communityService.addComment(userId, communityCommentRequest);
     }
 
     @PostMapping("/comment/edit")
-    public CommunityCommentResponse editComment(@RequestBody CommunityCommentRequest communityCommentRequest){
-        return communityService.editComment(communityCommentRequest);
+    public CommunityCommentResponse editComment(@RequestBody CommunityCommentRequest communityCommentRequest, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        return communityService.editComment(userId, communityCommentRequest);
     }
 
     @PostMapping("/reports")
-    public void submitReport(@RequestBody CommunityReportsRequest communityReportsRequest){
-        communityService.submitReport(communityReportsRequest);
+    public void submitReport(@RequestBody CommunityReportsRequest communityReportsRequest, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
+        communityService.submitReport(userId, communityReportsRequest);
     }
 
     @GetMapping("/delete")
-    public void deleteContent(@RequestParam String target, @RequestParam Long targetId, @RequestParam Long userId){
+    public void deleteContent(@RequestParam String target, @RequestParam Long targetId, HttpServletRequest request){
+        Long userId = getLoggedInUserId.getUserId(request);
         communityService.deleteContent(target, targetId, userId);
     }
 }

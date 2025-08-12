@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import instance from "../../apis/instance";
 import usePresignedUpload from "../../hooks/usePresignedUpload";
 import Header from "../templates/Header";
+import { useAuthStore } from "../../store/authStore";
 
 export const submitPost = async (postData, type) => {
   const res = await instance.post(`/community/post/submit/${type}`, postData);
@@ -12,10 +13,10 @@ export const submitPost = async (postData, type) => {
 };
 
 export default function NewPost() {
+  const { userInfo, clearAuthInfo } = useAuthStore();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     no: "",
-    userId: "",
     title: "",
     category: "",
     content: "",
@@ -26,10 +27,7 @@ export default function NewPost() {
 
   const location = useLocation();
   const post = location.state?.post;
-  const currentUserInfo = location.state?.currentUserInfo;
   const [isEditMode, setIsEditMode] = useState(false);
-  console.log(location.state);
-
 
   const [isFileChanged, setIsFileChanged] = useState(false);
 
@@ -102,8 +100,6 @@ export default function NewPost() {
     data.append("category", formData.category);
     data.append("content", formData.content);
     data.append("isFileChanged", isFileChanged);
-    data.append("userId", post.userId);
-
 
     if (isFileChanged && formData.attachedFile) {
       try {
@@ -120,7 +116,7 @@ export default function NewPost() {
       isEditMode ? type = "update" : type = "create";
       const post = await submitPost(data, type);
       navigate("/communityPost", {
-        state: { post, currentUserInfo },
+        state: { post },
       });
 
       console.log("성공", post);

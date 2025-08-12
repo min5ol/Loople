@@ -8,30 +8,30 @@ import webSocketService, { MessageType } from '../../services/WebSocketService';
 import hamburgerMenu from "../../assets/hamburgerMenu.png";
 import { useAuthStore } from "../../store/authStore";
 
-const buildChatRoom = async (chatUserInfo, postId) => {
-  const res = await instance.post(`/chat/completion/user/buildRoom/${postId}`, chatUserInfo);
+const buildChatRoom = async (partner, postId) => {
+  const res = await instance.get(`/chat/completion/user/buildRoom/${postId}`, { params: { partner } });
   return res.data;
 }
 
-const getAllRoom = async (nickname) => {
-  const res = await instance.get(`/chat/completion/user/allRoom/${nickname}`);
+const getAllRoom = async () => {
+  const res = await instance.get(`/chat/completion/user/allRoom`);
   return res.data
 }
 
-const viewRoomText = async (roomId, nickname) => {
-  const res = await instance.get(`/chat/completion/user/${roomId}/text`, { params: { nickname } });
+const viewRoomText = async (roomId) => {
+  const res = await instance.get(`/chat/completion/user/${roomId}/text`);
   return res.data;
 }
 
-const deleteChatRoom = async (roomId, nickname) => {
-  const res = await instance.get(`/chat/completion/user/delete/${roomId}`, { params: { nickname } });
+const deleteChatRoom = async (roomId) => {
+  const res = await instance.get(`/chat/completion/user/delete/${roomId}`);
   return res.data;
 }
 
 export default function Chat() {
+  const { userInfo, clearAuthInfo } = useAuthStore();
   const navigate = useNavigate()
   const location = useLocation();
-  const currentUserInfo = location.state?.userInfo;
   const post = location.state?.post;
 
   const [chatList, setChatList] = useState([]);
@@ -50,56 +50,56 @@ export default function Chat() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { userInfo, clearAuthInfo } = useAuthStore();
 
   useEffect(() => {
-    console.log("user", currentUserInfo);
+    console.log("user", userInfo);
     console.log("post", post);
   }, [])
 
+  // 1. chatUserInfo 설정 (userInfo, post가 준비되었을 때만)
   useEffect(() => {
-    if (userInfo && post) {
-      setChatUserInfo({
-        participantA: userInfo.nickname,
-        participantB: post.nickname,
-      });
-    }
+    if (!userInfo || !post) return;
+
+    setChatUserInfo({
+      participantA: userInfo.nickname,
+      participantB: post.nickname,
+    });
   }, [userInfo, post]);
 
+  // 2. 채팅방 및 채팅 리스트 설정
   useEffect(() => {
-    setChatList([]);
-    setCurrentRoom(null);
-    setIsOpenRoom(false);
+    const fetchData = async () => {
+      try {
+        if (!chatUserInfo.participantA || !chatUserInfo.participantB || !post?.no) return;
 
-    const fetchAllRoom = async () => {
-      const list = await getAllRoom(userInfo.nickname);
-      setChatList(list);
-      console.log("list", list);
-    }
+        // 1. 기존 채팅방 리스트 가져오기
+        const list = await getAllRoom();
+        setChatList(list);
 
-    fetchAllRoom();
+        // 2. 방 생성 또는 가져오기
+        const saved = await buildChatRoom(post.nickname, post.no);
+        setCurrentRoom(saved);
+        setIsOpenRoom(true);
+        setIsShowChatInfo(false);
+        setIsChatMenuOpen(false);
 
-    if (!chatUserInfo.participantA || !chatUserInfo.participantB || !post?.no) return;
+        // 3. 채팅방 리스트에 추가
+        setChatList((prev) => {
+          const filtered = prev.filter(room => room.no !== saved.no); // 중복 제거
+          return [saved, ...filtered]; // 새 방을 맨 앞으로!
+        });
 
-    const fetchBuild = async () => {
-      const saved = await buildChatRoom(chatUserInfo, post.no);
-      setCurrentRoom(saved);
-      console.log("ss", saved);
-      setIsOpenRoom(true);
-      setIsShowChatInfo(false);
-      setIsChatMenuOpen(false);
-      setChatList((prev) => {
-        const exists = prev.find((room) => room.no === saved.no);
-        if (exists) return prev;
-        return [...prev, saved];
-      });
-      const res = await viewRoomText(saved.no, userInfo.nickname);
-      setTextHistory(res);
-      console.log(saved);
+        // 4. 채팅 기록 가져오기
+        const res = await viewRoomText(saved.no);
+        setTextHistory(res);
+      } catch (error) {
+        console.error("채팅방 생성 또는 데이터 로딩 실패:", error);
+      }
+    };
 
-      fetchBuild();
-    }
-  }, [userInfo, chatUserInfo]);
+    fetchData();
+  }, [chatUserInfo, post]);
+
 
 
   //webSocket
@@ -270,11 +270,10 @@ export default function Chat() {
 
 
   const fetchRoom = async (chat) => {
-    setCurrentRoom(chat);
-    setIsOpenRoom(true);
-    const res = await viewRoomText(chat.no, userInfo.nickname);
-    console.log(res);
+    const res = await viewRoomText(chat.no);
     setTextHistory(res);
+    setIsOpenRoom(true);
+    setCurrentRoom(chat);
   }
 
   const scrollToBottom = () => {
@@ -291,7 +290,7 @@ export default function Chat() {
   const handleDelete = async () => {
     setIsDeleting(true); // 🔄 삭제 중 표시 시작
     try {
-      await deleteChatRoom(currentRoom.no, userInfo.nickname);
+      await deleteChatRoom(currentRoom.no);
       setChatList(prevList => prevList.filter(room => room.no !== currentRoom.no));
       setCurrentRoom(null);
       setIsShowChatInfo(false);
@@ -305,11 +304,9 @@ export default function Chat() {
   }
 
 
-
-
   return (
     <>
-      <Header currentUserInfo={currentUserInfo} />
+      <Header />
       <div className="flex mx-auto h-[600px] w-full max-w-4xl border rounded shadow mt-20 overflow-hidden">
 
         {/* 채팅 리스트 */}
@@ -413,7 +410,7 @@ export default function Chat() {
               {/* 채팅 메시지 목록 */}
               <div className="flex flex-col gap-3 p-4 overflow-y-auto flex-1 scroll-smooth" ref={chatEndRef} style={{ scrollbarWidth: 'thin' }}>
 
-                {textHistory.length > 0 && (
+                {textHistory && textHistory.length > 0 && (
                   <>
                     {textHistory.map((text, idx) => {
                       const isCurrentUser = text.nickname === userInfo.nickname;
@@ -477,7 +474,7 @@ export default function Chat() {
               </p>
               <button
                 className="w-full text-left py-2 px-3 mb-2 rounded hover:bg-green-100 transition-colors text-green-700 font-medium border border-green-300"
-                onClick={() => navigate("/communityPost", { state: { currentUserInfo, post } })}
+                onClick={() => navigate("/communityPost", { state: { post } })}
               >
                 🔗 중고 게시글 보러가기
               </button>

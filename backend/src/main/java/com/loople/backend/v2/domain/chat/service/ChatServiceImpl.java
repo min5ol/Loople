@@ -34,11 +34,12 @@ public class ChatServiceImpl implements ChatService {
 
     //chatbot
     @Override
-    public ChatRoomResponse buildRoomWithAI(String nickname) {
+    public ChatRoomResponse buildRoomWithAI(Long userId) {
+        User byId = findById(userId);
         ChatRoom room = chatRoomRepository
-                .findByParticipantAAndParticipantBAndPostId(nickname, "AI", null)
+                .findByParticipantAAndParticipantBAndPostId(byId.getNickname(), "AI", null)
                 .orElseGet(() -> chatRoomRepository.save(ChatRoom.builder()
-                        .participantA(nickname)
+                        .participantA(byId.getNickname())
                         .participantB("AI")
                         .createdAt(LocalDateTime.now())
                         .updatedAt(LocalDateTime.now())
@@ -90,9 +91,10 @@ public class ChatServiceImpl implements ChatService {
     //user
     @Override
     @Transactional
-    public ChatRoomResponse buildRoom(ChatRoomRequest chatRoomRequest, Long postId) {
-        String participantA = chatRoomRequest.getParticipantA();
-        String participantB = chatRoomRequest.getParticipantB();
+    public ChatRoomResponse buildRoom(Long userId, String partner, Long postId) {
+        User byId = findById(userId);
+        String participantA = byId.getNickname();
+        String participantB = partner;
 
         // 순서 고정: 항상 사전 순으로 저장
         if (participantA.compareTo(participantB) > 0) {
@@ -131,9 +133,10 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public List<ChatRoomResponse> getAllRooms(String nickname) {
-        List<ChatRoom> allByParticipantA = chatRoomRepository.findAllByParticipantAAndALeftFalse(nickname);
-        List<ChatRoom> allByParticipantB = chatRoomRepository.findAllByParticipantBAndBLeftFalse(nickname);
+    public List<ChatRoomResponse> getAllRooms(Long userId) {
+        User byId = findById(userId);
+        List<ChatRoom> allByParticipantA = chatRoomRepository.findAllByParticipantAAndALeftFalse(byId.getNickname());
+        List<ChatRoom> allByParticipantB = chatRoomRepository.findAllByParticipantBAndBLeftFalse(byId.getNickname());
 
         List<ChatRoom> merged = new ArrayList<>();
         merged.addAll(allByParticipantA);
@@ -150,10 +153,10 @@ public class ChatServiceImpl implements ChatService {
 
 
     @Override
-    public List<ChatTextResponse> viewRoomText(Long roomId, String nickname) {
+    public List<ChatTextResponse> viewRoomText(Long roomId, Long userId) {
         ChatRoom room = chatRoomRepository.findByNo(roomId).orElseThrow(() -> new NoSuchElementException("채팅방 정보 없음"));
-
-        boolean amIA = isMeA(nickname, room);
+        User byId = findById(userId);
+        boolean amIA = isMeA(byId.getNickname(), room);
         List<ChatText> atDesc;
 
         if (amIA) {
@@ -169,10 +172,10 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public void deleteChatRoom(Long roomId, String nickname) {
+    public void deleteChatRoom(Long roomId, Long userId) {
         ChatRoom room = chatRoomRepository.findByNo(roomId).orElseThrow(() -> new NoSuchElementException("채팅방 정보 없음"));
-
-        boolean amIA = isMeA(nickname, room);
+        User byId = findById(userId);
+        boolean amIA = isMeA(byId.getNickname(), room);
 
         if (amIA) {
             room.setALeft(true);
@@ -186,7 +189,7 @@ public class ChatServiceImpl implements ChatService {
 
     }
 
-    private static boolean isMeA(String nickname, ChatRoom room) {
+    private boolean isMeA(String nickname, ChatRoom room) {
         return room.getParticipantA().equals(nickname);
     }
 

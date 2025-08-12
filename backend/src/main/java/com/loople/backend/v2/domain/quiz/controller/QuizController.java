@@ -70,21 +70,21 @@ public class QuizController {
     //Mono: 비동기 단일 값 컨테이너 -> 나중에 1개의 데이터를 비동기적으로 받음
     @PostMapping("/getProblem")
     public ProblemResponseDto getProblem(HttpServletRequest request) {
-        Long userId = getUserId(request);
+        Long userId = getLoggedInUserId.getUserId(request);
         return quizService.getProblem(userId);
     }
     
     //사용자 응답 제출 비교
     @PostMapping("/submitAnswer")
     public UserAnswerResponseDto getAnswer(@RequestBody UserAnswerRequestDto userAnswerRequestDto, HttpServletRequest request){
-        Long userId = getUserId(request);
+        Long userId = getLoggedInUserId.getUserId(request);
         return quizService.saveUserAnswer(userAnswerRequestDto, userId);
     }
 
     //출석 일수 구하기
     @GetMapping("/getAttendanceDays")
     public List<Integer> checkAttendanceDaysByUser(HttpServletRequest request){
-        Long userId = getUserId(request);
+        Long userId = getLoggedInUserId.getUserId(request);
         return quizService.fetchAttendanceStatus(userId);
     }
 
@@ -127,9 +127,5 @@ public class QuizController {
                 + "마지막으로, 생성한 " + n + "개의 문제를 JSON 파일 형식으로 출력해줘.\n"
                 + "학생들이 흥미를 느끼고, 자연스럽게 순환 경제와 분리배출을 배울 수 있게 너의 능력을 발휘해줘! \uD83D\uDE0A";
 
-    }
-
-    private Long getUserId(HttpServletRequest request){
-        return getLoggedInUserId.getUserId(request);
     }
 }

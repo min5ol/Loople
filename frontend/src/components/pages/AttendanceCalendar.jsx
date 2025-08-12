@@ -6,6 +6,7 @@
 // src/components/pages/AttendanceCalendar.jsx
 import React, { useState, useEffect } from "react";
 import instance from '../../apis/instance.js';
+import { useAuthStore } from "../../store/authStore";
 
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -14,7 +15,8 @@ export const getAttendanceDays = async () => {
   return res.data;
 };
 
-export default function AttendanceCalendar({userId}) {
+export default function AttendanceCalendar() {
+  const { userInfo, clearAuthInfo } = useAuthStore();
   const [today, setToday] = useState(new Date());
   const [calendarDays, setCalendarDays] = useState([]);
   const [attendanceDays, setAttendanceDays] = useState([]);

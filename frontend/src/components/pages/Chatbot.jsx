@@ -3,9 +3,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import instance from "../../apis/instance";
+import { useAuthStore } from "../../store/authStore";
 
-export const buildRoom = async (nickname) => {
-  const res = await instance.get(`/chat/completion/chatbot/buildRoom/${nickname}`);
+export const buildRoom = async () => {
+  const res = await instance.get(`/chat/completion/chatbot/buildRoom`);
   return res.data;
 };
 
@@ -16,9 +17,9 @@ export const getCategory = async (categoryType, parentId) => {
   return res.data;
 };
 
-export const getDetails = async (parentId, userId) => {
+export const getDetails = async (parentId) => {
   const res = await instance.get("/chat/completion/chatbot/details", {
-    params: { parentId, userId },
+    params: { parentId },
   });
   return res.data;
 };
@@ -28,7 +29,8 @@ export const sendMessages = async (userMessage) => {
   return res.data;
 };
 
-export default function Chatbot({ currentUserInfo }) {
+export default function Chatbot() {
+  const { userInfo, clearAuthInfo } = useAuthStore();
   const [room, setRoom] = useState(null);
   const [showChatRoom, setShowChatRoom] = useState(false);
   const [chatHistory, setChatHistory] = useState([
@@ -55,7 +57,7 @@ export default function Chatbot({ currentUserInfo }) {
     setUserMessage('');
     setIsInputDisabled(true);
 
-    const room = await buildRoom(currentUserInfo.nickname);
+    const room = await buildRoom(userInfo.nickname);
     setRoom(room);
     setShowChatRoom(true);
 
@@ -207,7 +209,7 @@ export default function Chatbot({ currentUserInfo }) {
       setIsInputDisabled(false);
     }
 
-    const detail = await getDetails(parentId, currentUserInfo.no);
+    const detail = await getDetails(parentId, userInfo.no);
     console.log("getDetails 응답, detail: ", detail);
 
     const detailMessages = getDetailMessages(detail, parentId);
@@ -221,7 +223,7 @@ export default function Chatbot({ currentUserInfo }) {
     setChatHistory(prev => [...prev, { type: "USER", text: userMessage }]);
     setWaitingResponse(true);
 
-    const payLoad = { roomId: room.no, content: userMessage, nickname: currentUserInfo.nickname, type: MessageType.CHAT };
+    const payLoad = { roomId: room.no, content: userMessage, nickname: userInfo.nickname, type: MessageType.CHAT };
     setUserMessage('');
 
     try {
