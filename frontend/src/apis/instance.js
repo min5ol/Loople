@@ -1,42 +1,35 @@
-// 작성일: 2025.07.14
-// 작성자: 백진선, 장민솔
-// 설명: 공통 axios 인스턴스 설정, 기본 주소랑 헤더 미리 지정
+// Axios 인스턴스: 스토어의 accessToken을 자동으로 Authorization 헤더에 실어줍니다.
+import axios from "axios";
+import { useAuthStore } from "../store/authStore";
 
-// src/apis/instance.js
-import axios from 'axios';
-import { useAuthStore } from '../store/authStore';
-
-// 로컬 스토리지에서 accessToken 꺼내옴
-// 로그인 후에 저장된 토큰이 있어야 Authorization 헤더에 붙여서 요청 가능함
-const token = localStorage.getItem('accessToken');
-
-// axios 인스턴스 하나 만들어서 설정
-// baseURL은 백엔드 API 기본주소, 헤더에는 json 형식이랑 토큰 넣어둠
 const instance = axios.create({
-  baseURL: 'http://localhost:8080/api/v2',
+  baseURL: "/api/v2", // Vite proxy로 8080으로 전달됨
+  withCredentials: false,
   headers: {
-    'Content-Type': 'application/json',
-    // 'Authorization': `Bearer ${token}`,
+    "Content-Type": "application/json",
   },
-  withCredentials: true,
 });
 
-instance.interceptors.request.use(
-  (config) => {
-    const { accessToken } = useAuthStore.getState();
-
-    if (accessToken)
-    {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+// 요청 인터셉터: 토큰 자동 첨부
+instance.interceptors.request.use((config) => {
+  const token = useAuthStore.getState()?.accessToken;
+  if (token) {
+    config.headers = config.headers || {};
+    if (!config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    else
-    {
-      delete config.headers.Authorization;
-    }
+  }
+  return config;
+});
 
-    return config;
-  },
+// 응답 인터셉터(선택): 401 로깅
+instance.interceptors.response.use(
+  (res) => res,
   (error) => {
+    if (error?.response?.status === 401) {
+      console.warn("[axios] 401 Unauthorized 응답 수신");
+      // 필요 시: useAuthStore.getState().logout(); 등 추가 처리
+    }
     return Promise.reject(error);
   }
 );
