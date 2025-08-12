@@ -1,7 +1,6 @@
-// src/components/pages/Home.jsx
 import React, { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '../../store/authStore'
+import { useAuthStore, selectSetAuthInfo } from '../../store/authStore'
 import instance from '../../apis/instance'
 
 import logo from '../../assets/brandLogo.png'
@@ -12,28 +11,24 @@ import appleIcon from '../../assets/apple.png'
 
 export default function Home() {
   const navigate = useNavigate()
-  const setAuthInfo = useAuthStore((s) => s.setAuthInfo)
+  const setAuthInfo = useAuthStore(selectSetAuthInfo)
 
   const [form, setForm] = useState({ email: '', password: '' })
   const [submitting, setSubmitting] = useState(false)
 
-  // ---- 환경설정/콜백 빌더 ----
   const CFG = useMemo(() => {
-    const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
-    const apiPrefix = (import.meta.env.VITE_API_PREFIX || '')
     const appBase = (import.meta.env.VITE_APP_BASE_URL || window.location.origin).replace(/\/+$/, '')
-    const cbBase = import.meta.env.VITE_OAUTH_CALLBACK_PATH || '/oauth/callback' // base만, 예: /oauth/callback
-
-    const buildRedirectUri = (provider) => `${appBase}${cbBase}/${provider}`
-
     return {
-      API: `${apiBase}${apiPrefix}`,
       APP: appBase,
-      buildRedirectUri,
       GOOGLE_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       KAKAO_ID: import.meta.env.VITE_KAKAO_CLIENT_ID,
       NAVER_ID: import.meta.env.VITE_NAVER_CLIENT_ID,
-      APPLE_SERVICE_ID: import.meta.env.VITE_APPLE_SERVICE_ID, // (선택)
+      REDIRECT: {
+        google: import.meta.env.VITE_GOOGLE_REDIRECT_URI || `${appBase}/oauth/callback/google`,
+        kakao:  import.meta.env.VITE_KAKAO_REDIRECT_URI  || `${appBase}/oauth/callback/kakao`,
+        naver:  import.meta.env.VITE_NAVER_REDIRECT_URI  || `${appBase}/oauth/callback/naver`,
+        apple:  import.meta.env.VITE_APPLE_REDIRECT_URI  || `${appBase}/oauth/callback/apple`,
+      },
     }
   }, [])
 
@@ -42,42 +37,21 @@ export default function Home() {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  // 응답 스키마가 다를 때도 안전하게 뽑기
-  const pickAuthPayload = (resp) => {
-    const d = resp?.data ?? resp
-    const p = d?.data ?? d
-    return {
-      userId: p?.userId ?? p?.id ?? p?.user_no ?? null,
-      token: p?.token ?? p?.jwt ?? p?.accessToken ?? p?.access_token ?? null,
-      nickname: p?.nickname ?? p?.name ?? p?.nick ?? '',
-    }
-  }
-
   const handleLogin = async (e) => {
     e.preventDefault()
     if (submitting) return
     setSubmitting(true)
     try {
-      const resp = await instance.post('/users/login', form)
-      const { userId, token, nickname } = pickAuthPayload(resp)
-
-      if (!token) {
-        // 디버깅에 도움
-        console.warn('[login resp raw]', resp)
-        throw new Error('응답에서 토큰을 찾을 수 없습니다.')
-      }
+      const res = await instance.post('/users/login', form)
+      const { userId, token, nickname } = res?.data || {}
+      if (!token) throw new Error('응답에서 토큰을 찾을 수 없습니다.')
 
       setAuthInfo({ userId, nickname, email: form.email, token })
-
-      // ❗ state에 axios 응답/에러 넣지 않음 (DataCloneError 방지)
-      navigate('/quiz', { replace: true })
+      navigate('/quiz', { state: { userId, from: 'login' } })
     } catch (err) {
-      console.error('로그인 실패(detail):', err)
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        '알 수 없는 오류'
-      alert('로그인 실패: ' + message)
+      console.error('로그인 실패:', err)
+      const msg = err?.response?.data?.message || err?.message || '알 수 없는 오류가 발생했습니다.'
+      alert('로그인 실패: ' + msg)
     } finally {
       setSubmitting(false)
     }
@@ -89,21 +63,11 @@ export default function Home() {
     sessionStorage.setItem('oauth_state', state)
     sessionStorage.setItem('oauth_provider', provider)
 
-    const redirect_uri = CFG.buildRedirectUri(provider)
-
-    const ensure = (ok, msg) => {
-      if (!ok) {
-        alert(msg)
-        throw new Error(msg)
-      }
-    }
-
     switch (provider) {
-      case 'google': {
-        ensure(!!CFG.GOOGLE_ID, 'VITE_GOOGLE_CLIENT_ID가 없습니다.')
+      case 'google':
         return `https://accounts.google.com/o/oauth2/v2/auth?` + new URLSearchParams({
           client_id: CFG.GOOGLE_ID,
-          redirect_uri,
+          redirect_uri: CFG.REDIRECT.google,
           response_type: 'code',
           scope: 'openid email profile',
           state,
@@ -111,36 +75,28 @@ export default function Home() {
           access_type: 'online',
           prompt: 'consent',
         }).toString()
-      }
-      case 'kakao': {
-        ensure(!!CFG.KAKAO_ID, 'VITE_KAKAO_CLIENT_ID가 없습니다.')
+      case 'kakao':
         return `https://kauth.kakao.com/oauth/authorize?` + new URLSearchParams({
           client_id: CFG.KAKAO_ID,
-          redirect_uri,
+          redirect_uri: CFG.REDIRECT.kakao,
           response_type: 'code',
           state,
         }).toString()
-      }
-      case 'naver': {
-        ensure(!!CFG.NAVER_ID, 'VITE_NAVER_CLIENT_ID가 없습니다.')
+      case 'naver':
         return `https://nid.naver.com/oauth2.0/authorize?` + new URLSearchParams({
           client_id: CFG.NAVER_ID,
-          redirect_uri,
+          redirect_uri: CFG.REDIRECT.naver,
           response_type: 'code',
           state,
         }).toString()
-      }
-      case 'apple': {
-        // 실제 운영 시 nonce 등 추가 처리 권장
-        ensure(!!CFG.APPLE_SERVICE_ID, 'VITE_APPLE_SERVICE_ID가 없습니다.')
+      case 'apple':
         return `https://appleid.apple.com/auth/authorize?` + new URLSearchParams({
-          client_id: CFG.APPLE_SERVICE_ID,
-          redirect_uri,
+          client_id: import.meta.env.VITE_APPLE_SERVICE_ID,
+          redirect_uri: CFG.REDIRECT.apple,
           response_type: 'code',
           scope: 'name email',
           state,
         }).toString()
-      }
       default:
         throw new Error('Unsupported provider')
     }
@@ -159,6 +115,8 @@ export default function Home() {
     { id: 'apple', name: 'Apple', icon: appleIcon, bg: 'bg-[#000000]', text: 'text-white' },
   ]
 
+  const formInvalid = !form.email || !form.password
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-[#264D3D] font-ptd-400">
       <div className="bg-[#FEF7E2] w-full max-w-md p-10 rounded-2xl shadow-xl box-border">
@@ -173,45 +131,29 @@ export default function Home() {
           로그인하고 루플링들과 함께 순환경제를 실천해요 🌱
         </p>
 
-        {/* 로컬 로그인 */}
         <form onSubmit={handleLogin} className="space-y-4">
           <input
-            type="email"
-            name="email"
-            placeholder="이메일"
-            value={form.email}
-            onChange={handleChange}
-            required
-            autoComplete="username"
-            disabled={submitting}
-            className="w-full h-12 px-4 rounded-lg border-none shadow-inner focus:outline-none focus:ring-2 focus:ring-primary-light font-ptd-400 bg-[#F9F9F9] placeholder-gray-400 box-border disabled:opacity-60"
+            type="email" name="email" placeholder="이메일"
+            value={form.email} onChange={handleChange} required autoComplete="username"
+            className="w-full h-12 px-4 rounded-lg border-none shadow-inner focus:outline-none focus:ring-2 focus:ring-primary-light font-ptd-400 bg-[#F9F9F9] placeholder-gray-400 box-border"
           />
           <input
-            type="password"
-            name="password"
-            placeholder="비밀번호"
-            value={form.password}
-            onChange={handleChange}
-            required
-            autoComplete="current-password"
-            disabled={submitting}
-            className="w-full h-12 px-4 rounded-lg border-none shadow-inner focus:outline-none focus:ring-2 focus:ring-primary-light font-ptd-400 bg-[#F9F9F9] placeholder-gray-400 box-border disabled:opacity-60"
+            type="password" name="password" placeholder="비밀번호"
+            value={form.password} onChange={handleChange} required autoComplete="current-password"
+            className="w-full h-12 px-4 rounded-lg border-none shadow-inner focus:outline-none focus:ring-2 focus:ring-primary-light font-ptd-400 bg-[#F9F9F9] placeholder-gray-400 box-border"
           />
           <button
-            type="submit"
-            disabled={submitting}
+            type="submit" disabled={submitting || formInvalid}
             className="w-full h-12 bg-primary text-white rounded-lg hover:bg-[#2f7b4d] transition font-ptd-600 border-none shadow-inner disabled:opacity-60"
           >
             {submitting ? '로그인 중...' : '로그인'}
           </button>
         </form>
 
-        {/* 구분선 */}
         <div className="flex items-center gap-2 text-xs text-[#888] my-6">
           <div className="flex-1 h-px bg-[#DADADA]" /> 또는 <div className="flex-1 h-px bg-[#DADADA]" />
         </div>
 
-        {/* 소셜 로그인 */}
         <div className="space-y-3">
           {socialProviders.map(({ id, name, icon, bg, text }) => (
             <button
@@ -225,13 +167,9 @@ export default function Home() {
           ))}
         </div>
 
-        {/* 회원가입 안내 */}
         <p className="mt-8 text-sm text-center text-[#202020]">
           계정이 없으신가요?{' '}
-          <span
-            className="text-[#3C9A5F] font-semibold cursor-pointer hover:underline"
-            onClick={() => navigate('/signup')}
-          >
+          <span className="text-[#3C9A5F] font-semibold cursor-pointer hover:underline" onClick={() => navigate('/signup')}>
             회원가입
           </span>
         </p>

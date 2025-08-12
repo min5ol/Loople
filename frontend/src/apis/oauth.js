@@ -1,21 +1,14 @@
-// 작성일: 2025.07.21
-// 작성자: 장민솔
-// 설명: 소셜 로그인 요청 API - provider와 code를 백엔드에 전송하여 JWT 토큰을 발급받음
-
-// src/apis/oauth.js
-import axiosInstance from './instance';
+import instance from "./instance";
 
 /**
- * 소셜 로그인 요청
- * @param {string} provider - "kakao" | "google" | "naver"
- * @param {*} code - OAuth 인가 코드
- * @returns {Promise<{ accessToken: string, isNewUser: boolean}>}
+ * 소셜 로그인 (인가코드 교환)
+ * 주의: 백엔드 OAuthServiceImpl 쪽 클라이언트 선택은 보통 'google' | 'kakao' 등 **소문자**를 기대합니다.
+ * 그래서 여기서 provider를 소문자로 변환해서 보냅니다.
  */
-
-export const socialLogin = async (provider, code) => {
-  const res = await axiosInstance.post('/oauth/login', {
-    provider,
+export async function socialLogin(provider, code) {
+  const res = await instance.post("/oauth/login", {
+    provider: String(provider).toLowerCase(),
     code,
   });
-  return res.data;
-};
+  return res.data; // { token?, isNew, email, socialId, provider ... }
+}
