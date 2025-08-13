@@ -1,17 +1,17 @@
 # Loople 🌿
 
 ## 📌 목차
-[1] [프로젝트 개요](#프로젝트-개요)  
-[2] [주요 기능](#주요-기능)  
-[3] [프로젝트 구조](#프로젝트-구조)  
-[4] [기술 스택](#기술-스택)  
-[5] [API 명세서](#API-명세서)  
-[6] [팀원](#팀원)  
-[7] [실행](#실행)  
+<a href="#overview" style="text-decoration:none;">[1] 프로젝트 개요</a>
+<a href="#main-feature" style="text-decoration:none;">[2] 주요 기능</a>
+<a href="#structure" style="text-decoration:none;">[3] 프로젝트 구조</a>
+<a href="#tech-stack" style="text-decoration:none;">[4] 기술 스택</a>
+<a href="#api-specification" style="text-decoration:none;">[5] API 명세서</a>
+<a href="#team" style="text-decoration:none;">[6] 팀원</a>
+<a href="#run" style="text-decoration:none;">[7] 실행</a>
 
 ---
 
-<h2 id="프로젝트-개요">📌 프로젝트 개요</h2>
+<h2 id="overview">📌 프로젝트 개요</h2>
 
 - **프로젝트명**: 루플(Loople)
 - **프로젝트 기간**: 2025.07.09 ~ 2025.08.12
@@ -21,7 +21,8 @@
 
 ---
 
-<h2 id="주요-기능">📌 주요 기능</h2>
+<h2 id="main-feature">📌 주요 기능</h2>  
+
 ### 회원가입 및 로그인(소셜로그인)
 ### 퀴즈
 로그인 시 사용자에게 **퀴즈를 출제**한다.  
@@ -52,7 +53,8 @@
 
 ---
 
-## 📌 프로젝트 구조
+<h2 id="structure">📌 프로젝트 구조</h2>
+
 ### FE
 ~~~plaintext
 FRONTEND/
@@ -168,7 +170,8 @@ backend/
 
 ---
 
-## 📌 기술 스택
+<h2 id="tech-stack">📌 기술 스택</h2>
+
 ### FE
 <img src="https://img.shields.io/badge/react-61DAFB?style=for-the-badge&logo=react&logoColor=black"> <img src="https://img.shields.io/badge/vite-646CFF?style=for-the-badge&logo=vite&logoColor=white"> <img src="https://img.shields.io/badge/unocss-333333?style=for-the-badge&logo=unoCSS&logoColor=white"> <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white"> <img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white"> <img src="https://img.shields.io/badge/webpack-8DD6F9?style=for-the-badge&logo=webpack&logoColor=white"> <img src="https://img.shields.io/badge/VSCODE-339AF0?style=for-the-badge&logo=vscode&logoColor=white">
 
@@ -190,7 +193,8 @@ backend/
 
 ---
 
-## 📌 API 명세서
+<h2 id="api-specification">📌 API 명세서</h2>
+
 ### UserController
 ![UserController](./images/UserController.png)
 ### RuleController
@@ -224,7 +228,8 @@ backend/
 
 ---
 
-## 📌 팀원
+<h2 id="team">📌 팀원</h2>
+
 |  이름  |  역할  |  GitHub  |  담당 기능 |
 |--------|--------|----------|------------|
 | 백진선 | FE, BE | blrlk | 퀴즈, 게시판, 챗봇, 채팅, 지역별 규칙 |
@@ -232,7 +237,8 @@ backend/
 
 ---
 
-## 📌 실행
+<h2 id="run">📌 실행</h2>
+
 ### FE
   npm run dev
 ### BE
