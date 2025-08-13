@@ -1,13 +1,13 @@
 # Loople 🌿
 
 ## 📌 목차
-<a href="#overview" style="text-decoration:none;">[1] 프로젝트 개요</a>
-<a href="#main-feature" style="text-decoration:none;">[2] 주요 기능</a>
-<a href="#structure" style="text-decoration:none;">[3] 프로젝트 구조</a>
-<a href="#tech-stack" style="text-decoration:none;">[4] 기술 스택</a>
-<a href="#api-specification" style="text-decoration:none;">[5] API 명세서</a>
-<a href="#team" style="text-decoration:none;">[6] 팀원</a>
-<a href="#run" style="text-decoration:none;">[7] 실행</a>
+<a href="#overview" style="text-decoration:none;">[1] 프로젝트 개요</a>  
+<a href="#main-feature" style="text-decoration:none;">[2] 주요 기능</a>  
+<a href="#structure" style="text-decoration:none;">[3] 프로젝트 구조</a>  
+<a href="#tech-stack" style="text-decoration:none;">[4] 기술 스택</a>  
+<a href="#api-specification" style="text-decoration:none;">[5] API 명세서</a>  
+<a href="#team" style="text-decoration:none;">[6] 팀원</a>  
+<a href="#run" style="text-decoration:none;">[7] 실행</a>  
 
 ---
 
