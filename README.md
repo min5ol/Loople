@@ -182,6 +182,34 @@ backend/
 ## 📌 API 명세서
 ### UserController
 ![UserController](./images/UserController.png)
+### RuleController
+![RuleController](./images/RuleController.png)
+### QuizController
+![QuizController](./images/QuizController.png)
+### OAuthController
+![OAuthController](./images/OAuthController.png)
+### MyRoomItemController
+![MyRoomItemController](./images/MyRoomItemController.png)
+### MyLooplingController
+![MyLooplingController](./images/MyLooplingController.png)
+### MyBadgeController
+![MyBadgeController](./images/MyBadgeController.png)
+### CommunityController
+![CommunityController](./images/CommunityController.png)
+### ChatController
+![ChatController](./images/ChatController.png)
+### S3Controller
+![S3Controller](./images/S3Controller.png)
+### RoomItemController
+![RoomItemController](./images/RoomItemController.png)
+### MyRoomController
+![MyRoomController](./images/MyRoomController.png)
+### LooplingCatalogController
+![LooplingCatalogController](./images/LooplingCatalogController.png)
+### BeopjeongdongController
+![BeopjeongdongController](./images/BeopjeongdongController.png)
+### BadgeCatalogController
+![BadgeCatalogController](./images/BadgeCatalogController.png)
 
 ---
 
