@@ -8,7 +8,6 @@
 <a href="#api-specification" style="text-decoration:none;">[5] API 명세서</a>  
 <a href="#team" style="text-decoration:none;">[6] 팀원</a>  
 <a href="#run" style="text-decoration:none;">[7] 실행</a>  
-
 ---
 
 <h2 id="overview">📌 프로젝트 개요</h2>
