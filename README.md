@@ -174,9 +174,14 @@ backend/
 ### VCS
 <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white"> <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
 
----
-## 📌 프로젝트 산출물
+### COLLABORATION
+<img src="https://img.shields.io/badge/NOTION-000000?style=for-the-badge&logo=notion&logoColor=white"> 
 
+---
+
+## 📌 API 명세서
+### UserController
+(./images/UserController.png)
 
 ---
 
