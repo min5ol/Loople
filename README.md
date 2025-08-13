@@ -181,7 +181,7 @@ backend/
 
 ## 📌 API 명세서
 ### UserController
-(./images/UserController.png)
+![UserController](./images/UserController.png)
 
 ---
 
