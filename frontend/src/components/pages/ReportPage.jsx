@@ -80,64 +80,116 @@ export default function ReportPage() {
     }
   };
 
-  return (
-    <>
-      <Header />
-      <div className="pt-20 px-6 max-w-xl mx-auto">
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md space-y-4">
-          <table className="w-full table-fixed border border-gray-300">
-            <tbody>
-              <tr>
-                <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89] w-28">신고 대상</td>
-                <td className="py-2 px-3 select-none text-[#264D3D] bg-white focus:ring-2 focus:ring-[#3C9A5F] text-base">
-                  {target.target == "post" ? "게시글" : "댓글"}
-                </td>
-              </tr>
-              <tr>
-                <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89] w-28">신고 사유 <span className="text-red-500">*</span></td>
-                <td><CustomDropdown /></td>
-              </tr>
-              <tr>
-                <td colSpan={2} className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89] w-28">상세 사유 <span className="text-red-500">*</span></td>
-              </tr>
-              <tr>
-                <td colSpan={2} className="px-4 pb-4">
-                  <textarea
-                    name="reason"
-                    value={formData.reason}
-                    onChange={(e) => setFormData(prev => ({ ...prev, reason: e.target.value }))}
-                    rows={5}
-                    className="w-full px-3 py-2 border border-[#81C784] rounded focus:outline-none focus:ring-2 focus:ring-[#3C9A5F] box-border resize-none"
-                    placeholder="상세한 신고 사유를 입력해 주세요."
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td colSpan={2} className="text-center px-4 py-2">
-                  <button type="submit" className="bg-[#3C9A5F] text-[#FEF7E2] px-5 py-2 rounded hover:bg-[#264D3D] transition-colors whitespace-nowrap border-none">
-                    제출
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </form>
+return (
+  <>
+    <Header />
 
-        {reportResult && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full text-center">
-              <h2 className="text-lg font-semibold text-green-600 mb-4">신고가 정상적으로 이루어졌습니다.</h2>
-              <button className="bg-[#3C9A5F] text-[#FEF7E2] px-5 py-2 rounded hover:bg-[#264D3D] transition-colors whitespace-nowrap border-none" onClick={() => {
-                setReportResult(false);
-                navigate("/loopleHome");
-              }}>
-                확인
-              </button>
-            </div>
+    <div className="pt-20 px-6">
+      <form
+        onSubmit={handleSubmit}
+        className="
+          max-w-xl mx-auto
+          rounded-2xl px-6 py-7
+          bg-white/85 backdrop-blur-md
+          ring-1 ring-black/5
+          shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_12px_28px_rgba(0,0,0,0.10)]
+          space-y-6
+        "
+      >
+        {/* 헤더 */}
+        <div>
+          <h1 className="text-2xl font-ptd-700 text-brand-ink">신고하기</h1>
+          <p className="mt-1 text-sm text-brand-ink/65">
+            커뮤니티 안전을 위해 소중한 제보를 보내주세요.
+          </p>
+        </div>
+
+        {/* 신고 대상 */}
+        <div>
+          <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
+            신고 대상
+          </label>
+          <div className="h-11 px-4 rounded-lg bg-brand-50 ring-1 ring-black/10 grid place-items-center text-brand-ink">
+            {target === "post" ? "게시글" : "댓글"}
           </div>
-        )}
+        </div>
 
+        {/* 신고 사유 */}
+        <div>
+          <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
+            신고 사유 <span className="text-[#EF4444]">*</span>
+          </label>
+          <CustomDropdown />
+        </div>
+
+        {/* 상세 사유 */}
+        <div>
+          <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
+            상세 사유 <span className="text-[#EF4444]">*</span>
+          </label>
+          <textarea
+            name="reason"
+            value={formData.reason}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, reason: e.target.value }))
+            }
+            rows={6}
+            placeholder="상세한 신고 사유를 입력해 주세요."
+            className="
+              w-full px-4 py-3 rounded-lg
+              bg-white placeholder-black/40
+              ring-1 ring-brand-300 focus:outline-none focus:ring-4
+              shadow-[inset_0_2px_6px_rgba(0,0,0,0.06)]
+              resize-none
+              text-brand-ink
+            "
+          />
+        </div>
+
+        {/* 제출 버튼 */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="
+              h-11 px-6 rounded-lg
+              bg-brand-600 text-white font-ptd-700
+              shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_4px_12px_rgba(0,0,0,0.12)]
+              hover:bg-brand-500 transition
+            "
+          >
+            제출
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {/* 신고 완료 모달 */}
+    {reportResult && (
+      <div className="fixed inset-0 z-50 grid place-items-center bg-black/40">
+        <div className="w-[88%] max-w-sm rounded-2xl bg-white p-6 ring-1 ring-black/5 shadow-2xl text-center">
+          <h2 className="text-lg font-ptd-700 text-brand-ink">
+            신고가 정상적으로 접수되었습니다.
+          </h2>
+          <p className="mt-2 text-sm text-brand-ink/70">
+            검토 후 필요 시 추가 조치를 진행합니다.
+          </p>
+          <button
+            className="
+              mt-5 h-10 px-5 rounded-lg
+              bg-brand-600 text-white font-ptd-600
+              hover:bg-brand-500 transition
+            "
+            onClick={() => {
+              setReportResult(false);
+              navigate("/loopleHome");
+            }}
+          >
+            확인
+          </button>
+        </div>
       </div>
-    </>
-  );
+    )}
+  </>
+);
+
 }

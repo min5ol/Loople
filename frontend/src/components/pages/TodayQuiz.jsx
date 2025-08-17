@@ -89,114 +89,173 @@ export default function TodayQuiz() {
     handleSolve();
   }, []);
 
-  return (
-    <div>
-      {/* 에러 메시지 출력 영역 - errorMessage 내부에 데이터가 있으면 아래 로직 수행 */}
-      {!loading && errorMessage && (
-        <div className="mb-4 p-6 bg-red-100 border border-red-400 text-red-700 rounded-md text-center shadow-sm">
-          <p className="mb-4 text-base font-medium">
-            {errorMessage}
-          </p>
-          <button onClick={goToHome} className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md transition duration-200 border-none cursor-pointer">
-            홈으로 이동
-          </button>
-        </div>
-      )}
-
-      {loading && (
-        <div className="text-center text-gray-500 text-sm py-6">
-          오늘의 퀴즈를 불러오는 중입니다
-        </div>
-      )}
-
-      {/* 문제 보여주기 (아직 풀지 않았을 때) */}
-      {!loading && problem && !problem.hasSolvedToday && (
-        <div className="mb-6 p-4 border rounded border-gray-300 bg-gray-50 flex flex-col justify-center items-center text-center">
-          <p className="text-lg font-semibold mb-4">{problem.question}</p>
-
-          <div className="flex flex-wrap gap-3 justify-center">
-            {/* OX 문제일 때 */}
-            {problem.type === "OX" ? (
-              <>
-                <button onClick={() => handleSubmit("O")} className="px-5 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition cursor-pointer border-none">
-                  O
-                </button>
-                <button onClick={() => handleSubmit("X")} className="px-5 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer border-none" >
-                  X
-                </button>
-              </>
-            ) :
-              /* 객관식 문제일 때, 옵션이 존재하는 경우 */
-              problem.type === "MULTIPLE" ? problem.options && problem.options.length > 0 ? (
-                <div className="flex flex-col gap-3 justify-center items-center">
-                  {problem.options.map((opt, idx) => (
-                    <button key={idx} onClick={() => handleSubmit(String.fromCharCode(65 + idx))} className="border-none px-4 py-2 bg-[#3C9A5F] text-white rounded hover:bg-[#338553] transition cursor-pointer w-full max-w-md text-left">
-                      {String.fromCharCode(65 + idx)}. {opt.content}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <span>문제 오류</span>
-              ) : null}
-          </div>
-        </div>
-      )}
-
-      {/* 제출 결과 보여주기 */}
-      {submitResult && (
-        <div>
-          <div className={`text-center p-6 rounded shadow-sm 
-              ${submitResult.isCorrect
-                ? 'border border-green-400 bg-green-100 text-green-800'
-                : 'border border-red-400 bg-red-100 text-red-800'
-              }`}
-          >
-
-          <p className="mb-4 text-base font-medium">
-            {(() => {
-              const { isCorrect, isWeekly, isMonthly, points } = submitResult;
-
-              const bonusText = [
-                isWeekly ? '주간 출석 보상' : '',
-                isMonthly ? '월간 출석 보상' : ''
-              ].filter(Boolean).join(' 및 ');
-
-              if (isCorrect) {
-                return bonusText
-                  ? `정답! ${bonusText}과 함께 +${points}점 획득!`
-                  : `정답! +${points}점 획득!`;
-              } else {
-                return bonusText
-                  ? `틀렸습니다. ${bonusText}과 함께 기본 출석 점수로 +${points}점이 지급되었습니다.`
-                  : `틀렸습니다. 기본 출석 점수로 +${points}점이 지급되었습니다.`;
-              }
-            })()}
-          </p>
-
-          <button onClick={goToHome}
-            className={`cursor-pointer border-none px-5 py-2 text-white font-semibold rounded-md transition duration-200 
-              ${submitResult.isCorrect ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}
-          >
-            home으로 이동
-          </button>
-
-        </div>
-        </div>
-
-  )
-}
-
-{/*제출 현황 표시*/ }
-{
-  isSubmitting && (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white px-6 py-4 rounded-lg shadow-md text-center">
-        <p className="text-lg font-semibold text-gray-800">제출 중입니다</p>
-        <p className="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
+return (
+  <div className="w-full">
+    {/* 상태: 로딩 */}
+    {loading && (
+      <div className="text-center text-brand-ink/60 text-sm py-8">
+        오늘의 퀴즈를 불러오는 중입니다…
       </div>
-    </div>
-  )
-}
-    </div >
-  );
+    )}
+
+    {/* 상태: 에러/이미 풂 */}
+    {!loading && errorMessage && (
+      <div
+        className="
+          mb-6 p-6 text-center rounded-2xl
+          bg-white/85 backdrop-blur-md ring-1 ring-black/5
+          shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_10px_24px_rgba(0,0,0,0.10)]
+        "
+      >
+        <p className="mb-4 text-base font-ptd-600 text-brand-ink">{errorMessage}</p>
+        <button
+          onClick={goToHome}
+          className="
+            h-11 px-5 rounded-xl bg-brand-600 text-white font-ptd-700
+            shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_6px_12px_rgba(0,0,0,0.12)]
+            hover:bg-brand-500 transition
+          "
+        >
+          홈으로 이동
+        </button>
+      </div>
+    )}
+
+    {/* 문제 카드 */}
+    {!loading && problem && !problem.hasSolvedToday && (
+      <div
+        className="
+          mb-6 rounded-2xl p-6 md:p-8 text-center
+          bg-white/85 backdrop-blur-md ring-1 ring-black/5
+          shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_14px_32px_rgba(0,0,0,0.12)]
+        "
+      >
+        <h3 className="text-lg md:text-xl font-ptd-700 text-brand-ink leading-relaxed mb-4">
+          {problem.question}
+        </h3>
+
+        {/* 선택지 */}
+        <div className="flex flex-col items-center gap-3 mt-2">
+          {problem.type === "OX" ? (
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleSubmit("O")}
+                disabled={isSubmitting}
+                className="
+                  h-11 px-6 rounded-xl bg-brand-600 text-white font-ptd-700
+                  shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_6px_12px_rgba(0,0,0,0.12)]
+                  hover:bg-brand-500 transition disabled:opacity-60
+                "
+              >
+                O
+              </button>
+              <button
+                onClick={() => handleSubmit("X")}
+                disabled={isSubmitting}
+                className="
+                  h-11 px-6 rounded-xl bg-brand-500 text-white font-ptd-700
+                  shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_6px_12px_rgba(0,0,0,0.12)]
+                  hover:bg-brand-600 transition disabled:opacity-60
+                "
+              >
+                X
+              </button>
+            </div>
+          ) : problem.type === "MULTIPLE" ? (
+            problem.options?.length ? (
+              <div className="w-full max-w-md flex flex-col gap-2">
+                {problem.options.map((opt, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSubmit(String.fromCharCode(65 + idx))}
+                    disabled={isSubmitting}
+                    className="
+                      w-full text-left h-12 px-4 rounded-xl
+                      bg-brand-100 text-brand-ink
+                      ring-1 ring-black/5 hover:bg-brand-300 transition
+                      shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
+                      disabled:opacity-60
+                    "
+                  >
+                    <span className="font-ptd-700 mr-2">
+                      {String.fromCharCode(65 + idx)}.
+                    </span>
+                    <span className="font-ptd-500">{opt.content}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <span className="text-sm text-brand-ink/60">문제 오류가 있어요.</span>
+            )
+          ) : null}
+        </div>
+      </div>
+    )}
+
+    {/* 채점 결과 */}
+    {submitResult && (
+      <div
+        className="
+          rounded-2xl p-6 md:p-8 text-center
+          bg-white/85 backdrop-blur-md ring-1 ring-black/5
+          shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_10px_24px_rgba(0,0,0,0.10)]
+        "
+      >
+        <p
+          className={[
+            "mb-4 text-base font-ptd-700",
+            submitResult.isCorrect ? "text-brand-600" : "text-brand-ink/80",
+          ].join(" ")}
+        >
+          {(() => {
+            const { isCorrect, isWeekly, isMonthly, points } = submitResult;
+            const bonusText = [
+              isWeekly ? "주간 출석 보상" : "",
+              isMonthly ? "월간 출석 보상" : "",
+            ]
+              .filter(Boolean)
+              .join(" 및 ");
+
+            if (isCorrect) {
+              return bonusText
+                ? `정답! ${bonusText}과 함께 +${points}점 획득!`
+                : `정답! +${points}점 획득!`;
+            }
+            return bonusText
+              ? `틀렸습니다. ${bonusText}과 함께 기본 출석 점수로 +${points}점이 지급되었습니다.`
+              : `틀렸습니다. 기본 출석 점수로 +${points}점이 지급되었습니다.`;
+          })()}
+        </p>
+
+        <button
+          onClick={goToHome}
+          className="
+            h-11 px-5 rounded-xl bg-brand-600 text-white font-ptd-700
+            shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_6px_12px_rgba(0,0,0,0.12)]
+            hover:bg-brand-500 transition
+          "
+        >
+          홈으로 이동
+        </button>
+      </div>
+    )}
+
+    {/* 제출 중 오버레이 */}
+    {isSubmitting && (
+      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div
+          className="
+            bg-white/90 backdrop-blur-md px-6 py-5 rounded-2xl
+            shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_10px_24px_rgba(0,0,0,0.12)]
+            text-center ring-1 ring-black/5
+          "
+        >
+          <p className="text-base font-ptd-700 text-brand-ink">제출 중입니다</p>
+          <p className="text-xs text-brand-ink/60 mt-1">잠시만 기다려주세요…</p>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
 }

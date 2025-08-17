@@ -131,85 +131,146 @@ export default function NewPost() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  return (
-    <>
-      <Header />
-      <form onSubmit={handlePost} className="max-w-md mx-auto mt-10 p-6 bg-[#F6F6F6] rounded-lg shadow-md flex justify-center item-center text-base mt-20">
-        <table className="w-full">
-          <tbody>
-            <tr>
-              <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89] w-28">제목 <span className="text-red-500">*</span></td>
-              <td className="p-3 m-0">
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-[#81C784] border-solid rounded focus:outline-none focus:ring-2 focus:ring-[#3C9A5F] box-border"
-                  placeholder="제목을 입력하세요"
-                  required
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89]">카테고리 <span className="text-red-500">*</span></td>
-              <td className="p-3">
-                <CustomDropdown selected={formData.category} onSelect={(type) => setFormData((prev) => ({ ...prev, category: type }))} />
-              </td>
-            </tr>
-            <tr>
-              <td colSpan={2} className="pt-3 px-3 font-semibold text-[#264D3D] border-b border-[#749E89]">
-                내용 <span className="text-red-500">*</span>
-              </td>
-            </tr>
-            <tr>
-              <td colSpan={2} className="p-3">
-                <textarea
-                  name="content"
-                  value={formData.content}
-                  onChange={handleChange}
-                  rows="6"
-                  className="w-full px-3 py-2 border border-[#81C784] rounded focus:outline-none focus:ring-2 focus:ring-[#3C9A5F] box-border resize-none"
-                  placeholder="내용을 입력하세요"
-                  required
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="p-3 font-semibold text-[#264D3D] border-r border-[#749E89]">첨부파일</td>
-              <td className="p-3">
-                <input
-                  type="file"
-                  name="attachedFile"
-                  onChange={(e) => {
-                    setFormData((prev) => ({ ...prev, attachedFile: e.target.files[0] }))
-                    setIsFileChanged(true);
-                  }}
-                  className="w-full text-[#202020]"
-                  accept="image/*,.pdf,.hwp,.doc,.docx,.xls,.xlsx,.txt"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td colSpan={2} className="p-3 text-center">
-                <input
-                  type="submit"
-                  value={isLoading ? "처리 중..." : isEditMode ? "수정하기" : "등록하기"}
-                  disabled={isLoading}
-                  className={`cursor-pointer w-full max-w-xs py-3 rounded-lg font-semibold text-[#FEF7E2] text-base border-none ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-[#3C9A5F] hover:bg-[#264D3D]"
-                    } transition-colors`}
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+return (
+  <>
+    <Header />
 
-        {error && (
-          <p className="text-red-600 text-center font-medium mt-3">
-            업로드 중 오류가 발생했습니다. 다시 시도해주세요.
-          </p>
-        )}
-      </form>
-    </>
-  );
+    <form
+      onSubmit={handlePost}
+      className="
+        max-w-2xl mx-auto mt-20 px-6 py-7
+        rounded-2xl
+        bg-white/85 backdrop-blur-md
+        ring-1 ring-black/5
+        shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_12px_28px_rgba(0,0,0,0.10)]
+      "
+    >
+      {/* 헤더 */}
+      <div className="mb-6">
+        <h2 className="text-2xl md:text-3xl font-ptd-700 text-brand-ink">
+          {isEditMode ? "게시글 수정" : "새 게시글"}
+        </h2>
+        <p className="mt-1 text-sm text-brand-ink/60">
+          커뮤니티 가이드에 맞춰 따듯한 소통을 해주세요 🌿
+        </p>
+      </div>
+
+      {/* 제목 */}
+      <div className="mb-5">
+        <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
+          제목 <span className="text-[#EF4444]">*</span>
+        </label>
+        <input
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          placeholder="제목을 입력하세요"
+          required
+          className="
+            ctl-input h-11
+            shadow-[inset_0_2px_6px_rgba(0,0,0,0.06)]
+            ring-1 ring-brand-300 focus:ring-4
+          "
+        />
+      </div>
+
+      {/* 카테고리 */}
+      <div className="mb-5">
+        <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
+          카테고리 <span className="text-[#EF4444]">*</span>
+        </label>
+        <div className="relative">
+          <CustomDropdown
+            selected={formData.category}
+            onSelect={(type) => setFormData((prev) => ({ ...prev, category: type }))}
+          />
+        </div>
+      </div>
+
+      {/* 내용 */}
+      <div className="mb-5">
+        <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
+          내용 <span className="text-[#EF4444]">*</span>
+        </label>
+        <textarea
+          name="content"
+          value={formData.content}
+          onChange={handleChange}
+          rows="8"
+          placeholder="내용을 입력하세요"
+          required
+          className="
+            w-full px-4 py-3 rounded-lg
+            bg-white placeholder-black/40
+            ring-1 ring-brand-300 focus:outline-none focus:ring-4
+            shadow-[inset_0_2px_6px_rgba(0,0,0,0.06)]
+            resize-none
+          "
+        />
+      </div>
+
+      {/* 첨부파일 */}
+      <div className="mb-6">
+        <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">첨부파일</label>
+        <div
+          className="
+            w-full rounded-lg bg-brand-50
+            ring-1 ring-black/5
+            px-4 py-3
+            flex items-center justify-between gap-3
+          "
+        >
+          <input
+            type="file"
+            name="attachedFile"
+            onChange={(e) => {
+              setFormData((prev) => ({ ...prev, attachedFile: e.target.files[0] }));
+              setIsFileChanged(true);
+            }}
+            className="flex-1 text-brand-ink text-sm file:mr-4 file:rounded-md file:border-0 file:bg-brand-600 file:px-3 file:py-2 file:text-white file:cursor-pointer hover:file:bg-brand-500"
+            accept="image/*,.pdf,.hwp,.doc,.docx,.xls,.xlsx,.txt"
+          />
+        </div>
+      </div>
+
+      {/* 제출 */}
+      <div className="flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="
+            h-11 px-4 rounded-lg
+            bg-white text-brand-ink
+            ring-1 ring-black/10
+            hover:bg-brand-50 transition
+          "
+        >
+          취소
+        </button>
+
+        <input
+          type="submit"
+          value={isLoading ? "처리 중..." : isEditMode ? "수정하기" : "등록하기"}
+          disabled={isLoading}
+          className={[
+            "h-11 px-6 rounded-lg font-ptd-700 text-white cursor-pointer",
+            "shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_4px_12px_rgba(0,0,0,0.12)]",
+            isLoading
+              ? "bg-brand-300 cursor-not-allowed"
+              : "bg-brand-600 hover:bg-brand-500",
+          ].join(" ")}
+        />
+      </div>
+
+      {/* 에러 */}
+      {error && (
+        <p className="mt-4 text-center text-[#B91C1C] font-ptd-600">
+          업로드 중 오류가 발생했습니다. 다시 시도해주세요.
+        </p>
+      )}
+    </form>
+  </>
+);
+
 }
