@@ -61,7 +61,14 @@ export default function NewPost() {
         <span
           tabIndex={0}
           onClick={() => setIsOpen(!isOpen)}
-          className="block border border-[#6e9b72] border-solid rounded p-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#20583e] select-none text-[#202020] bg-white text-sm"
+          className={`
+    ctl-input h-11
+    shadow-[inset_0_2px_6px_rgba(0,0,0,0.06)]
+    ring-1 ring-brand-300 focus:ring-4
+    text-[#202020] text-[14px] font-[Noto_Sans_KR]
+    flex items-center cursor-pointer select-none
+        ${!selected ? "text-gray-400" : "text-[#202020]"}
+  `}
         >
           {categoryMap[selected] || "카테고리 선택"}
         </span>
@@ -132,146 +139,149 @@ export default function NewPost() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-return (
-  <>
-    <Header />
+  return (
+    <>
+      <Header />
 
-    <form
-      onSubmit={handlePost}
-      className="
+      <form
+        onSubmit={handlePost}
+        className="
         max-w-2xl mx-auto mt-20 px-6 py-7
         rounded-2xl
         bg-white/85 backdrop-blur-md
         ring-1 ring-black/5
         shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_12px_28px_rgba(0,0,0,0.10)]
       "
-    >
-      {/* 헤더 */}
-      <div className="mb-6">
-        <h2 className="text-2xl md:text-3xl font-ptd-700 text-brand-ink">
-          {isEditMode ? "게시글 수정" : "새 게시글"}
-        </h2>
-        <p className="mt-1 text-sm text-brand-ink/60">
-          커뮤니티 가이드에 맞춰 따듯한 소통을 해주세요 🌿
-        </p>
-      </div>
+      >
+        {/* 헤더 */}
+        <div className="mb-6">
+          <h2 className="text-2xl md:text-3xl font-ptd-700 text-brand-ink">
+            {isEditMode ? "게시글 수정" : "새 게시글"}
+          </h2>
+          <p className="mt-1 text-sm text-brand-ink/60">
+            커뮤니티 가이드에 맞춰 따듯한 소통을 해주세요 🌿
+          </p>
+        </div>
 
-      {/* 제목 */}
-      <div className="mb-5">
-        <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
-          제목 <span className="text-[#EF4444]">*</span>
-        </label>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="제목을 입력하세요"
-          required
-          className="
+        {/* 제목 */}
+        <div className="mb-5">
+          <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
+            제목 <span className="text-[#EF4444]">*</span>
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="제목을 입력하세요"
+            required
+            className="
             ctl-input h-11
             shadow-[inset_0_2px_6px_rgba(0,0,0,0.06)]
             ring-1 ring-brand-300 focus:ring-4
+            text-[#202020] text-[14px] font-[Noto_Sans_KR]
           "
-        />
-      </div>
-
-      {/* 카테고리 */}
-      <div className="mb-5">
-        <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
-          카테고리 <span className="text-[#EF4444]">*</span>
-        </label>
-        <div className="relative">
-          <CustomDropdown
-            selected={formData.category}
-            onSelect={(type) => setFormData((prev) => ({ ...prev, category: type }))}
           />
-        </div>
-      </div>
 
-      {/* 내용 */}
-      <div className="mb-5">
-        <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
-          내용 <span className="text-[#EF4444]">*</span>
-        </label>
-        <textarea
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          rows="8"
-          placeholder="내용을 입력하세요"
-          required
-          className="
+        </div>
+
+        {/* 카테고리 */}
+        <div className="mb-5">
+          <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
+            카테고리 <span className="text-[#EF4444]">*</span>
+          </label>
+          <div className="relative">
+            <CustomDropdown
+              selected={formData.category}
+              onSelect={(type) => setFormData((prev) => ({ ...prev, category: type }))}
+            />
+          </div>
+        </div>
+
+        {/* 내용 */}
+        <div className="mb-5">
+          <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">
+            내용 <span className="text-[#EF4444]">*</span>
+          </label>
+          <textarea
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            rows="8"
+            placeholder="내용을 입력하세요"
+            required
+            className="
             w-full px-4 py-3 rounded-lg
             bg-white placeholder-black/40
             ring-1 ring-brand-300 focus:outline-none focus:ring-4
             shadow-[inset_0_2px_6px_rgba(0,0,0,0.06)]
             resize-none
+            text-[14px] font-[Noto-Sans-KR] text-[#202020]
           "
-        />
-      </div>
+          />
+        </div>
 
-      {/* 첨부파일 */}
-      <div className="mb-6">
-        <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">첨부파일</label>
-        <div
-          className="
+        {/* 첨부파일 */}
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-ptd-600 text-brand-ink">첨부파일</label>
+          <div
+            className="
             w-full rounded-lg bg-brand-50
             ring-1 ring-black/5
             px-4 py-3
             flex items-center justify-between gap-3
           "
-        >
-          <input
-            type="file"
-            name="attachedFile"
-            onChange={(e) => {
-              setFormData((prev) => ({ ...prev, attachedFile: e.target.files[0] }));
-              setIsFileChanged(true);
-            }}
-            className="flex-1 text-brand-ink text-sm file:mr-4 file:rounded-md file:border-0 file:bg-brand-600 file:px-3 file:py-2 file:text-white file:cursor-pointer hover:file:bg-brand-500"
-            accept="image/*,.pdf,.hwp,.doc,.docx,.xls,.xlsx,.txt"
-          />
+          >
+            <input
+              type="file"
+              name="attachedFile"
+              onChange={(e) => {
+                setFormData((prev) => ({ ...prev, attachedFile: e.target.files[0] }));
+                setIsFileChanged(true);
+              }}
+              className="flex-1 text-brand-ink text-sm file:mr-4 file:rounded-md file:border-0 file:bg-brand-600 file:px-3 file:py-2 file:text-white file:cursor-pointer hover:file:bg-brand-500"
+              accept="image/*,.pdf,.hwp,.doc,.docx,.xls,.xlsx,.txt"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* 제출 */}
-      <div className="flex items-center justify-end gap-2">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="
+        {/* 제출 */}
+        <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="
             h-11 px-4 rounded-lg
             bg-white text-brand-ink
             ring-1 ring-black/10
             hover:bg-brand-50 transition
           "
-        >
-          취소
-        </button>
+          >
+            취소
+          </button>
 
-        <input
-          type="submit"
-          value={isLoading ? "처리 중..." : isEditMode ? "수정하기" : "등록하기"}
-          disabled={isLoading}
-          className={[
-            "h-11 px-6 rounded-lg font-ptd-700 text-white cursor-pointer",
-            "shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_4px_12px_rgba(0,0,0,0.12)]",
-            isLoading
-              ? "bg-brand-300 cursor-not-allowed"
-              : "bg-brand-600 hover:bg-brand-500",
-          ].join(" ")}
-        />
-      </div>
+          <input
+            type="submit"
+            value={isLoading ? "처리 중..." : isEditMode ? "수정하기" : "등록하기"}
+            disabled={isLoading}
+            className={[
+              "h-11 px-6 rounded-lg font-ptd-700 text-white cursor-pointer",
+              "shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_4px_12px_rgba(0,0,0,0.12)]",
+              isLoading
+                ? "bg-brand-300 cursor-not-allowed"
+                : "bg-brand-600 hover:bg-brand-500",
+            ].join(" ")}
+          />
+        </div>
 
-      {/* 에러 */}
-      {error && (
-        <p className="mt-4 text-center text-[#B91C1C] font-ptd-600">
-          업로드 중 오류가 발생했습니다. 다시 시도해주세요.
-        </p>
-      )}
-    </form>
-  </>
-);
+        {/* 에러 */}
+        {error && (
+          <p className="mt-4 text-center text-[#B91C1C] font-ptd-600">
+            업로드 중 오류가 발생했습니다. 다시 시도해주세요.
+          </p>
+        )}
+      </form>
+    </>
+  );
 
 }
