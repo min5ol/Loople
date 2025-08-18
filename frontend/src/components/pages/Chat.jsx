@@ -66,40 +66,40 @@ export default function Chat() {
     });
   }, [userInfo, post]);
 
-  // 2. 채팅방 및 채팅 리스트 설정
+  // 1. 진입 시 무조건 전체 채팅 목록 불러오기
   useEffect(() => {
-    const fetchData = async () => {
+    const loadChatList = async () => {
       try {
-        if (!chatUserInfo.participantA || !chatUserInfo.participantB || !post?.no) return;
-
-        // 1. 기존 채팅방 리스트 가져오기
         const list = await getAllRoom();
         setChatList(list);
-
-        // 2. 방 생성 또는 가져오기
-        const saved = await buildChatRoom(post.nickname, post.no);
-        setCurrentRoom(saved);
-        setIsOpenRoom(true);
-        setIsShowChatInfo(false);
-        setIsChatMenuOpen(false);
-
-        // 3. 채팅방 리스트에 추가
-        setChatList((prev) => {
-          const filtered = prev.filter(room => room.no !== saved.no); // 중복 제거
-          return [saved, ...filtered]; // 새 방을 맨 앞으로!
-        });
-
-        // 4. 채팅 기록 가져오기
-        const res = await viewRoomText(saved.no);
-        setTextHistory(res);
       } catch (error) {
-        console.error("채팅방 생성 또는 데이터 로딩 실패:", error);
+        console.error("채팅 리스트 로딩 실패:", error);
       }
     };
 
-    fetchData();
-  }, [chatUserInfo, post]);
+    loadChatList();
+  }, []);
 
+  // 2. post가 있을 경우 (게시글에서 진입했을 때만 방 생성)
+  useEffect(() => {
+    const buildRoomFromPost = async () => {
+      if (!userInfo || !post) return;
+
+      const saved = await buildChatRoom(post.nickname, post.no);
+      setCurrentRoom(saved);
+      setIsOpenRoom(true);
+
+      const res = await viewRoomText(saved.no);
+      setTextHistory(res);
+
+      setChatList((prev) => {
+        const filtered = prev.filter(room => room.no !== saved.no);
+        return [saved, ...filtered];
+      });
+    };
+
+    buildRoomFromPost();
+  }, [userInfo, post]);
 
 
   //webSocket
@@ -192,6 +192,11 @@ export default function Chat() {
     if (isOpenRoom) {
       scrollToBottom();
     }
+
+    //  setChatUserInfo({
+    //   participantA: userInfo.nickname,
+    //   participantB: currentRoom.no,
+    // });
   }, [isOpenRoom]);
 
   const formatChatTime = (updatedAt) => {
@@ -271,9 +276,14 @@ export default function Chat() {
 
   const fetchRoom = async (chat) => {
     const res = await viewRoomText(chat.no);
+    setIsChatMenuOpen(false)
     setTextHistory(res);
     setIsOpenRoom(true);
     setCurrentRoom(chat);
+    setChatUserInfo({
+      participantA: chat.participantA,
+      participantB: chat.participantA,
+    });
   }
 
   const scrollToBottom = () => {
@@ -304,274 +314,271 @@ export default function Chat() {
   }
 
 
-return (
-  <>
-    <Header />
+  return (
+    <>
+      <Header />
+      <div className="mx-auto mt-20 w-full max-w-5xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-md ring-1 ring-black/5 shadow-[0_12px_28px_rgba(0,0,0,0.08)]">
+        <div className="flex h-[640px]">
 
-    <div className="mx-auto mt-20 w-full max-w-5xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-md ring-1 ring-black/5 shadow-[0_12px_28px_rgba(0,0,0,0.08)]">
-      <div className="flex h-[640px]">
+          {/* 채팅 리스트 */}
+          <aside className="w-[32%] min-w-[240px] border-r border-[#EAEAEA] bg-white flex flex-col">
+            <div className="px-4 py-3 text-sm font-ptd-700 text-[#202020] bg-white/90 sticky top-0 z-10 ring-1 ring-black/5">
+              채팅 목록
+            </div>
 
-        {/* 채팅 리스트 */}
-        <aside className="w-[32%] min-w-[240px] border-r border-[#EAEAEA] bg-white flex flex-col">
-          <div className="px-4 py-3 text-sm font-ptd-700 text-[#202020] bg-white/90 sticky top-0 z-10 ring-1 ring-black/5">
-            채팅 목록
-          </div>
+            <ul className="flex-1 overflow-y-auto p-0 list-none">
+              {chatList.length > 0 &&
+                chatList.map((chat) => (
+                  <li
+                    key={chat.no}
+                    className="px-4 py-3 border-b border-[#F0F0F0] cursor-pointer hover:bg-[#FAFAFA] transition"
+                    onClick={() => fetchRoom(chat)}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="m-0 text-[13px] font-ptd-600 text-[#202020] truncate">
+                        {userInfo.nickname === chat.participantA
+                          ? chat.participantB
+                          : chat.participantA}
+                      </p>
+                      <p className="m-0 text-[11px] text-[#9CA3AF]">
+                        {formatChatTime(chat.updatedAt)}
+                      </p>
+                    </div>
 
-          <ul className="flex-1 overflow-y-auto">
-            {chatList.length > 0 &&
-              chatList.map((chat) => (
-                <li
-                  key={chat.no}
-                  className="px-4 py-3 border-b border-[#F0F0F0] cursor-pointer hover:bg-[#FAFAFA] transition"
-                  onClick={() => fetchRoom(chat)}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="m-0 text-[13px] font-ptd-600 text-[#202020] truncate">
-                      {userInfo.nickname === chat.participantA
-                        ? chat.participantB
-                        : chat.participantA}
-                    </p>
-                    <p className="m-0 text-[11px] text-[#9CA3AF]">
-                      {formatChatTime(chat.updatedAt)}
-                    </p>
-                  </div>
-
-                  {/* 게시물 제목 */}
-                  {chat.postTitle && (
-                    <p className="m-0 mb-0.5 text-[11px] text-[#166534]/80 truncate">
-                      📌 {chat.postTitle}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="m-0 text-[12px] text-[#6B7280] italic truncate">
-                      {chat.lastMessage || "메시지를 전송해 보세요!"}
-                    </p>
-                    {chat.unreadCount > 0 && (
-                      <span className="shrink-0 px-2 py-0.5 rounded-full text-[11px] bg-[#EF4444] text-white">
-                        {chat.unreadCount}
-                      </span>
+                    {/* 게시물 제목 */}
+                    {chat.postTitle && (
+                      <p className="m-0 mb-0.5 text-[11px] text-[#166534]/80 truncate">
+                        📌 {chat.postTitle}
+                      </p>
                     )}
+
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="m-0 text-[12px] text-[#6B7280] italic truncate">
+                        {chat.lastMessage || "메시지를 전송해 보세요!"}
+                      </p>
+                      {chat.unreadCount > 0 && (
+                        <span className="shrink-0 px-2 py-0.5 rounded-full text-[11px] bg-[#EF4444] text-white">
+                          {chat.unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+            </ul>
+          </aside>
+
+          {/* 채팅 디테일 */}
+          <section className="flex-1 bg-[#F6F6F6] flex flex-col">
+            {isOpenRoom && currentRoom && (
+              <>
+                {/* 상단 바 */}
+                <div className="px-4 py-3 flex items-center justify-between bg-white/90 backdrop-blur-md ring-1 ring-black/5">
+                  <button
+                    className="text-sm text-[#404040] rounded-full hover:bg-[#F3F3F3] w-8 h-8 inline-flex items-center justify-center"
+                    onClick={() => setIsOpenRoom(!isOpenRoom)}
+                    aria-label="목록으로"
+                  >
+                    ‹
+                  </button>
+
+                  <div className="text-[15px] font-ptd-700 text-[#202020] truncate">
+                    {userInfo.nickname === currentRoom.participantA
+                      ? currentRoom.participantB
+                      : currentRoom.participantA}
                   </div>
-                </li>
-              ))}
-          </ul>
-        </aside>
 
-        {/* 채팅 디테일 */}
-        <section className="flex-1 bg-[#F6F6F6] flex flex-col">
-          {isOpenRoom && currentRoom && (
-            <>
-              {/* 상단 바 */}
-              <div className="px-4 py-3 flex items-center justify-between bg-white/90 backdrop-blur-md ring-1 ring-black/5">
-                <button
-                  className="text-sm text-[#404040] rounded-full hover:bg-[#F3F3F3] w-8 h-8 inline-flex items-center justify-center"
-                  onClick={() => setIsOpenRoom(!isOpenRoom)}
-                  aria-label="목록으로"
-                >
-                  ‹
-                </button>
+                  <button
+                    className="w-8 h-8 rounded-full hover:bg-[#F3F3F3] inline-flex items-center justify-center"
+                    onClick={() => setIsChatMenuOpen(!isChatMenuOpen)}
+                    aria-label="채팅 메뉴"
+                  >
+                    <img src={hamburgerMenu} alt="" className="w-4 h-4 opacity-70" />
+                  </button>
 
-                <div className="text-[15px] font-ptd-700 text-[#202020] truncate">
-                  {userInfo.nickname === currentRoom.participantA
-                    ? currentRoom.participantB
-                    : currentRoom.participantA}
+                  {/* 드롭다운 메뉴 */}
+                  {isChatMenuOpen && (
+                    <div className="absolute right-4 top-14 w-44 rounded-lg bg-white ring-1 ring-black/5 shadow-lg z-10">
+                      <ul className="py-1 text-[13px] text-[#374151] list-none p-0">
+                        <li
+                          className="px-3 py-2 hover:bg-[#F7F7F7] cursor-pointer"
+                          onClick={() => {
+                            setIsShowChatInfo(!isShowChatInfo);
+                            setIsOpenRoom(!isChatMenuOpen);
+                            setIsChatMenuOpen(!isChatMenuOpen);
+                          }}
+                        >
+                          채팅방 정보
+                        </li>
+                        <li className="px-3 py-2 hover:bg-[#F7F7F7] cursor-pointer">
+                          채팅방 고정
+                        </li>
+                        <li
+                          className="px-3 py-2 hover:bg-[#F7F7F7] cursor-pointer text-[#B91C1C] font-ptd-600"
+                          onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
+                        >
+                          채팅방 나가기
+                        </li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
-                <button
-                  className="w-8 h-8 rounded-full hover:bg-[#F3F3F3] inline-flex items-center justify-center"
-                  onClick={() => setIsChatMenuOpen(!isChatMenuOpen)}
-                  aria-label="채팅 메뉴"
+                {/* 게시물 제목 바 */}
+                <div
+                  className="px-4 py-2 bg-white text-[13px] text-[#166534]/85 text-center truncate ring-1 ring-black/5"
+                  title={currentRoom.postTitle}
                 >
-                  <img src={hamburgerMenu} alt="" className="w-4 h-4 opacity-70" />
-                </button>
+                  {currentRoom.postTitle}
+                </div>
 
-                {/* 드롭다운 메뉴 */}
-                {isChatMenuOpen && (
-                  <div className="absolute right-4 top-14 w-44 rounded-lg bg-white ring-1 ring-black/5 shadow-lg z-10">
-                    <ul className="py-1 text-[13px] text-[#374151]">
-                      <li
-                        className="px-3 py-2 hover:bg-[#F7F7F7] cursor-pointer"
-                        onClick={() => {
-                          setIsShowChatInfo(!isShowChatInfo);
-                          setIsOpenRoom(!isChatMenuOpen);
-                          setIsChatMenuOpen(!isChatMenuOpen);
-                        }}
-                      >
-                        채팅방 정보
-                      </li>
-                      <li className="px-3 py-2 hover:bg-[#F7F7F7] cursor-pointer">
-                        채팅방 고정
-                      </li>
-                      <li className="px-3 py-2 hover:bg-[#F7F7F7] cursor-pointer">
-                        알림 끄기
-                      </li>
-                      <li
-                        className="px-3 py-2 hover:bg-[#F7F7F7] cursor-pointer text-[#B91C1C] font-ptd-600"
-                        onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
-                      >
-                        채팅방 나가기
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              {/* 게시물 제목 바 */}
-              <div
-                className="px-4 py-2 bg-white text-[13px] text-[#166534]/85 text-center truncate ring-1 ring-black/5"
-                title={currentRoom.postTitle}
-              >
-                {currentRoom.postTitle}
-              </div>
-
-              {/* 메시지 리스트 */}
-              <div
-                ref={chatEndRef}
-                className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
-                style={{ scrollbarWidth: "thin" }}
-              >
-                {textHistory?.length > 0 &&
-                  textHistory.map((text, idx) => {
-                    const isMe = text.nickname === userInfo.nickname;
-                    return (
-                      <div
-                        key={idx}
-                        className={`flex items-end ${isMe ? "justify-end" : "justify-start"}`}
-                      >
-                        {isMe && (
-                          <span className="text-[11px] text-[#9CA3AF] mr-2">
-                            {formatChatTime(text.createdAt)}
-                          </span>
-                        )}
+                {/* 메시지 리스트 */}
+                <div
+                  ref={chatEndRef}
+                  className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
+                  style={{ scrollbarWidth: "thin" }}
+                >
+                  {textHistory?.length > 0 &&
+                    textHistory.map((text, idx) => {
+                      const isMe = text.nickname === userInfo.nickname;
+                      return (
                         <div
-                          className={[
-                            "max-w-[72%] px-3 py-2 rounded-2xl text-[13px] shadow-sm",
-                            isMe
-                              ? "bg-white text-[#202020] rounded-br-none ring-1"
-                              : "bg-[#F3F4F6] text-[#202020] rounded-bl-none",
-                          ].join(" ")}
-                          style={isMe ? { boxShadow: "0 2px 6px rgba(0,0,0,0.06)", borderColor: "rgba(129,199,132,0.45)" } : {}}
+                          key={idx}
+                          className={`flex items-end ${isMe ? "justify-end" : "justify-start"}`}
                         >
-                          {text.content}
+                          {isMe && (
+                            <span className="text-[11px] text-[#9CA3AF] mr-2">
+                              {formatChatTime(text.createdAt)}
+                            </span>
+                          )}
+                          <div
+                            className={[
+                              "max-w-[72%] px-3 py-2 rounded-2xl text-[13px] shadow-sm",
+                              isMe
+                                ? "bg-white text-[#202020] rounded-br-none ring-1"
+                                : "bg-[#F3F4F6] text-[#202020] rounded-bl-none",
+                            ].join(" ")}
+                            style={isMe ? { boxShadow: "0 2px 6px rgba(0,0,0,0.06)", borderColor: "rgba(129,199,132,0.45)" } : {}}
+                          >
+                            {text.content}
+                          </div>
+                          {!isMe && (
+                            <span className="text-[11px] text-[#9CA3AF] ml-2">
+                              {formatChatTime(text.createdAt)}
+                            </span>
+                          )}
                         </div>
-                        {!isMe && (
-                          <span className="text-[11px] text-[#9CA3AF] ml-2">
-                            {formatChatTime(text.createdAt)}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
+                      );
+                    })}
+                </div>
 
-              {/* 입력 영역 */}
-              <div className="px-3 py-3 bg-white ring-1 ring-[#EAEAEA]">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    className="
+                {/* 입력 영역 */}
+                <div className="px-3 py-3 bg-white ring-1 ring-[#EAEAEA]">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      className="
                       flex-1 rounded-lg px-3 py-2 text-[14px]
                       bg-white border border-[#E5E7EB]
                       placeholder:text-[#9CA3AF]
                       focus:outline-none focus:ring-2 focus:ring-[#81C784]/40 focus:border-transparent
                     "
-                    placeholder="메시지를 입력하세요"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSend();
-                    }}
-                  />
-                  <button
-                    className="
+                      placeholder="메시지를 입력하세요"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSend();
+                      }}
+                      onClick={() => {setIsChatMenuOpen(false)}}
+                    />
+                    <button
+                      className="
                       px-4 h-10 rounded-lg text-sm font-ptd-600
                       bg-[#202020] text-white
                       hover:bg-[#111]
                       transition
                     "
-                    onClick={handleSend}
-                  >
-                    전송
-                  </button>
+                      onClick={handleSend}
+                    >
+                      전송
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
 
-          {/* 채팅방 정보 패널 */}
-          {isShowChatInfo && (
-            <div className="relative flex-1 bg-white p-5 ring-1 ring-black/5">
-              <p className="text-[15px] font-ptd-700 text-[#202020] mb-3">
-                채팅 상대:{" "}
-                <span className="text-[#166534]">
-                  {userInfo.nickname === currentRoom?.participantA
-                    ? currentRoom?.participantB
-                    : currentRoom?.participantA}
-                </span>
-              </p>
-              <button
-                className="w-full text-left px-3 py-2 rounded-lg ring-1 ring-black/5 hover:bg-[#F7F7F7] transition text-[#202020] text-[14px] mb-2"
-                onClick={() => navigate("/communityPost", { state: { post } })}
-              >
-                🔗 중고 게시글 보러가기
-              </button>
-              <button
-                className="w-full text-left px-3 py-2 rounded-lg ring-1 ring-red-200/60 hover:bg-red-50 transition text-[#B91C1C] text-[14px]"
-                onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
-              >
-                🚪 채팅방 나가기
-              </button>
-
-              <button
-                className="absolute bottom-3 left-3 w-9 h-9 rounded-full hover:bg-[#F3F3F3] inline-flex items-center justify-center text-[#404040]"
-                onClick={() => {
-                  setIsShowChatInfo(false);
-                  setIsOpenRoom(true);
-                }}
-                aria-label="뒤로"
-              >
-                ‹
-              </button>
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
-
-    {/* 삭제 확인 모달 */}
-    {showDeleteConfirm && (
-      <div className="fixed inset-0 z-50 grid place-items-center bg-black/40">
-        <div className="w-[92%] max-w-sm rounded-2xl bg-white p-5 ring-1 ring-black/5 shadow-2xl">
-          {isDeleting ? (
-            <p className="text-center text-[15px] text-[#374151]">채팅방을 삭제하는 중입니다…</p>
-          ) : (
-            <>
-              <p className="text-[#202020] text-[15px] font-ptd-600 text-center">
-                정말 채팅방을 나가시겠습니까?
-              </p>
-              <p className="mt-2 text-center text-[13px] text-[#6B7280]">
-                한 번 삭제된 채팅방 데이터는 복구할 수 없습니다.
-              </p>
-              <div className="mt-4 flex items-center justify-center gap-2">
+            {/* 채팅방 정보 패널 */}
+            {isShowChatInfo && (
+              <div className="relative flex-1 bg-white p-5 ring-1 ring-black/5">
+                <p className="text-[15px] font-ptd-700 text-[#202020] mb-3">
+                  채팅 상대:{" "}
+                  <span className="text-[#166534]">
+                    {userInfo.nickname === currentRoom?.participantA
+                      ? currentRoom?.participantB
+                      : currentRoom?.participantA}
+                  </span>
+                </p>
                 <button
-                  className="px-4 h-10 rounded-lg text-sm bg-[#EF4444] text-white hover:bg-[#DC2626] transition"
-                  onClick={handleDelete}
+                  className="w-full text-left px-3 py-2 rounded-lg ring-1 ring-black/5 hover:bg-[#F7F7F7] transition text-[#202020] text-[14px] mb-2"
+                  onClick={() => navigate("/communityPost", { state: { post } })}
                 >
-                  삭제
+                  🔗 중고 게시글 보러가기
                 </button>
                 <button
-                  className="px-4 h-10 rounded-lg text-sm bg-white ring-1 ring-black/10 hover:bg-[#F7F7F7] transition"
-                  onClick={handleDeleteCancel}
+                  className="w-full text-left px-3 py-2 rounded-lg ring-1 ring-red-200/60 hover:bg-red-50 transition text-[#B91C1C] text-[14px]"
+                  onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
                 >
-                  취소
+                  🚪 채팅방 나가기
+                </button>
+
+                <button
+                  className="absolute bottom-3 left-3 w-9 h-9 rounded-full hover:bg-[#F3F3F3] inline-flex items-center justify-center text-[#404040]"
+                  onClick={() => {
+                    setIsShowChatInfo(false);
+                    setIsOpenRoom(true);
+                  }}
+                  aria-label="뒤로"
+                >
+                  ‹
                 </button>
               </div>
-            </>
-          )}
+            )}
+          </section>
         </div>
       </div>
-    )}
-  </>
-);
+
+      {/* 삭제 확인 모달 */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40">
+          <div className="w-[92%] max-w-sm rounded-2xl bg-white p-5 ring-1 ring-black/5 shadow-2xl">
+            {isDeleting ? (
+              <p className="text-center text-[15px] text-[#374151]">채팅방을 삭제하는 중입니다…</p>
+            ) : (
+              <>
+                <p className="text-[#202020] text-[15px] font-ptd-600 text-center">
+                  정말 채팅방을 나가시겠습니까?
+                </p>
+                <p className="mt-2 text-center text-[13px] text-[#6B7280]">
+                  한 번 삭제된 채팅방 데이터는 복구할 수 없습니다.
+                </p>
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  <button
+                    className="px-4 h-10 rounded-lg text-sm bg-[#EF4444] text-white hover:bg-[#DC2626] transition"
+                    onClick={handleDelete}
+                  >
+                    삭제
+                  </button>
+                  <button
+                    className="px-4 h-10 rounded-lg text-sm bg-white ring-1 ring-black/10 hover:bg-[#F7F7F7] transition"
+                    onClick={handleDeleteCancel}
+                  >
+                    취소
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
 }

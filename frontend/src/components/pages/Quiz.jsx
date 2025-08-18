@@ -104,29 +104,9 @@ export default function Quiz() {
             )}
           </div>
 
+          {/* 추후 삭제 예정 */}
           {/* 버튼 그룹 */}
           <div className="flex flex-wrap justify-center mt-8 gap-3">
-            <button
-              onClick={goToAttendance}
-              className="
-                ctl-btn-primary rounded-full
-                bg-white text-brand-ink
-                shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_4px_10px_rgba(0,0,0,0.08)]
-                hover:bg-brand-50
-              "
-            >
-              월간 출석 현황 확인하기
-            </button>
-
-            <button
-              onClick={goToQuiz}
-              className="
-                ctl-btn-primary rounded-full
-                shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_4px_12px_rgba(60,154,95,0.35)]
-              "
-            >
-              퀴즈풀기
-            </button>
 
             <button
               onClick={async () => {

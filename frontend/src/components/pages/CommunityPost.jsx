@@ -35,6 +35,8 @@ export default function CommunityPost() {
   const location = useLocation();
   const navigate = useNavigate();
   const post = location.state?.post;
+  console.log("post", post);
+  console.log("userInfo", userInfo);
 
   // 댓글 리스트 상태
   const [comments, setComments] = useState([]);
@@ -187,7 +189,7 @@ export default function CommunityPost() {
   const runIfOwner = (target, type, targetType) => {
     console.log("t", target);
     console.log("u", userInfo)
-    if (target.userId === userInfo.userId) {
+    if (target.userId === userInfo.id) {
       if (type === "수정") {
         if (targetType === "comment") {
           handleEditClick(target);
@@ -287,7 +289,7 @@ export default function CommunityPost() {
             작성자: <span className="font-ptd-600 text-brand-ink">{post.nickname}</span>
           </span>
 
-          {post.category === "USED" && post.userId !== userInfo.userId && (
+          {post.category === "USED" && post.userId !== userInfo.id && (
             <button
               onClick={() => navigate("/chat", { state: { post } })}
               className="h-9 px-3 rounded-full bg-brand-600 text-white text-sm font-ptd-600 hover:bg-brand-500 transition"

@@ -74,7 +74,7 @@ export default function AttendanceCalendar() {
   return (
     <div
       className="
-        min-h-screen px-6 font-ptd-400 flex items-center justify-center
+        p-6 font-ptd-400 flex items-center justify-center rounded
         bg-brand-50
         bg-[radial-gradient(900px_600px_at_10%_0%,#CFE7D8_0%,transparent_45%),radial-gradient(900px_600px_at_90%_100%,#FEF7E2_0%,transparent_40%)]
       "

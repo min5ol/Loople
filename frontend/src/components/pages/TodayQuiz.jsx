@@ -36,6 +36,7 @@ export default function TodayQuiz() {
   const [errorMessage, setErrorMessage] = useState(null); //에러 메시지 상태
   const [loading, setLoading] = useState(true);  // 페이지 로딩 상태
   const [isSubmitting, setIsSubmitting] = useState(false); // 정답 제출 상태
+  const [selectedAnswer, setSelectedAnswer] = useState(null); //사용자 선택 답안
   const hasFetched = useRef(false); //호출 여부 체크
   const navigate = useNavigate();
 
@@ -46,6 +47,7 @@ export default function TodayQuiz() {
   //문제 받아오기 처리 함수
   const handleSolve = async () => {
     setLoading(true); // 문제 받아오기 시작할 때 로딩 ON
+    setSelectedAnswer(null);
 
     try {
       const data = await getProblem();  //API 호출
@@ -61,7 +63,9 @@ export default function TodayQuiz() {
 
   //답안 제출 처리 함수
   const handleSubmit = async (answer) => {
+    if (isSubmitting || submitResult) return;
     setIsSubmitting(true); // 제출 시작
+    setSelectedAnswer(answer);  //선택 답안
     try {
       const payLoad = {
         problemId: problem.no,  //문제 번호
@@ -89,173 +93,176 @@ export default function TodayQuiz() {
     handleSolve();
   }, []);
 
-return (
-  <div className="w-full">
-    {/* 상태: 로딩 */}
-    {loading && (
-      <div className="text-center text-brand-ink/60 text-sm py-8">
-        오늘의 퀴즈를 불러오는 중입니다…
-      </div>
-    )}
+  return (
+    <div className="w-full">
+      {/* 상태: 로딩 */}
+      {loading && (
+        <div className="text-center text-brand-ink/60 text-sm py-8">
+          오늘의 퀴즈를 불러오는 중입니다…
+        </div>
+      )}
 
-    {/* 상태: 에러/이미 풂 */}
-    {!loading && errorMessage && (
-      <div
-        className="
+      {/* 상태: 에러/이미 풂 */}
+      {!loading && errorMessage && (
+        <div
+          className="
           mb-6 p-6 text-center rounded-2xl
           bg-white/85 backdrop-blur-md ring-1 ring-black/5
           shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_10px_24px_rgba(0,0,0,0.10)]
         "
-      >
-        <p className="mb-4 text-base font-ptd-600 text-brand-ink">{errorMessage}</p>
-        <button
-          onClick={goToHome}
-          className="
+        >
+          <p className="mb-4 text-base font-ptd-600 text-brand-ink">{errorMessage}</p>
+          <button
+            onClick={goToHome}
+            className="
             h-11 px-5 rounded-xl bg-brand-600 text-white font-ptd-700
             shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_6px_12px_rgba(0,0,0,0.12)]
             hover:bg-brand-500 transition
           "
-        >
-          홈으로 이동
-        </button>
-      </div>
-    )}
+          >
+            홈으로 이동
+          </button>
+        </div>
+      )}
 
-    {/* 문제 카드 */}
-    {!loading && problem && !problem.hasSolvedToday && (
-      <div
-        className="
+      {/* 문제 카드 */}
+      {!loading && problem && !problem.hasSolvedToday && (
+        <div
+          className="
           mb-6 rounded-2xl p-6 md:p-8 text-center
           bg-white/85 backdrop-blur-md ring-1 ring-black/5
           shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_14px_32px_rgba(0,0,0,0.12)]
         "
-      >
-        <h3 className="text-lg md:text-xl font-ptd-700 text-brand-ink leading-relaxed mb-4">
-          {problem.question}
-        </h3>
+        >
+          <h3 className="text-lg md:text-xl font-ptd-700 text-brand-ink leading-relaxed mb-4">
+            {problem.question}
+          </h3>
 
-        {/* 선택지 */}
-        <div className="flex flex-col items-center gap-3 mt-2">
-          {problem.type === "OX" ? (
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleSubmit("O")}
-                disabled={isSubmitting}
-                className="
-                  h-11 px-6 rounded-xl bg-brand-600 text-white font-ptd-700
-                  shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_6px_12px_rgba(0,0,0,0.12)]
-                  hover:bg-brand-500 transition disabled:opacity-60
-                "
-              >
-                O
-              </button>
-              <button
-                onClick={() => handleSubmit("X")}
-                disabled={isSubmitting}
-                className="
-                  h-11 px-6 rounded-xl bg-brand-500 text-white font-ptd-700
-                  shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_6px_12px_rgba(0,0,0,0.12)]
-                  hover:bg-brand-600 transition disabled:opacity-60
-                "
-              >
-                X
-              </button>
-            </div>
-          ) : problem.type === "MULTIPLE" ? (
-            problem.options?.length ? (
-              <div className="w-full max-w-md flex flex-col gap-2">
-                {problem.options.map((opt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleSubmit(String.fromCharCode(65 + idx))}
-                    disabled={isSubmitting}
-                    className="
-                      w-full text-left h-12 px-4 rounded-xl
-                      bg-brand-100 text-brand-ink
-                      ring-1 ring-black/5 hover:bg-brand-300 transition
-                      shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
-                      disabled:opacity-60
-                    "
-                  >
-                    <span className="font-ptd-700 mr-2">
-                      {String.fromCharCode(65 + idx)}.
-                    </span>
-                    <span className="font-ptd-500">{opt.content}</span>
-                  </button>
-                ))}
+          {/* 선택지 */}
+          <div className="flex flex-col items-center gap-3 mt-2">
+            {problem.type === "OX" ? (
+              <div className="flex gap-3">
+                {["O", "X"].map((val) => {
+                  const isSelected = selectedAnswer === val;
+
+                  return (
+                    <button
+                      key={val}
+                      onClick={() => handleSubmit(val)}
+                      disabled={isSubmitting || !!submitResult}
+                      className={`
+          h-11 px-6 rounded-xl text-white font-ptd-700 transition
+          shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_6px_12px_rgba(0,0,0,0.12)]
+
+          ${isSelected ? "bg-brand-600" : "bg-brand-500 hover:bg-brand-600 disabled:hover:bg-brand-600"}
+          ${submitResult ? "cursor-not-allowed" : ""}
+        `}
+                    >
+                      {val}
+                    </button>
+                  );
+                })}
               </div>
-            ) : (
-              <span className="text-sm text-brand-ink/60">문제 오류가 있어요.</span>
-            )
-          ) : null}
-        </div>
-      </div>
-    )}
 
-    {/* 채점 결과 */}
-    {submitResult && (
-      <div
-        className="
+
+            ) : problem.type === "MULTIPLE" ? (
+              problem.options?.length ? (
+                <div className="w-full max-w-md flex flex-col gap-2">
+                  {problem.options.map((opt, idx) => {
+                    const optionKey = String.fromCharCode(65 + idx); // A, B, C...
+                    const isSelected = selectedAnswer === optionKey;
+
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleSubmit(optionKey)}
+                        disabled={isSubmitting || !!submitResult}
+                        className={`
+          w-full text-left h-12 px-4 rounded-xl transition ring-1 ring-black/5
+          shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
+          ${isSelected ? "bg-brand-300" : "bg-brand-100 hover:bg-brand-300"}
+          ${submitResult ? "cursor-not-allowed" : ""}
+          text-brand-ink
+        `}
+                      >
+                        <span className="font-ptd-700 mr-2">{optionKey}.</span>
+                        <span className="font-ptd-500">{opt.content}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <span className="text-sm text-brand-ink/60">문제 오류가 있어요.</span>
+              )
+            ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* 채점 결과 */}
+      {submitResult && (
+        <div
+          className="
           rounded-2xl p-6 md:p-8 text-center
           bg-white/85 backdrop-blur-md ring-1 ring-black/5
           shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_10px_24px_rgba(0,0,0,0.10)]
         "
-      >
-        <p
-          className={[
-            "mb-4 text-base font-ptd-700",
-            submitResult.isCorrect ? "text-brand-600" : "text-brand-ink/80",
-          ].join(" ")}
         >
-          {(() => {
-            const { isCorrect, isWeekly, isMonthly, points } = submitResult;
-            const bonusText = [
-              isWeekly ? "주간 출석 보상" : "",
-              isMonthly ? "월간 출석 보상" : "",
-            ]
-              .filter(Boolean)
-              .join(" 및 ");
+          <p
+            className={[
+              "mb-4 text-base font-ptd-700",
+              submitResult.isCorrect ? "text-brand-600" : "text-brand-ink/80",
+            ].join(" ")}
+          >
+            {(() => {
+              const { isCorrect, isWeekly, isMonthly, points } = submitResult;
+              const bonusText = [
+                isWeekly ? "주간 출석 보상" : "",
+                isMonthly ? "월간 출석 보상" : "",
+              ]
+                .filter(Boolean)
+                .join(" 및 ");
 
-            if (isCorrect) {
+              if (isCorrect) {
+                return bonusText
+                  ? `정답! ${bonusText}과 함께 +${points}점 획득!`
+                  : `정답! +${points}점 획득!`;
+              }
               return bonusText
-                ? `정답! ${bonusText}과 함께 +${points}점 획득!`
-                : `정답! +${points}점 획득!`;
-            }
-            return bonusText
-              ? `틀렸습니다. ${bonusText}과 함께 기본 출석 점수로 +${points}점이 지급되었습니다.`
-              : `틀렸습니다. 기본 출석 점수로 +${points}점이 지급되었습니다.`;
-          })()}
-        </p>
+                ? `틀렸습니다. ${bonusText}과 함께 기본 출석 점수로 +${points}점이 지급되었습니다.`
+                : `틀렸습니다. 기본 출석 점수로 +${points}점이 지급되었습니다.`;
+            })()}
+          </p>
 
-        <button
-          onClick={goToHome}
-          className="
+          <button
+            onClick={goToHome}
+            className="
             h-11 px-5 rounded-xl bg-brand-600 text-white font-ptd-700
             shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_6px_12px_rgba(0,0,0,0.12)]
             hover:bg-brand-500 transition
           "
-        >
-          홈으로 이동
-        </button>
-      </div>
-    )}
+          >
+            홈으로 이동
+          </button>
+        </div>
+      )}
 
-    {/* 제출 중 오버레이 */}
-    {isSubmitting && (
-      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-        <div
-          className="
+      {/* 제출 중 오버레이 */}
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div
+            className="
             bg-white/90 backdrop-blur-md px-6 py-5 rounded-2xl
             shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_10px_24px_rgba(0,0,0,0.12)]
             text-center ring-1 ring-black/5
           "
-        >
-          <p className="text-base font-ptd-700 text-brand-ink">제출 중입니다</p>
-          <p className="text-xs text-brand-ink/60 mt-1">잠시만 기다려주세요…</p>
+          >
+            <p className="text-base font-ptd-700 text-brand-ink">제출 중입니다</p>
+            <p className="text-xs text-brand-ink/60 mt-1">잠시만 기다려주세요…</p>
+          </div>
         </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
 
 }
