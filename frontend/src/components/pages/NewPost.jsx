@@ -14,6 +14,7 @@ export const submitPost = async (postData, type) => {
 
 export default function NewPost() {
   const { userInfo, clearAuthInfo } = useAuthStore();
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     no: "",
@@ -45,8 +46,6 @@ export default function NewPost() {
   }, [post]);
 
   const CustomDropdown = ({ selected, onSelect }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
     const categories = [
       { type: "FREE", label: "자유 게시글" },
       { type: "USED", label: "중고 나눔 게시글" },
@@ -60,14 +59,15 @@ export default function NewPost() {
     return (
       <div className="relative w-full">
         <span
+          tabIndex={0}
           onClick={() => setIsOpen(!isOpen)}
-          className="block border border-[#81C784] border-solid rounded py-2 px-3 cursor-pointer select-none text-[#264D3D] bg-white focus:ring-2 focus:ring-[#3C9A5F] text-base"
+          className="block border border-[#6e9b72] border-solid rounded p-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#20583e] select-none text-[#202020] bg-white text-sm"
         >
           {categoryMap[selected] || "카테고리 선택"}
         </span>
 
         {isOpen && (
-          <div className="absolute z-20 w-full bg-white border border-[#81C784] rounded mt-1 shadow-md text-base">
+          <div className="absolute z-20 w-full bg-white rounded shadow-md text-sm top-13">
             {categories.map((cat) => (
               <p
                 key={cat.type}
@@ -75,10 +75,11 @@ export default function NewPost() {
                   onSelect(cat.type);
                   setIsOpen(false);
                 }}
-                className="px-3 py-2 cursor-pointer list-none"
+                className="p-3 m-0 cursor-pointer list-none hover:bg-[#6e9b72] hover:text-white rounded"
               >
                 {cat.label}
               </p>
+
             ))}
           </div>
         )}

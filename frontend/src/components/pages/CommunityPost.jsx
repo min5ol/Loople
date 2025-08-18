@@ -332,7 +332,6 @@ return (
             <span className="text-[#B91C1C] font-ptd-600">지원하지 않는 파일 형식입니다.</span>
           )}
         </div>
-      )}
 
       {/* 댓글 섹션 */}
       <section className="mt-8 rounded-2xl bg-brand-50 ring-1 ring-black/5 p-4">

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import instance from "../../apis/instance";
 import Header from "../templates/Header";
 
+// #20583e #6e9b72 #f0c85a #C8E6C9
+
 // API functions
 export const getRegion = async (data) => {
   const res = await instance.post("/regionalRules/region", data);
@@ -17,6 +19,8 @@ export const getRuleByAddress = async (selected) => {
 
 export default function RegionalRules() {
   const [sidoList, setSidoList] = useState([]);
+  const [openDropdown, setOpenDropdown] = useState(null); // null, "sido", "sigungu", ...
+
   const [sigunguList, setSigunguList] = useState([]);
   const [eupmyunList, setEupmyunList] = useState([]);
   const [riList, setRiList] = useState([]);
@@ -63,10 +67,7 @@ export default function RegionalRules() {
     }
 
     const region = await getRegion(updatedAddr);
-    console.log("region", region)
     const filtered = region.filter(name => name && name.trim() !== "");
-
-    console.log(updatedAddr);
 
     resetLowerLevels(level, filtered);
 
@@ -78,7 +79,6 @@ export default function RegionalRules() {
 
   const fetchRuleByAddress = async () => {
     const rules = await getRuleByAddress(selectedAddr);
-    console.log(rules);
 
     if (!rules || rules.length === 0) {
       setWasteInfo([]);
@@ -90,30 +90,26 @@ export default function RegionalRules() {
   };
 
 
-  {/* <CustomDropdown label="시도" options={sidoList} selected={selectedAddr.sido} onSelect={(sido) => { setSelectedAddr({ sido, sigungu: "", eupmyun: "", ri: "" }); setWasteInfo([]); /> */ }
-  // 시작이 대문자라 컴포넌트 함수로 인식
-  const CustomDropdown = ({ label, options, selected, onSelect }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
+  const CustomDropdown = ({ label, options, selected, isOpen, onToggle, onSelect }) => {
     return (
       <div className="relative w-50">
-        <div onClick={() => setIsOpen(!isOpen)}
-          className="text-center gap-1.5 p-2 text-sm transition-all border-none bg-white text-[#202020] font-semibold cursor-pointer" style={{
+        <div
+          onClick={onToggle}
+          className={`text-center gap-1.5 p-2 text-sm transition-all font-semibold cursor-pointer rounded border border-[#6e9b72] ${selected ? "bg-[#C8E6C9] bg-opacity-50" : "bg-white"}`}
+          style={{
             boxShadow: "inset 1px 1px 3px rgba(0,0,0,0.1), inset -1px -1px 3px rgba(255,255,255,0.7)",
-          }}>
+          }}
+        >
           {selected || label}
         </div>
         {isOpen && (
-          <ul className="absolute z-10 mt-1 w-full bg-white border border-[#81C784] rounded shadow-md max-h-60 overflow-y-auto list-none pl-0 ml-0">
-            <li className="px-4 py-2 bg-gray-100 text-gray-500 cursor-default select-none" key="label">{label}</li>
+          <ul className="absolute z-10 mt-1 w-full bg-white border border-[#6e9b72] rounded shadow-md max-h-60 overflow-y-auto list-none pl-0 ml-0">
+            <li className="px-4 py-2 bg-[#f0c85a] text-white cursor-default select-none font-semibold" key="label">{label}</li>
             {options.map((option, idx) => (
               <li
                 key={idx}
-                className="px-4 py-2 hover:bg-[#E8F5E9] cursor-pointer text-[#202020] h-7"
-                onClick={() => {
-                  onSelect(option);
-                  setIsOpen(false);
-                }}
+                className="px-4 py-2 hover:bg-[#f0c85a] hover:text-white cursor-pointer text-[#202020] h-7"
+                onClick={() => onSelect(option)}
               >
                 {option}
               </li>
@@ -122,13 +118,13 @@ export default function RegionalRules() {
         )}
       </div>
     );
-
   };
+
 
   const showInfo = (name, details) => {
     return (
       details && (
-        <p className="text-sm mb-2">
+        <p className="text-sm mb-2 text-[#202020]">
           <strong>{name}</strong>{details?.split("\n").map((line, idx) => (
             <span key={idx}>{line}<br /></span>
           ))}
@@ -167,9 +163,19 @@ return (
               label={label}
               options={options}
               selected={selectedAddr[level]}
-              onSelect={(value) => handleRegionChange(level, value)}
+              isOpen={openDropdown === level}
+              onToggle={() =>
+                setOpenDropdown(openDropdown === level ? null : level)
+              }
+              onSelect={(value) => {
+                handleRegionChange(level, value);
+                setOpenDropdown(null); // 선택하면 닫기
+              }}
             />
+
           ))}
+
+          {/* 조회 버튼 */}
 
           <button
             onClick={fetchRuleByAddress}
@@ -256,6 +262,9 @@ return (
                     </span>
                     의 상세 수거 정보가 존재하지 않습니다.
                   </p>
+                                        <p className="text-base text-[#f0c85a]">
+                        더 정확한 정보는 해당 지역 홈페이지를 참고해주세요.
+                      </p>
                   <a
                     href={item.homepage}
                     target="_blank"
@@ -264,8 +273,9 @@ return (
                   >
                     [{selectedAddr.sido} {selectedAddr.sigungu} 홈페이지 바로가기]
                   </a>
-                </div>
-              ))}
+                    </div>
+                  </div>
+                ))}
 
             {/* 유형별 카드 */}
             {['GENERAL', 'FOOD', 'RECYCLING'].map((type) => {

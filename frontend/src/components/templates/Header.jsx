@@ -17,6 +17,7 @@ export default function Header() {
   const clearAuthInfo = useAuthStore(selectClearAuthInfo);
   const hasHydrated = useAuthStore(selectHasHydrated);
 
+
   const menuItems = useMemo(
     () => [
       { label: "Loople 홈", path: "/loopleHome", emoji: "🌿" },
