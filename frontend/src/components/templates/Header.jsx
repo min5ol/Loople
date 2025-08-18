@@ -18,7 +18,7 @@ export default function Header() {
   const hasHydrated = useAuthStore(selectHasHydrated);
 
   const menuItems = [
-    { label: "Loople 홈", path: "/loopleHome", emoji: "🌿" },
+    // { label: "Loople 홈", path: "/loopleHome", emoji: "🌿" },
     { label: "마이페이지", path: "/mypage", emoji: "👤" },
     { label: "지역별 규칙", path: "/rule", emoji: "📜" },
     { label: "채팅하기", path: "/chat", emoji: "💬" },
@@ -31,7 +31,7 @@ export default function Header() {
 
   return (
     <div
-      className="fixed top-0 left-0 w-full z-50 bg-[#FEF7E2] border-b border-[#E5E5E5] shadow-sm"
+      className="fixed top-0 left-0 w-full z-50 bg-[#f2f2f2] border-b border-[#E5E5E5] shadow-sm"
       style={{ fontFamily: "pretendard" }}
     >
       <div className="flex items-center justify-between px-4 md:px-6 py-2 max-w-7xl mx-auto">

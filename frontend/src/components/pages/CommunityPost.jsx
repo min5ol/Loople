@@ -305,7 +305,7 @@ export default function CommunityPost() {
 
 
         {/* 댓글 섹션 */}
-        <section className="flex flex-col bg-[#f9fdf7] rounded-lg p-4 border border-[#C7E6C9]">
+        <section className="flex flex-col bg-[#f9fdf7] rounded-lg p-4 border border-[#C8E6C9]">
           <p className="text-xl font-semibold text-[#264D3D] m-0 mb-2">댓글</p>
           <hr />
 
@@ -317,7 +317,7 @@ export default function CommunityPost() {
                 return (
                   <div
                     key={comment.no}
-                    className="relative bg-white p-5 rounded shadow border border-[#C7E6C9]"
+                    className="relative bg-white p-5 rounded shadow border border-[#C8E6C9]"
                     ref={isLast ? commentRef : null}
                   >
                     <div className="flex justify-between items-center text-sm text-[#3C9A5F] mb-1">
