@@ -274,7 +274,6 @@ return (
                     [{selectedAddr.sido} {selectedAddr.sigungu} 홈페이지 바로가기]
                   </a>
                     </div>
-                  </div>
                 ))}
 
             {/* 유형별 카드 */}
