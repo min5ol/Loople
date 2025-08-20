@@ -56,15 +56,7 @@ export default function LoopleHome() {
 
       {/* 플로팅 챗봇 */}
       <div className="fixed right-4 bottom-4 md:right-6 md:bottom-6">
-        <div
-          className="
-            rounded-full p-2
-            bg-white/80 backdrop-blur-md
-            shadow-[inset_0_1px_2px_rgba(255,255,255,0.60),0_10px_20px_rgba(0,0,0,0.10)]
-          "
-        >
           <Chatbot />
-        </div>
       </div>
     </div>
   );

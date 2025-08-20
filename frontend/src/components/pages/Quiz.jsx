@@ -106,8 +106,7 @@ export default function Quiz() {
 
           {/* 추후 삭제 예정 */}
           {/* 버튼 그룹 */}
-          <div className="flex flex-wrap justify-center mt-8 gap-3">
-
+          {/* <div className="flex flex-wrap justify-center mt-8 gap-3">
             <button
               onClick={async () => {
                 const dlg = document.getElementById("quiz-modal");
@@ -142,7 +141,7 @@ export default function Quiz() {
             >
               임시문제생성
             </button>
-          </div>
+          </div> */}
 
           {/* 보상 안내 */}
           <p className="mt-5 text-xs text-brand-ink/50">
