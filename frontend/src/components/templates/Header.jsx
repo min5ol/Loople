@@ -20,7 +20,7 @@ export default function Header() {
 
   const menuItems = useMemo(
     () => [
-      { label: "Loople 홈", path: "/loopleHome", emoji: "🌿" },
+      { label: "Loople 홈", path: "/looplehome", emoji: "🌿" },
       { label: "마이페이지", path: "/mypage", emoji: "👤" },
       { label: "지역별 규칙", path: "/rule", emoji: "📜" },
       { label: "채팅하기", path: "/chat", emoji: "💬" },
@@ -50,7 +50,7 @@ export default function Header() {
           <div className="flex items-center gap-3">
             {/* 로고 (중립 버튼 감싸기) */}
             <button
-              onClick={() => navigate("/loopleHome")}
+              onClick={() => navigate("/looplehome")}
               className="
                 shrink-0 rounded-xl p-1.5
                 bg-white/90 hover:bg-white
@@ -100,12 +100,12 @@ export default function Header() {
                             ].join(" "),
                       ].join(" ")}
                     >
-                      <span
+                      {/* <span
                         aria-hidden
                         className={active ? "opacity-80" : "opacity-60 group-hover:opacity-80"}
                       >
                         {item.emoji}
-                      </span>
+                      </span> */}
                       <span>{item.label}</span>
                     </button>
                   );

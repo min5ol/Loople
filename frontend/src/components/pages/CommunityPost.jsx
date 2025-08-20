@@ -241,11 +241,17 @@ export default function CommunityPost() {
 
       <div className="max-w-3xl mx-auto mt-20 px-6 py-7 rounded-2xl bg-white/85 backdrop-blur-md ring-1 ring-black/5 shadow-[inset_0_1px_2px_rgba(255,255,255,0.65),0_12px_28px_rgba(0,0,0,0.10)]">
         {/* 제목 + 우측 메뉴 */}
-        <div className="flex items-start justify-between gap-4">
-          <h2 className="text-2xl md:text-3xl font-ptd-700 text-brand-ink leading-tight">
-            {post.title}
-          </h2>
+        <div className="flex items-start justify-between gap-4 relative">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {post.category === "NOTICE" && (
+              <div className="shrink-0 text-2xl">📢</div>
+            )}
+            <h2 className="text-2xl md:text-3xl m-0 font-ptd-700 text-brand-ink leading-tight break-words">
+              {post.title}
+            </h2>
+          </div>
 
+          {/* 옵션 버튼 */}
           <div className="relative group shrink-0">
             <button
               className="w-9 h-9 grid place-items-center rounded-full bg-white/90 ring-1 ring-black/5 hover:bg-brand-100 transition"
@@ -256,7 +262,7 @@ export default function CommunityPost() {
             </button>
 
             {/* 옵션 메뉴 */}
-            <div className="absolute right-0 mt-2 hidden group-hover:block w-40 rounded-xl bg-white ring-1 ring-black/5 shadow-xl overflow-hidden z-10">
+            <div className="absolute right-0 hidden group-hover:block w-40 rounded-xl bg-white ring-1 ring-black/5 shadow-xl overflow-hidden z-10">
               <button
                 className="w-full px-4 py-2 text-left text-sm text-brand-ink hover:bg-brand-50"
                 onClick={() => runIfOwner(post, "수정", "post")}
@@ -282,6 +288,7 @@ export default function CommunityPost() {
             </div>
           </div>
         </div>
+
 
         {/* 메타 정보 */}
         <div className="mt-3 flex items-center justify-between text-xs md:text-sm">
@@ -401,7 +408,7 @@ export default function CommunityPost() {
                         <button className="w-8 h-8 grid place-items-center rounded-full hover:bg-brand-100">
                           ⋮
                         </button>
-                        <div className="absolute right-0 mt-2 hidden group-hover:block w-32 rounded-xl bg-white ring-1 ring-black/5 shadow-xl overflow-hidden z-10">
+                        <div className="absolute right-0 hidden group-hover:block w-32 rounded-xl bg-white ring-1 ring-black/5 shadow-xl overflow-hidden z-10">
                           <button
                             className="w-full px-3 py-2 text-left text-sm hover:bg-brand-50"
                             onClick={() => runIfOwner(comment, "수정", "comment")}
