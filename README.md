@@ -39,9 +39,9 @@
 
 ### 게시판
 <p align="center">
-  <img src="./images/view/community1.png" alt="community1" width="32.5%" />
-  <img src="./images/view/community2.png" alt="community2" width="32.5%" />
-  <img src="./images/view/community3.png" alt="community3" width="32.5%" />
+  <img src="./images/view/community1.png" alt="community1" width="32%" />
+  <img src="./images/view/community2.png" alt="community2" width="32%" />
+  <img src="./images/view/community3.png" alt="community3" width="32%" />
 </p>  
 
 공지사항, 자유 게시글, 중고 게시글을 확인할 수 있다.  
