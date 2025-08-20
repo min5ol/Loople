@@ -24,7 +24,7 @@
 
 ### 회원가입 및 로그인(소셜로그인)
 <p align="center">
-  <img src="./images/execute/signup.png" width="45%" />
+  <img src="./images/execute/signup.png" alt="signup" width="45%" />
   <img src="./images/execute/signin.png" width="45%" />
 </p>
 
