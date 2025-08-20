@@ -24,11 +24,11 @@
 
 ### 회원가입 및 로그인(소셜로그인)
 <div align="center" style="display: flex; justify-content: space-between;" >
-  <div width="45%">
+  <div style="width:45%;">
     <img src="./images/view/signup.png" alt="signup" />
     <p>회원가입 화면</p>
   </div>
-  <div width="45%">
+  <div style="width:45%;">
     <img src="./images/view/signin.png" alt="signup" />
     <p>로그인 화면</p>
   </div>
