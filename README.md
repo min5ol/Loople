@@ -24,7 +24,7 @@
 
 ### 회원가입 및 로그인(소셜로그인)
 <p align="center">
-
+  <img src="./images/execute/signup.png" width="45%" />
   <img src="./images/execute/signin.png" width="45%" />
 </p>
 
@@ -32,36 +32,49 @@
 <p align="center">
   <img src="./images/execute/quiz1.png" width="45%" />
   <img src="./images/execute/quiz2.png" width="45%" />
-</p>
+</p>  
+
 로그인 시 사용자에게 **퀴즈를 출제**한다.  
 퀴즈 문제는 **매월 1일 00:00:00에 OpenAI API를 통해 한 달 치 문제가 자동으로 생성**된다.
 
 ### 게시판
-![community1](./images/execute/community1.png)
-![community2](./images/execute/community2.png)
-![community3](./images/execute/community3.png)
+<p align="center">
+  <img src="./images/execute/community1.png" width="33%" />
+  <img src="./images/execute/community2.png" width="33%" />
+  <img src="./images/execute/community3.png" width="33%" />
+</p>  
+
 공지사항, 자유 게시글, 중고 게시글을 확인할 수 있다.  
 중고 게시글은 판매가 아닌 **나눔을 기반**으로 한다.  
   사용하지 않지만 **버리기 아까운 물건을 나눔**하는 것이 목적이다.  
 사용자 지역 기반의 게시글과 전체 게시글을 **선택적으로 확인**할 수 있다.
 
 ### 챗봇
-![chatbot1](./images/execute/chatbot1.png)
-![chatbot2](./images/execute/chatbot2.png)
+<p align="center">
+  <img src="./images/execute/chatbot1.png" width="45%" />
+  <img src="./images/execute/chatbot2.png" width="45%" />
+</p>  
+
 쓰레기 처리 요령을 챗봇 형식으로 간단하게 안내한다.  
 지역별 수거 정보도 빠르게 확인 가능하다.  
 추가 질문이 있는 경우, OpenAI API를 활용한 자유 질문/응답이 가능하다.
 
 ### 채팅
-![chat1](./images/execute/chat1.png)
-![chat2](./images/execute/chat2.png)
+<p align="center">
+  <img src="./images/execute/chat1.png" width="45%" />
+  <img src="./images/execute/chat2.png" width="45%" />
+</p>  
+
 사용자 간 **1:1 실시간 채팅 기능**을 제공한다.  
 특히 **중고 나눔 거래 시 소통 수단**으로 활용된다.
 
 ### 알림
 ### 지역별 규칙
-![regionalrule1](./images/execute/regionalrule1.png)
-![regionalrule2](./images/execute/regionalrule2.png)
+<p align="center">
+  <img src="./images/execute/regionalrule1.png" width="45%" />
+  <img src="./images/execute/regionalrule2.png" width="45%" />
+</p>  
+
 챗봇 기능과 별도로 **더 상세한 쓰레기 분리수거 및 처리 규칙을 제공**한다.  
 이 기능은 **전국 단위 정보를 바탕**으로 하며, 사용자 지역과 무관하게 조회할 수 있다.
 
