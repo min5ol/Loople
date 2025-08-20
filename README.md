@@ -24,13 +24,15 @@
 
 ### 회원가입 및 로그인(소셜로그인)
 <p align="center">
-  <img src="./images/execute/signup.png" width="45%" />
+
   <img src="./images/execute/signin.png" width="45%" />
 </p>
 
 ### 퀴즈
-![quiz1](./images/execute/quiz1.png)
-![quiz2](./images/execute/quiz2.png)
+<p align="center">
+  <img src="./images/execute/quiz1.png" width="45%" />
+  <img src="./images/execute/quiz2.png" width="45%" />
+</p>
 로그인 시 사용자에게 **퀴즈를 출제**한다.  
 퀴즈 문제는 **매월 1일 00:00:00에 OpenAI API를 통해 한 달 치 문제가 자동으로 생성**된다.
 
