@@ -23,6 +23,10 @@
 <h2 id="main-feature">📌 주요 기능</h2>  
 
 ### 회원가입 및 로그인(소셜로그인)
+<figure style="display: inline-block; margin: 0 1rem; text-align: center;">
+  <img src="./images/view/signup.png" width="300" />
+  <figcaption>회원가입 화면</figcaption>
+</figure>
 <p align="center">
   <img src="./images/view/signup.png" alt="signup" width="45%" />
   <img src="./images/view/signin.png" alt="signin" width="45%" />
