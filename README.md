@@ -24,14 +24,14 @@
 
 ### 회원가입 및 로그인(소셜로그인)
 <p align="center">
-  <img src="./images/execute/signup.png" alt="signup" width="45%" />
-  <img src="./images/execute/signin.png" width="45%" />
+  <img src="./images/view/signup.png" alt="signup" width="45%" />
+  <img src="./images/view/signin.png" alt="signin" width="45%" />
 </p>
 
 ### 퀴즈
 <p align="center">
-  <img src="./images/execute/quiz1.png" width="45%" />
-  <img src="./images/execute/quiz2.png" width="45%" />
+  <img src="./images/view/quiz1.png" alt="quiz1" width="45%" />
+  <img src="./images/view/quiz2.png" alt="quiz1" width="45%" />
 </p>  
 
 로그인 시 사용자에게 **퀴즈를 출제**한다.  
@@ -39,9 +39,9 @@
 
 ### 게시판
 <p align="center">
-  <img src="./images/execute/community1.png" width="33%" />
-  <img src="./images/execute/community2.png" width="33%" />
-  <img src="./images/execute/community3.png" width="33%" />
+  <img src="./images/view/community1.png" alt="community1" width="33%" />
+  <img src="./images/view/community2.png" alt="community2" width="33%" />
+  <img src="./images/view/community3.png" alt="community3" width="33%" />
 </p>  
 
 공지사항, 자유 게시글, 중고 게시글을 확인할 수 있다.  
@@ -51,8 +51,8 @@
 
 ### 챗봇
 <p align="center">
-  <img src="./images/execute/chatbot1.png" width="45%" />
-  <img src="./images/execute/chatbot2.png" width="45%" />
+  <img src="./images/view/chatbot1.png" alt="chatbot1" width="45%" />
+  <img src="./images/view/chatbot2.png" alt="chatbot2" width="45%" />
 </p>  
 
 쓰레기 처리 요령을 챗봇 형식으로 간단하게 안내한다.  
@@ -61,8 +61,8 @@
 
 ### 채팅
 <p align="center">
-  <img src="./images/execute/chat1.png" width="45%" />
-  <img src="./images/execute/chat2.png" width="45%" />
+  <img src="./images/view/chat1.png" alt="chat1" width="45%" />
+  <img src="./images/view/chat2.png" alt="chat2" width="45%" />
 </p>  
 
 사용자 간 **1:1 실시간 채팅 기능**을 제공한다.  
@@ -71,8 +71,8 @@
 ### 알림
 ### 지역별 규칙
 <p align="center">
-  <img src="./images/execute/regionalrule1.png" width="45%" />
-  <img src="./images/execute/regionalrule2.png" width="45%" />
+  <img src="./images/view/regionalrule1.png" alt="regionalrule1" width="45%" />
+  <img src="./images/view/regionalrule2.png" alt="regionalrule2" width="45%" />
 </p>  
 
 챗봇 기능과 별도로 **더 상세한 쓰레기 분리수거 및 처리 규칙을 제공**한다.  
@@ -225,35 +225,35 @@ backend/
 <h2 id="api-specification">📌 API 명세서</h2>
 
 ### UserController
-![UserController](./images/UserController.png)
+![UserController](./images/api/UserController.png)
 ### RuleController
-![RuleController](./images/RuleController.png)
+![RuleController](./images/api/RuleController.png)
 ### QuizController
-![QuizController](./images/QuizController.png)
+![QuizController](./images/api/QuizController.png)
 ### OAuthController
-![OAuthController](./images/OAuthController.png)
+![OAuthController](./images/api/OAuthController.png)
 ### MyRoomItemController
-![MyRoomItemController](./images/MyRoomItemController.png)
+![MyRoomItemController](./images/api/MyRoomItemController.png)
 ### MyLooplingController
-![MyLooplingController](./images/MyLooplingController.png)
+![MyLooplingController](./images/api/MyLooplingController.png)
 ### MyBadgeController
-![MyBadgeController](./images/MyBadgeController.png)
+![MyBadgeController](./images/api/MyBadgeController.png)
 ### CommunityController
-![CommunityController](./images/CommunityController.png)
+![CommunityController](./images/api/CommunityController.png)
 ### ChatController
-![ChatController](./images/ChatController.png)
+![ChatController](./images/api/ChatController.png)
 ### S3Controller
-![S3Controller](./images/S3Controller.png)
+![S3Controller](./images/api/S3Controller.png)
 ### RoomItemController
-![RoomItemController](./images/RoomItemController.png)
+![RoomItemController](./images/api/RoomItemController.png)
 ### MyRoomController
-![MyRoomController](./images/MyRoomController.png)
+![MyRoomController](./images/api/MyRoomController.png)
 ### LooplingCatalogController
-![LooplingCatalogController](./images/LooplingCatalogController.png)
+![LooplingCatalogController](./images/api/LooplingCatalogController.png)
 ### BeopjeongdongController
-![BeopjeongdongController](./images/BeopjeongdongController.png)
+![BeopjeongdongController](./images/api/BeopjeongdongController.png)
 ### BadgeCatalogController
-![BadgeCatalogController](./images/BadgeCatalogController.png)
+![BadgeCatalogController](./images/api/BadgeCatalogController.png)
 
 ---
 
